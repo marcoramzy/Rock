@@ -24,6 +24,7 @@ using System.Text.RegularExpressions;
 using DotLiquid;
 
 using Rock.UniversalSearch;
+using Rock.Utility;
 using Rock.Web.Cache;
 
 namespace Rock.Lava.Blocks
@@ -231,7 +232,7 @@ namespace Rock.Lava.Blocks
         /// <summary>
         ///
         /// </summary>
-        private class DataRowDrop : DotLiquid.Drop
+        private class DataRowDrop : RockDynamic
         {
             private readonly DataRow _dataRow;
 

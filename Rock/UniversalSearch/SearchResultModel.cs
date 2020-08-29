@@ -15,13 +15,14 @@
 // </copyright>
 //
 using Rock.UniversalSearch.IndexModels;
+using Rock.Utility;
 
 namespace Rock.UniversalSearch
 {
     /// <summary>
     /// Search Result Object
     /// </summary>
-    public class SearchResultModel: DotLiquid.Drop
+    public class SearchResultModel: RockDynamic
     {
         /// <summary>
         /// Gets or sets the score.

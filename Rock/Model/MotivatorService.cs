@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Rock.Utility;
 using Rock.Web.Cache;
 
 namespace Rock.Model
@@ -620,7 +621,7 @@ namespace Rock.Model
         /// <summary>
         /// The MotivatorScore struct used to return the motivator score
         /// </summary>
-        public class MotivatorScore : DotLiquid.Drop
+        public class MotivatorScore : RockDynamic
         {
             /// <summary>
             /// Gets or sets the Name.

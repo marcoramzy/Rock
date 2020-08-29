@@ -2348,14 +2348,8 @@ $('#{this.ClientID} .{GRID_SELECT_CELL_CSS_CLASS}').on( 'click', function (event
                 // get all properties of the objects in the grid
                 List<PropertyInfo> allprops = new List<PropertyInfo>( oType.GetProperties() );
 
-                // If this is a DotLiquid.Drop class, don't include any of the properties that are inherited from DotLiquid.Drop
-                if ( typeof( DotLiquid.Drop ).IsAssignableFrom( oType ) )
-                {
-                    var dropProperties = typeof( DotLiquid.Drop ).GetProperties().Select( a => a.Name );
-                    allprops = allprops.Where( a => !dropProperties.Contains( a.Name ) ).ToList();
-                }
                 // If this is a RockDynamic class, don't include any of the properties that are inherited from RockDynamic
-                else if ( typeof( RockDynamic ).IsAssignableFrom( oType ) )
+                if ( typeof( RockDynamic ).IsAssignableFrom( oType ) )
                 {
                     var dropProperties = typeof( RockDynamic ).GetProperties().Select( a => a.Name );
                     allprops = allprops.Where( a => !dropProperties.Contains( a.Name ) ).ToList();
@@ -3644,10 +3638,10 @@ $('#{this.ClientID} .{GRID_SELECT_CELL_CSS_CLASS}').on( 'click', function (event
                 additionalMergeProperties = dataSourceObjectType.GetProperties().ToList();
             }
 
-            // If this is a DotLiquid.Drop class, don't include any of the properties that are inherited from DotLiquid.Drop
-            if ( typeof( DotLiquid.Drop ).IsAssignableFrom( dataSourceObjectType ) )
+            // If this is a RockDynamic class, don't include any of the properties that are inherited from RockDynamic
+            if ( typeof( RockDynamic ).IsAssignableFrom( dataSourceObjectType ) )
             {
-                var dropProperties = typeof( DotLiquid.Drop ).GetProperties().Select( a => a.Name );
+                var dropProperties = typeof( RockDynamic ).GetProperties().Select( a => a.Name );
                 additionalMergeProperties = additionalMergeProperties.Where( a => !dropProperties.Contains( a.Name ) ).ToList();
             }
 
