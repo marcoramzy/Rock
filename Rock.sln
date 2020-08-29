@@ -83,6 +83,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rock.Oidc", "Rock.Oidc\Rock
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rock.Lava", "Rock.Lava\Rock.Lava.csproj", "{37E293DD-F282-4A34-91FA-5FB8503D5672}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rock.Common", "Rock.Common\Rock.Common.csproj", "{13568622-324E-4493-B605-C9896E725D30}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -197,6 +199,10 @@ Global
 		{37E293DD-F282-4A34-91FA-5FB8503D5672}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{37E293DD-F282-4A34-91FA-5FB8503D5672}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{37E293DD-F282-4A34-91FA-5FB8503D5672}.Release|Any CPU.Build.0 = Release|Any CPU
+		{13568622-324E-4493-B605-C9896E725D30}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{13568622-324E-4493-B605-C9896E725D30}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{13568622-324E-4493-B605-C9896E725D30}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{13568622-324E-4493-B605-C9896E725D30}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
