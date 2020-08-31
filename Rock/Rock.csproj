@@ -560,6 +560,7 @@
     <Compile Include="Lava\Blocks\InteractionContentChannelItemWrite.cs" />
     <Compile Include="Lava\Blocks\IRockLavaBlock.cs" />
     <Compile Include="Lava\LavaFileSystem.cs" />
+    <Compile Include="Lava\RockFilters.cs" />
     <Compile Include="Logging\IRockLogReader.cs" />
     <Compile Include="Logging\RockLogEvent.cs" />
     <Compile Include="Logging\RockLogSystemSettings.cs" />
@@ -1391,7 +1392,6 @@
     <Compile Include="Lava\LavaSupportLevel.cs" />
     <Compile Include="Lava\LegacyLavaSyntaxDetectedException.cs" />
     <Compile Include="Lava\LegacyLavaUpdater.cs" />
-    <Compile Include="Lava\RockFilters.cs" />
     <Compile Include="Lava\Shortcodes\DynamicShortcodeBlock.cs" />
     <Compile Include="Lava\Shortcodes\DynamicShortcodeInline.cs" />
     <Compile Include="Lava\Shortcodes\IRockShortcode.cs" />

@@ -27,7 +27,7 @@ namespace Rock.Lava.Blocks
     /// 
     /// </summary>
     /// <seealso cref="DotLiquid.Block" />
-    public class RockLavaBlockBase : DotLiquid.Block, IRockStartup
+    public class RockLavaBlockBase : DotLiquid.Block //, IRockStartup
     {
         /// <summary>
         /// Gets the not authorized message.

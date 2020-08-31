@@ -78,11 +78,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Core\LavaHelper.cs" />
-    <Compile Include="Core\RockFilters.cs" />
+    <Compile Include="Constants.cs" />
+    <Compile Include="Engine\LavaEngineBase.cs" />
     <Compile Include="Liquid\RockLavaBlockBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Startup.cs" />
+    <Compile Include="Shortcodes\LavaShortcodeMetaDataAttribute.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DotLiquid\DotLiquid.csproj">
@@ -103,8 +103,8 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Core\" />
     <Folder Include="Filters\Generic\" />
-    <Folder Include="Shortcodes\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
