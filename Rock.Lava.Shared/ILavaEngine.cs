@@ -20,36 +20,6 @@ using System.Collections.Generic;
 
 namespace Rock.Lava
 {
-    /// <summary>
-    /// Represents a specific environment and configuration in which a Lava template is resolved at runtime by the Lava Engine.
-    /// </summary>
-    public interface ILavaContext
-    {
-        //IList<IDictionary<string, object>> Environments { get; }
-        IList<IDictionary<string, object>> Scopes { get; }
-
-        //IDictionary<string, object> GetInternalMergeFields();
-
-        /// <summary>
-        /// Gets the set of merge fields in the current Lava source markup.
-        /// </summary>
-        /// <returns></returns>
-        IDictionary<string, object> GetMergeFieldsInScope();
-
-        /// <summary>
-        /// Gets the set of merge fields in the current Lava block or container hierarchy.
-        /// </summary>
-        /// <returns></returns>
-        IDictionary<string, object> GetMergeFieldsInEnvironment();
-
-        string ResolveMergeFields( string content, IDictionary<string, object> mergeObjects, string enabledLavaCommands, bool encodeStrings = false, bool throwExceptionOnErrors = false );
-        string ResolveMergeFields( string content, IDictionary<string, object> mergeObjects );
-
-        object GetValue( string key );
-        void SetValue( string key, object value );
-
-        ILavaEngine LavaEngine { get; }
-    }
 
     /// <summary>
     /// Represents a Lava Template.

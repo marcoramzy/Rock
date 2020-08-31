@@ -85,7 +85,8 @@
     <Compile Include="Core\LavaHelper.cs" />
     <Compile Include="Core\LavaIgnoreAttribute.cs" />
     <Compile Include="Core\LavaIncludeAttribute.cs" />
-    <Compile Include="Core\LavaType.cs" />
+    <Compile Include="Core\LavaTypeAttribute.cs" />
+    <Compile Include="ILavaContext.cs" />
     <Compile Include="ILavaEngine.cs" />
     <Compile Include="ILavaTemplate.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -1377,7 +1377,6 @@
     <Compile Include="Jobs\UpdatePersistedDataviews.cs" />
     <Compile Include="Lava\Blocks\Execute.cs" />
     <Compile Include="Lava\Blocks\RockEntity.cs" />
-    <Compile Include="Lava\Blocks\RockLavaBlockBase.cs" />
     <Compile Include="Lava\Blocks\Search.cs" />
     <Compile Include="Lava\Blocks\Javascript.cs" />
     <Compile Include="Lava\Blocks\Cache.cs" />
@@ -2979,13 +2978,17 @@
     <Folder Include="Web\UI\Controls\Finance\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\DotLiquid\DotLiquid.csproj">
-      <Project>{00edcb8d-ef33-459c-ad62-02876bd24dff}</Project>
-      <Name>DotLiquid</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Rock.DownhillCss\Rock.DownhillCss.csproj">
       <Project>{cadd9206-2c6b-42e4-b20b-2dfc3eb4d6d4}</Project>
       <Name>Rock.DownhillCss</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Rock.Lava.Shared\Rock.Lava.Shared.csproj">
+      <Project>{8820cd93-70ee-496d-b17b-0c4c68dd4957}</Project>
+      <Name>Rock.Lava.Shared</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Rock.Lava\Rock.Lava.csproj">
+      <Project>{37e293dd-f282-4a34-91fa-5fb8503d5672}</Project>
+      <Name>Rock.Lava</Name>
     </ProjectReference>
     <ProjectReference Include="..\Rock.Version\Rock.Version.csproj">
       <Project>{6fe0930c-6832-4c2f-8a76-d4e4a2d80ddf}</Project>
