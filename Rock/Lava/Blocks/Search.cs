@@ -17,6 +17,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Dynamic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -241,14 +242,16 @@ namespace Rock.Lava.Blocks
                 _dataRow = dataRow;
             }
 
-            public override object BeforeMethod( string method )
+            public override bool TryGetMember( GetMemberBinder binder, out object result )
             {
-                if ( _dataRow.Table.Columns.Contains( method ) )
+                if ( _dataRow.Table.Columns.Contains( binder.Name ) )
                 {
-                    return _dataRow[method];
+                    result = _dataRow[binder.Name];
+                    return true;
                 }
 
-                return null;
+                result = null;
+                return false;
             }
         }
     }
