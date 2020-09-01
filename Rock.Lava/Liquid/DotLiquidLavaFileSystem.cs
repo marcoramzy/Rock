@@ -26,8 +26,10 @@ namespace Rock.Lava
     /// <summary>
     /// Lava's <seealso cref="IFileSystem"/>. This is used when Lava templates retrieve other Lava templates when using the include tag.
     /// </summary>
-    public class DotLiquidLavaFileSystem : LavaFileSystem, IFileSystem
+    public class DotLiquidLavaFileSystem : LavaFileSystemBase, IFileSystem
     {
+        string IFileSystem.ReadTemplateFile( Context context, string templateName );
+
         /// <summary>
         /// Called by Liquid to retrieve a template file
         /// </summary>
@@ -35,7 +37,8 @@ namespace Rock.Lava
         /// <param name="templateName"></param>
         /// <returns></returns>
         /// <exception cref="FileSystemException">LavaFileSystem Template Not Found</exception>
-        string IFileSystem.ReadTemplateFile( Context context, string templateName )
+
+        protected override string OnResolveTemplatePath( string inputPath )
         {
             string templatePath = ( string ) context[templateName];
 
