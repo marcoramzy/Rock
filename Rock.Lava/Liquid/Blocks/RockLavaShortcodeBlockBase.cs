@@ -15,44 +15,20 @@
 // </copyright>
 //
 using System.IO;
-using System.Linq;
 
 using DotLiquid;
 
 using Rock.Utility;
 
-namespace Rock.Lava.Blocks
+namespace Rock.Lava.Shortcodes
 {
     /// <summary>
     /// 
     /// </summary>
     /// <seealso cref="DotLiquid.Block" />
-    public class RockLavaBlockBase : global::DotLiquid.Block //, IRockStartup
+    public class RockLavaShortcodeBlockBase : Block,  IRockShortcode //IRockStartup,, 
     {
-        /// <summary>
-        /// Gets the not authorized message.
-        /// </summary>
-        /// <value>
-        /// The not authorized message.
-        /// </value>
-        public static string NotAuthorizedMessage
-        {
-            get
-            {
-                return "The Lava command '{0}' is not configured for this template.";
-            }
-        }
         
-        /// <summary>
-        /// Determines whether the specified command is authorized.
-        /// </summary>
-        /// <param name="context">The context.</param>
-        /// <returns></returns>
-        protected bool IsAuthorized( Context context )
-        {
-            return LavaHelper.IsAuthorized( context, this.GetType().Name );
-        }
-
         /// <summary>
         /// Renders the specified context.
         /// </summary>
@@ -69,14 +45,14 @@ namespace Rock.Lava.Blocks
         /// <value>
         /// The order.
         /// </value>
-        public int StartupOrder { get { return 0; } }
+        //public int StartupOrder { get { return 0; } }
 
-        /// <summary>
-        /// Method that will be run at Rock startup
-        /// </summary>
-        public virtual void OnStartup()
-        {
-        }
+        ///// <summary>
+        ///// Method that will be run at Rock startup
+        ///// </summary>
+        //public virtual void OnStartup()
+        //{
+        //}
 
     }
 }

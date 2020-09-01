@@ -16,7 +16,6 @@
 //
 using System;
 using System.IO;
-using System.Web;
 
 using DotLiquid;
 using DotLiquid.Exceptions;
@@ -24,34 +23,11 @@ using DotLiquid.FileSystems;
 
 namespace Rock.Lava
 {
-    public interface ILavaFileSystem
-    {
-        /// <summary>
-        /// Called by Lava to retrieve a template file.
-        /// </summary>
-        /// <param name="templatePath"></param>
-        /// <returns></returns>
-        string ReadTemplateFile( ILavaContext context, string templateName );
-    }
-
     /// <summary>
     /// Lava's <seealso cref="IFileSystem"/>. This is used when Lava templates retrieve other Lava templates when using the include tag.
     /// </summary>
-    public abstract class LavaFileSystemBase : ILavaFileSystem
+    public class DotLiquidLavaFileSystem : LavaFileSystem, IFileSystem
     {
-        /// <summary>
-        /// Gets or sets the root.
-        /// </summary>
-        /// <value>
-        /// The root.
-        /// </value>
-        public string Root { get; set; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="LavaFileSystem"/> class.
-        /// </summary>
-        public LavaFileSystemBase() { }
-
         /// <summary>
         /// Called by Liquid to retrieve a template file
         /// </summary>
@@ -59,14 +35,12 @@ namespace Rock.Lava
         /// <param name="templateName"></param>
         /// <returns></returns>
         /// <exception cref="FileSystemException">LavaFileSystem Template Not Found</exception>
-        public string ReadTemplateFile( ILavaContext context, string templateName )
+        string IFileSystem.ReadTemplateFile( Context context, string templateName )
         {
             string templatePath = ( string ) context[templateName];
 
             // Try to find exact file specified
-            var resolvedPath = this.OnResolveTemplatePath( templatePath );
-
-            var file = new FileInfo( resolvedPath );
+            var file = new FileInfo( FullPath( templatePath ) );
             if ( file.Exists )
             {
                 return File.ReadAllText( file.FullName );
@@ -107,7 +81,5 @@ namespace Rock.Lava
 
             throw new FileSystemException( "LavaFileSystem Template Not Found", templatePath );
         }
-
-        protected abstract string OnResolveTemplatePath( string inputPath );
     }
 }

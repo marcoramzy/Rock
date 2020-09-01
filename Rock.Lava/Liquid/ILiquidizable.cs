@@ -14,10 +14,26 @@
 // limitations under the License.
 // </copyright>
 //
-namespace Rock.Lava.Shortcodes
+using System.Collections.Generic;
+using dotLiquid = global::DotLiquid;
+
+namespace Rock.Lava
 {
-    interface IRockShortcode
+    /// <summary>
+    /// Represents an object model that can be used with Lava
+    /// </summary>
+    public interface ILiquidizable //: dotLiquid.IIndexable dotLiquid.ILiquidizable
     {
-        string TemplateElementName { get; }
+        object ToLiquid();
+        object this[object key] { get; }
+        bool ContainsKey( object key );
+
+        /// <summary>
+        /// Gets the available keys (for debugging info).
+        /// </summary>
+        /// <value>
+        /// The available keys.
+        /// </value>
+        List<string> AvailableKeys { get;  }
     }
 }

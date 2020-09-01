@@ -82,7 +82,7 @@
     <Compile Include="Core\CommonMergeFieldsOptions.cs" />
     <Compile Include="Core\ILavaDataObject.cs" />
     <Compile Include="Core\IRockLavaBlock.cs" />
-    <Compile Include="Core\LavaHelper.cs" />
+    <Compile Include="Core\LavaDictionary.cs" />
     <Compile Include="Core\LavaIgnoreAttribute.cs" />
     <Compile Include="Core\LavaIncludeAttribute.cs" />
     <Compile Include="Core\LavaTypeAttribute.cs" />

@@ -14,9 +14,9 @@
 // limitations under the License.
 // </copyright>
 //
+using System;
+using System.Collections.Generic;
 using System.IO;
-
-using DotLiquid;
 
 using Rock.Utility;
 
@@ -26,17 +26,35 @@ namespace Rock.Lava.Shortcodes
     /// 
     /// </summary>
     /// <seealso cref="DotLiquid.Block" />
-    public class RockLavaShortcodeBlockBase : DotLiquid.Block, IRockStartup, IRockShortcode
+    public class RockLavaShortcodeBlockBase : IRockShortcode //DotLiquid.Block, IRockStartup,
     {
-        
+        /// <summary>
+        /// Get the name of the shortcode as it is used in the Liquid template.
+        /// </summary>
+        public virtual string TemplateElementName
+        {
+            get
+            {
+                return this.GetType().Name.ToLower();
+            }
+        }
+        public virtual void Initialize( string tagName, string markup, List<string> tokens )
+        {
+            //_markup = markup;
+
+            //base.Initialize( tagName, markup, tokens );
+        }
+
         /// <summary>
         /// Renders the specified context.
         /// </summary>
         /// <param name="context">The context.</param>
         /// <param name="result">The result.</param>
-        public override void Render( Context context, TextWriter result )
+        public virtual void Render( ILavaContext context, TextWriter result )
         {
-            base.Render( context, result );
+            //throw new NotImplementedException();
+
+            //base.Render( context, result );
         }
 
         /// <summary>
@@ -45,14 +63,14 @@ namespace Rock.Lava.Shortcodes
         /// <value>
         /// The order.
         /// </value>
-        public int StartupOrder { get { return 0; } }
+        //public int StartupOrder { get { return 0; } }
 
         /// <summary>
         /// Method that will be run at Rock startup
         /// </summary>
-        public virtual void OnStartup()
-        {
-        }
+        //public virtual void OnStartup()
+        //{
+        //}
 
     }
 }

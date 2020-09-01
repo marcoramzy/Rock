@@ -24,6 +24,11 @@ namespace Rock.Lava
     /// </summary>
     public interface ILavaContext
     {
+        /// <summary>
+        /// The set of Lava Commands that are specifically enabled in this context.
+        /// </summary>
+        IList<string> EnabledCommands { get; }
+
         //IList<IDictionary<string, object>> Environments { get; }
         IList<IDictionary<string, object>> Scopes { get; }
 
@@ -43,6 +48,8 @@ namespace Rock.Lava
 
         string ResolveMergeFields( string content, IDictionary<string, object> mergeObjects, string enabledLavaCommands, bool encodeStrings = false, bool throwExceptionOnErrors = false );
         string ResolveMergeFields( string content, IDictionary<string, object> mergeObjects );
+
+        object this[string key] { get; set; }
 
         object GetValue( string key );
         void SetValue( string key, object value );

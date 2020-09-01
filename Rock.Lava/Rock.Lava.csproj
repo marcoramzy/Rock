@@ -79,10 +79,26 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Constants.cs" />
+    <Compile Include="Core\Blocks\RockLavaBlockBase.cs" />
+    <Compile Include="Core\LavaFileSystem.cs" />
+    <Compile Include="Core\Shortcodes\IRockShortcode.cs" />
+    <Compile Include="Core\Shortcodes\RockLavaShortcodeBase.cs" />
+    <Compile Include="Core\Shortcodes\RockLavaShortcodeBlockBase.cs" />
     <Compile Include="Engine\LavaEngineBase.cs" />
-    <Compile Include="Liquid\RockLavaBlockBase.cs" />
+    <Compile Include="Filters\Generic\TemplateFilters.cs" />
+    <Compile Include="Liquid\Blocks\DynamicShortcodeBlock.cs" />
+    <Compile Include="Liquid\Blocks\DynamicShortcodeInline.cs" />
+    <Compile Include="Liquid\DotLiquidEngine.cs" />
+    <Compile Include="Liquid\DotLiquidLavaContext.cs" />
+    <Compile Include="Liquid\DotLiquidLavaTemplate.cs" />
+    <Compile Include="Liquid\Filters\DotLiquidFilters.cs" />
+    <Compile Include="Liquid\ILiquidizable.cs" />
+    <Compile Include="Liquid\DotLiquidLavaFileSystem.cs" />
+    <Compile Include="Liquid\RockLavaTagBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RockDynamic.cs" />
     <Compile Include="Shortcodes\LavaShortcodeMetaDataAttribute.cs" />
+    <Compile Include="Utilities\RockSerializableDictionary.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DotLiquid\DotLiquid.csproj">
@@ -102,9 +118,6 @@
     <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Core\" />
-    <Folder Include="Filters\Generic\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

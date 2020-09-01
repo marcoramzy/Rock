@@ -27,7 +27,7 @@ namespace Rock.Lava.Blocks
     /// 
     /// </summary>
     /// <seealso cref="DotLiquid.Block" />
-    public class RockLavaBlockBase : DotLiquid.Block, IRockStartup
+    public class RockLavaBlockBase : IRockLavaBlock // ILava DotLiquid.Block, IRockStartup
     {
         /// <summary>
         /// Gets the not authorized message.
@@ -48,9 +48,9 @@ namespace Rock.Lava.Blocks
         /// </summary>
         /// <param name="context">The context.</param>
         /// <returns></returns>
-        protected bool IsAuthorized( Context context )
+        protected bool IsAuthorized( ILavaContext context )
         {
-            return LavaHelper.IsAuthorized( context, this.GetType().Name );
+            return LavaSecurityHelper.IsAuthorized( context, this.GetType().Name );
         }
 
         /// <summary>
@@ -58,9 +58,9 @@ namespace Rock.Lava.Blocks
         /// </summary>
         /// <param name="context">The context.</param>
         /// <param name="result">The result.</param>
-        public override void Render( Context context, TextWriter result )
+        public void Render( ILavaContext context, TextWriter result )
         {
-            base.Render( context, result );
+            //base.Render( context, result );
         }
 
         /// <summary>
@@ -78,5 +78,29 @@ namespace Rock.Lava.Blocks
         {
         }
 
+    }
+
+    public static class LavaSecurityHelper
+    {
+        /// <summary>
+        /// Determines whether the specified command is authorized within the context.
+        /// </summary>
+        /// <param name="context">The context.</param>
+        /// <param name="command">The command.</param>
+        /// <returns>
+        ///   <c>true</c> if the specified command is authorized; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool IsAuthorized( ILavaContext context, string command )
+        {
+            if ( context.EnabledCommands.Any() )
+            {
+                if ( context.EnabledCommands.Contains( "All" ) || context.EnabledCommands.Contains( command ) )
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
     }
 }

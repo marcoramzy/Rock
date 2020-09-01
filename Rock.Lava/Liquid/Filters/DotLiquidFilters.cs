@@ -14,10 +14,17 @@
 // limitations under the License.
 // </copyright>
 //
-namespace Rock.Lava.Shortcodes
+namespace Rock.Lava.DotLiquid
 {
-    interface IRockShortcode
+    /// <summary>
+    /// A set of Lava filters that can be used with the DotLiquid templating framework.
+    /// </summary>
+    /// <remarks>
+    /// Where possible, filters are implemented as a wrapper around an equivalent function that is independent of any specific templating framework.
+    /// The purpose of this approach is to allow the core filter functionality to be more easily reimplemented and re-used with other templating frameworks such as Liquid or Razor.
+    /// </remarks>
+    public static partial class DotLiquidFilters
     {
-        string TemplateElementName { get; }
+        //
     }
 }

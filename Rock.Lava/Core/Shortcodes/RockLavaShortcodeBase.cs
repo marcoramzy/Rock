@@ -25,18 +25,19 @@ namespace Rock.Lava.Shortcodes
     /// <summary>
     /// 
     /// </summary>
-    /// <seealso cref="DotLiquid.Block" />
-    public class RockLavaShortcodeBase : DotLiquid.Tag, IRockStartup, IRockShortcode
+    public class RockLavaShortcodeBase : IRockShortcode //global::DotLiquid.Tag, IRockStartup
     {
-        
+        public string TemplateElementName => throw new System.NotImplementedException();
+
         /// <summary>
         /// Renders the specified context.
         /// </summary>
         /// <param name="context">The context.</param>
         /// <param name="result">The result.</param>
-        public override void Render( Context context, TextWriter result )
+        public void Render( ILavaContext context, TextWriter result )
         {
-            base.Render( context, result );
+            throw new System.Exception( "Render is not implemented. This needs to be forwarded to a Liquid framework" );
+            //base.Render( context, result );
         }
 
         /// <summary>
@@ -45,14 +46,14 @@ namespace Rock.Lava.Shortcodes
         /// <value>
         /// The order.
         /// </value>
-        public int StartupOrder { get { return 0; } }
+        //public int StartupOrder { get { return 0; } }
 
         /// <summary>
         /// Method that will be run at Rock startup
         /// </summary>
-        public virtual void OnStartup()
-        {
-        }
+        //public virtual void OnStartup()
+        //{
+        //}
 
     }
 }

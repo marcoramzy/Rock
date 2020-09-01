@@ -27,42 +27,8 @@ namespace Rock.Lava.Blocks
     /// 
     /// </summary>
     /// <seealso cref="DotLiquid.Block" />
-    public class RockLavaBlockBase : global::DotLiquid.Block //, IRockStartup
+    public class RockLavaTagBase : global::DotLiquid.Tag //, IRockStartup
     {
-        /// <summary>
-        /// Gets the not authorized message.
-        /// </summary>
-        /// <value>
-        /// The not authorized message.
-        /// </value>
-        public static string NotAuthorizedMessage
-        {
-            get
-            {
-                return "The Lava command '{0}' is not configured for this template.";
-            }
-        }
-        
-        /// <summary>
-        /// Determines whether the specified command is authorized.
-        /// </summary>
-        /// <param name="context">The context.</param>
-        /// <returns></returns>
-        protected bool IsAuthorized( Context context )
-        {
-            return LavaHelper.IsAuthorized( context, this.GetType().Name );
-        }
-
-        /// <summary>
-        /// Renders the specified context.
-        /// </summary>
-        /// <param name="context">The context.</param>
-        /// <param name="result">The result.</param>
-        public override void Render( Context context, TextWriter result )
-        {
-            base.Render( context, result );
-        }
-
         /// <summary>
         /// All IRockStartup classes will be run in order by this value. If class does not depend on an order, return zero.
         /// </summary>

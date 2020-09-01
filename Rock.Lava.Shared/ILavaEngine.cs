@@ -84,6 +84,10 @@ namespace Rock.Lava
         /// <param name="type"></param>
         /// <param name="allowedMembers"></param>
         void RegisterSafeType( Type type, string[] allowedMembers = null );
+
+        bool TryParseTemplate( string inputTemplate, out ILavaTemplate template );
+
+        ILavaTemplate ParseTemplate( string inputTemplate );
     }
 
 }

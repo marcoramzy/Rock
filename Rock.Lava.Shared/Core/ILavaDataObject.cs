@@ -11,6 +11,6 @@ namespace Rock.Lava
     /// </summary>
     public interface ILavaDataObject
     {
-
+        object ToLiquid();
     }
 }
