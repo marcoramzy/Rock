@@ -20,8 +20,6 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-using DotLiquid;
-
 namespace Rock.Lava.Shortcodes
 {
     /// <summary>
@@ -32,14 +30,6 @@ namespace Rock.Lava.Shortcodes
         private static readonly Regex Syntax = new Regex( @"(\w+)" );
 
         string _markup = string.Empty;
-
-        /// <summary>
-        /// Method that will be run at Rock startup
-        /// </summary>
-        public override void OnStartup()
-        {
-            Template.RegisterShortcode<BootstrapAlert>( "bootstrapalert" );
-        }
 
         /// <summary>
         /// Initializes the specified tag name.
@@ -60,7 +50,7 @@ namespace Rock.Lava.Shortcodes
         /// </summary>
         /// <param name="context">The context.</param>
         /// <param name="result">The result.</param>
-        public override void Render( Context context, TextWriter result )
+        public override void Render( ILavaContext context, TextWriter result )
         {
 
             using ( TextWriter writer = new StringWriter() )
@@ -86,7 +76,7 @@ namespace Rock.Lava.Shortcodes
         /// <param name="markup">The markup.</param>
         /// <param name="context">The context.</param>
         /// <returns></returns>
-        private Dictionary<string, string> ParseMarkup( string markup, Context context )
+        private Dictionary<string, string> ParseMarkup( string markup, ILavaContext context )
         {
             // first run lava across the inputted markup
             var internalMergeFields = new Dictionary<string, object>();
@@ -101,13 +91,11 @@ namespace Rock.Lava.Shortcodes
             }
 
             // get merge fields loaded by the block or container
-            if ( context.Environments.Count > 0 )
+            foreach ( var item in context.GetMergeFieldsInEnvironment() )
             {
-                foreach ( var item in context.Environments[0] )
-                {
-                    internalMergeFields.AddOrReplace( item.Key, item.Value );
-                }
+                internalMergeFields.AddOrReplace( item.Key, item.Value );
             }
+
             var resolvedMarkup = markup.ResolveMergeFields( internalMergeFields );
 
             var parms = new Dictionary<string, string>();

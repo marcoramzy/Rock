@@ -553,7 +553,7 @@ namespace Rock.Lava.Blocks
         /// </summary>
         /// <param name="context">The context.</param>
         /// <returns></returns>
-        private static Person GetCurrentPerson( DotLiquid.Context context )
+        private static Person GetCurrentPerson( ILavaContext context )
         {
             Person currentPerson = null;
 

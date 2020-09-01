@@ -23,9 +23,6 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
-using DotLiquid;
-using DotLiquid.Util;
-
 using Rock.Data;
 using Rock.Model;
 
@@ -83,14 +80,6 @@ namespace Rock.Lava.Shortcodes
         const string ROLE_ID = "roleid";
         const string LOOK_AHEAD_DAYS = "lookaheaddays";
         const string SCHEDULE_CATEGORY_ID = "schedulecategoryid";
-
-        /// <summary>
-        /// Method that will be run at Rock startup
-        /// </summary>
-        public override void OnStartup()
-        {
-            Template.RegisterShortcode<ScheduledContent>( _tagName );
-        }
 
         /// <summary>
         /// Initializes the specified tag name.
@@ -298,7 +287,7 @@ namespace Rock.Lava.Shortcodes
         /// </summary>
         /// <param name="context">The context.</param>
         /// <returns></returns>
-        private static Person GetCurrentPerson( DotLiquid.Context context )
+        private static Person GetCurrentPerson( ILavaContext context )
         {
             Person currentPerson = null;
 

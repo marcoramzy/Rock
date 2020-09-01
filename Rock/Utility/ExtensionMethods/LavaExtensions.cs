@@ -24,15 +24,15 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-using DotLiquid;
-
 using Rock.Attribute;
 using Rock.Data;
+using Rock.Lava;
 using Rock.Model;
 using Rock.Web.Cache;
 
 namespace Rock
 {
+
     /// <summary>
     /// Rock Lava related extensions
     /// </summary>
@@ -48,7 +48,7 @@ namespace Rock
             //
             // Register any 3rd party library classes that are safe to use.
             //
-            Template.RegisterSafeType( typeof( Common.Mobile.DeviceData ), typeof( Common.Mobile.DeviceData ).GetProperties().Select( p => p.Name ).ToArray() );
+            LavaEngine.Instance.RegisterSafeType( typeof( Common.Mobile.DeviceData ), typeof( Common.Mobile.DeviceData ).GetProperties().Select( p => p.Name ).ToArray() );
         }
 
         #endregion
@@ -125,9 +125,9 @@ namespace Rock
             }
 
             // If the object is liquidable, get the object return by its ToLiquid() method.
-            if ( myObject is DotLiquid.ILiquidizable )
+            if ( myObject is ILiquidizable )
             {
-                myObject = ( (DotLiquid.ILiquidizable)myObject ).ToLiquid();
+                myObject = ( (ILiquidizable)myObject ).ToLiquid();
             }
 
             // If the object is null, return an empty string
@@ -178,36 +178,12 @@ namespace Rock
                 }
             }
 
-            // If the object is a Liquid Drop object, return a list of all of the object's properties
-            if ( myObject is Drop )
-            {
-                var result = new Dictionary<string, object>();
-                Type baseDrop = typeof( DropBase );
-
-                foreach ( var propInfo in entityType.GetProperties( BindingFlags.Public | BindingFlags.Instance ) )
-                {
-                    if ( propInfo != null && propInfo.DeclaringType != baseDrop )
-                    {
-                        try
-                        {
-                            result.Add( propInfo.Name, propInfo.GetValue( myObject, null ).LiquidizeChildren( levelsDeep, rockContext, entityHistory ) );
-                        }
-                        catch ( Exception ex )
-                        {
-                            result.Add( propInfo.Name, ex.ToString() );
-                        }
-                    }
-                }
-
-                return result;
-            }
-
-            // If the object has the [LiquidType] attribute, enumerate the allowed properties and return a list of those properties
-            if ( entityType.GetCustomAttributes( typeof( LiquidTypeAttribute ), false ).Any() )
+            // If the object has the [LavaType] attribute, enumerate the allowed properties and return a list of those properties
+            if ( entityType.GetCustomAttributes( typeof( LavaTypeAttribute ), false ).Any() )
             {
                 var result = new Dictionary<string, object>();
 
-                var attr = (LiquidTypeAttribute)entityType.GetCustomAttributes( typeof( LiquidTypeAttribute ), false ).First();
+                var attr = (LavaTypeAttribute)entityType.GetCustomAttributes( typeof( LavaTypeAttribute ), false ).First();
                 foreach ( string propName in attr.AllowedMembers )
                 {
                     var propInfo = entityType.GetProperty( propName );
@@ -585,10 +561,19 @@ namespace Rock
                     enabledLavaCommands = GlobalAttributesCache.Value( "DefaultEnabledLavaCommands" );
                 }
 
-                Template template = GetTemplate( content );
-                template.Registers.AddOrReplace( "EnabledCommands", enabledLavaCommands );
-                template.InstanceAssigns.AddOrReplace( "CurrentPerson", currentPersonOverride );
-                return template.Render( Hash.FromDictionary( mergeObjects ) );
+                var template = GetTemplate( content );
+
+                var renderParameters = new LavaRenderParameters();
+
+                renderParameters.Registers.AddOrReplace( "EnabledCommands", enabledLavaCommands );
+                renderParameters.InstanceAssigns.AddOrReplace( "CurrentPerson", currentPersonOverride );
+
+                string output;
+                IList<Exception> errors;
+
+                var isRendered = template.TryRender( mergeObjects, out output, out errors );
+
+                return output;
             }
             catch ( Exception ex )
             {
@@ -656,34 +641,34 @@ namespace Rock
                     }
                 }
 
-                Template template = GetTemplate( content );
-                template.Registers.AddOrReplace( "EnabledCommands", enabledLavaCommands );
+                var template = GetTemplate( content );
+
+                var renderParameters = new LavaRenderParameters();
+
+                renderParameters.Registers.AddOrReplace( "EnabledCommands", enabledLavaCommands );
+                renderParameters.LocalVariables = mergeObjects;
 
                 string result;
+                IList<Exception> errors;
 
                 if ( encodeStrings )
                 {
-                    // if encodeStrings = true, we want any string values to be XML Encoded ( 
-                    RenderParameters renderParameters = new RenderParameters();
-                    renderParameters.LocalVariables = Hash.FromDictionary( mergeObjects );
+                    // if encodeStrings = true, we want any string values to be XML Encoded                    
                     renderParameters.ValueTypeTransformers = new Dictionary<Type, Func<object, object>>();
                     renderParameters.ValueTypeTransformers[typeof( string )] = EncodeStringTransformer;
-                    result = template.Render( renderParameters );
-                }
-                else
-                {
-                    result = template.Render( Hash.FromDictionary( mergeObjects ) );
                 }
 
-                if ( throwExceptionOnErrors && template.Errors.Any() )
+                var isRendered = template.TryRender( renderParameters, out result, out errors );
+
+                if ( throwExceptionOnErrors && errors.Any() )
                 {
-                    if ( template.Errors.Count == 1 )
+                    if ( errors.Count == 1 )
                     {
-                        throw template.Errors[0];
+                        throw errors[0];
                     }
                     else
                     {
-                        throw new AggregateException( template.Errors );
+                        throw new AggregateException( errors );
                     }
                 }
 
@@ -713,7 +698,7 @@ namespace Rock
         /// </summary>
         /// <param name="content">The content of the template.</param>
         /// <returns></returns>
-        private static Template GetTemplate( string content )
+        private static ILavaTemplate GetTemplate( string content )
         {
             const int hashLength = 10;
             string templateKey;
@@ -740,7 +725,7 @@ namespace Rock
             var template = LavaTemplateCache.Get( templateKey, content ).Template;
 
             // Clear any previous errors from the template.
-            template.Errors.Clear();
+            //template.Errors.Clear();
 
             return template;
         }

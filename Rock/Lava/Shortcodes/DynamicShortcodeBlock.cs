@@ -22,9 +22,6 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
-using DotLiquid;
-using DotLiquid.Util;
-
 using Rock.Lava.Blocks;
 using Rock.Model;
 using Rock.Utility;
@@ -60,7 +57,7 @@ namespace Rock.Lava.Shortcodes
             foreach(var shortcode in blockShortCodes )
             {
                 // register this shortcode
-                Template.RegisterShortcode<DynamicShortcodeBlock>( shortcode.TagName );
+                LavaEngine.Instance.RegisterShortcode(( shortcode.TagName );
             }
         }
 
@@ -149,7 +146,7 @@ namespace Rock.Lava.Shortcodes
         /// </summary>
         /// <param name="context">The context.</param>
         /// <param name="result">The result.</param>
-        public override void Render( Context context, TextWriter result )
+        public override void Render( ILavaContext context, TextWriter result )
         {
             // get enabled security commands
             if ( context.Registers.ContainsKey( "EnabledCommands" ) )
@@ -353,7 +350,7 @@ namespace Rock.Lava.Shortcodes
         /// <param name="markup">The markup.</param>
         /// <param name="context">The context.</param>
         /// <returns></returns>
-        private Dictionary<string, object> ParseMarkup( string markup, Context context )
+        private Dictionary<string, object> ParseMarkup( string markup, ILavaContext context )
         {
             var parms = new Dictionary<string, object>();
 
@@ -419,7 +416,7 @@ namespace Rock.Lava.Shortcodes
         /// </summary>
         /// <param name="context">The context.</param>
         /// <param name="parms">The parms.</param>
-        private void LoadBlockMergeFields( Context context, Dictionary<string, object> parms )
+        private void LoadBlockMergeFields( ILavaContext context, Dictionary<string, object> parms )
         {
             _internalMergeFields = new Dictionary<string, object>();
 
@@ -434,13 +431,10 @@ namespace Rock.Lava.Shortcodes
             }
 
             // get merge fields loaded by the block or container
-            if ( context.Environments.Count > 0 )
+            foreach ( var item in context.GetMergeFieldsInEnvironment() )
             {
-                foreach ( var item in context.Environments[0] )
-                {
-                    _internalMergeFields.AddOrReplace( item.Key, item.Value );
-                    parms.AddOrReplace( item.Key, item.Value );
-                }
+                _internalMergeFields.AddOrReplace( item.Key, item.Value );
+                parms.AddOrReplace( item.Key, item.Value );
             }
         }
     }

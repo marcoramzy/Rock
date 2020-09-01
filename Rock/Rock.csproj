@@ -558,7 +558,6 @@
     <Compile Include="Jobs\PostV103DataMigrationsSpiritualGifts.cs" />
     <Compile Include="Lava\Blocks\InteractionWrite.cs" />
     <Compile Include="Lava\Blocks\InteractionContentChannelItemWrite.cs" />
-    <Compile Include="Lava\Blocks\IRockLavaBlock.cs" />
     <Compile Include="Lava\LavaFileSystem.cs" />
     <Compile Include="Lava\RockFilters.cs" />
     <Compile Include="Logging\IRockLogReader.cs" />
@@ -1010,7 +1009,6 @@
     <Compile Include="SystemGuid\SystemSetting.cs" />
     <Compile Include="SystemKey\GroupTypeAttributeKey.cs" />
     <Compile Include="Utility\RockColor.cs" />
-    <Compile Include="Utility\RockDynamic.cs" />
     <Compile Include="Utility\Scripturize.cs" />
     <Compile Include="Utility\ExtensionMethods\StringRockExtensions.cs" />
     <Compile Include="Utility\WebRequestHelper.cs" />
@@ -1385,17 +1383,10 @@
     <Compile Include="Lava\Blocks\WebRequest.cs" />
     <Compile Include="Lava\Blocks\Sql.cs" />
     <Compile Include="Lava\Blocks\WorkflowActivate.cs" />
-    <Compile Include="Lava\CommonMergeFieldsOptions.cs" />
-    <Compile Include="Lava\ILiquidizable.cs" />
     <Compile Include="Lava\LavaHelper.cs" />
     <Compile Include="Lava\LavaSupportLevel.cs" />
     <Compile Include="Lava\LegacyLavaSyntaxDetectedException.cs" />
     <Compile Include="Lava\LegacyLavaUpdater.cs" />
-    <Compile Include="Lava\Shortcodes\DynamicShortcodeBlock.cs" />
-    <Compile Include="Lava\Shortcodes\DynamicShortcodeInline.cs" />
-    <Compile Include="Lava\Shortcodes\IRockShortcode.cs" />
-    <Compile Include="Lava\Shortcodes\RockLavaShortcodeBlockBase.cs" />
-    <Compile Include="Lava\Shortcodes\RockLavaShortcodeBase.cs" />
     <Compile Include="Lava\Shortcodes\BootstrapAlert.cs" />
     <Compile Include="MergeTemplates\HtmlMergeTemplateType.cs" />
     <Compile Include="MergeTemplates\MergeTemplateType.cs" />

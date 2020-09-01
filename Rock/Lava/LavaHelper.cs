@@ -238,7 +238,7 @@ namespace Rock.Lava
         /// <param name="context">The context.</param>
         /// <returns>The current person or null if not found.</returns>
         /// <exception cref="ArgumentNullException">context</exception>
-        public static Person GetCurrentPerson( DotLiquid.Context context )
+        public static Person GetCurrentPerson( ILavaContext context )
         {
             if ( context == null )
             {
@@ -305,7 +305,7 @@ namespace Rock.Lava
         /// you can always choose to not use this helper method and instead roll your own implementation.
         /// </para>
         /// </param>
-        public static void ParseCommandMarkup( string markup, DotLiquid.Context context, Dictionary<string, string> parms )
+        public static void ParseCommandMarkup( string markup, ILavaContext context, Dictionary<string, string> parms )
         {
             if ( markup.IsNull() )
             {
@@ -381,7 +381,7 @@ namespace Rock.Lava
         /// <returns>
         ///   <c>true</c> if the specified command is authorized; otherwise, <c>false</c>.
         /// </returns>
-        public static bool IsAuthorized( DotLiquid.Context context, string command )
+        public static bool IsAuthorized( ILavaContext context, string command )
         {
             if ( context?.Registers?.ContainsKey( "EnabledCommands" ) == true && command.IsNotNullOrWhiteSpace() )
             {

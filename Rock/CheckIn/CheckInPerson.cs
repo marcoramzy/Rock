@@ -20,6 +20,7 @@ using System.Linq;
 using System.Runtime.Serialization;
 
 using Rock.Attribute;
+using Rock.Lava;
 using Rock.Model;
 
 namespace Rock.CheckIn
@@ -404,7 +405,7 @@ namespace Rock.CheckIn
     /// <summary>
     /// Helper class for summarizing the selected check-in
     /// </summary>
-    [DotLiquid.LiquidType( "Schedule", "GroupType", "Group", "Location", "GroupTypeConfiguredForLabel" )]
+    [LavaType( "Schedule", "GroupType", "Group", "Location", "GroupTypeConfiguredForLabel" )]
     public class CheckInPersonSummary
     {
         /// <summary>

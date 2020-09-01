@@ -16,13 +16,14 @@
 //
 using System;
 using System.Collections.Generic;
+using Rock.Lava;
 
 namespace Rock.Store
 {
     /// <summary>
     /// Base model class for the store 
     /// </summary>
-    public class StoreModel : DotLiquid.ILiquidizable
+    public class StoreModel : ILavaDataObject
     {
 
         /// <summary>
@@ -62,9 +63,9 @@ namespace Rock.Store
                     propValue = ((Guid)propValue).ToString();
                 }
 
-                if ( debug && propValue is DotLiquid.ILiquidizable )
+                if ( debug && propValue is ILavaDataObject )
                 {
-                    dictionary.Add( propInfo.Name, ((DotLiquid.ILiquidizable)propValue).ToLiquid() );
+                    dictionary.Add( propInfo.Name, ((ILavaDataObject)propValue).ToLiquid() );
                 }
                 else
                 {

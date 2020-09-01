@@ -21,8 +21,6 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
-using DotLiquid;
-
 using Rock.Utility;
 
 namespace Rock.Lava.Blocks
@@ -30,7 +28,7 @@ namespace Rock.Lava.Blocks
     /// <summary>
     /// Tag which allows you to list all of the registered Lava commands on your server.
     /// </summary>
-    public class TagList : Tag, IRockStartup
+    public class TagList : RockLavaTagBase, IRockStartup
     {
         private static readonly Regex Syntax = new Regex( @"(\w+)" );
 

@@ -23,9 +23,6 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Text.RegularExpressions;
 
-using DotLiquid;
-using DotLiquid.Util;
-
 using Rock.Web.Cache;
 
 namespace Rock.Lava.Blocks

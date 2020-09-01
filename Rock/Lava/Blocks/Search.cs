@@ -22,8 +22,6 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-using DotLiquid;
-
 using Rock.UniversalSearch;
 using Rock.Utility;
 using Rock.Web.Cache;

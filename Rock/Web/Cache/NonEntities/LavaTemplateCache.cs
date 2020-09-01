@@ -16,7 +16,7 @@
 //
 using System;
 
-using DotLiquid;
+using Rock.Lava;
 
 namespace Rock.Web.Cache
 {
@@ -46,7 +46,7 @@ namespace Rock.Web.Cache
         /// <value>
         /// The defined type id.
         /// </value>
-        public Template Template { get; set; }
+        public ILavaTemplate Template { get; set; }
 
         #endregion
 
@@ -108,7 +108,7 @@ namespace Rock.Web.Cache
 
         private static LavaTemplateCache Load( string content )
         {
-            var template = Template.Parse( content );
+            var template = LavaEngine.Instance.ParseTemplate( content );
 
             /* 
              * 2/19/2020 - JPH
@@ -119,7 +119,7 @@ namespace Rock.Web.Cache
              *
              * Reason: Rock Issue #4084, Weird Behavior with Lava Includes
              */
-            template.MakeThreadSafe();
+            //template.MakeThreadSafe();
 
             var lavaTemplate = new LavaTemplateCache { Template = template };
             return lavaTemplate;
