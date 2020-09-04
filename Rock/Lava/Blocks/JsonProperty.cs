@@ -16,47 +16,20 @@
 //
 using System.Collections.Generic;
 using System.Data;
-using System.Dynamic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Xml.Linq;
-
-using DotLiquid;
-
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
-
-using RestSharp;
-using RestSharp.Authenticators;
-using Rock.Utility;
 
 namespace Rock.Lava.Blocks
 {
     /// <summary>
     /// Web
     /// </summary>
-    public class JsonProperty : DotLiquid.Block, IRockStartup
+    public class JsonProperty : RockLavaBlockBase
     {
         private static readonly Regex Syntax = new Regex( @"(\w+)" );
 
         string _markup = string.Empty;
-
-        /// <summary>
-        /// All IRockStartup classes will be run in order by this value. If class does not depend on an order, return zero.
-        /// </summary>
-        /// <value>
-        /// The order.
-        /// </value>
-        public int StartupOrder { get { return 0; } }
-
-        /// <summary>
-        /// Method that will be run at Rock startup
-        /// </summary>
-        public void OnStartup()
-        {
-            Template.RegisterTag<JsonProperty>( "jsonproperty" );
-        }
 
         /// <summary>
         /// Initializes the specified tag name.
@@ -77,7 +50,7 @@ namespace Rock.Lava.Blocks
         /// </summary>
         /// <param name="context">The context.</param>
         /// <param name="result">The result.</param>
-        public override void Render( Context context, TextWriter result )
+        public override void Render( ILavaContext context, TextWriter result )
         {
             var parms = ParseMarkup( _markup, context );
 
@@ -123,7 +96,7 @@ namespace Rock.Lava.Blocks
         /// <param name="markup">The markup.</param>
         /// <param name="context">The context.</param>
         /// <returns></returns>
-        private Dictionary<string, string> ParseMarkup( string markup, Context context )
+        private Dictionary<string, string> ParseMarkup( string markup, ILavaContext context )
         {
             // first run lava across the inputted markup
             var internalMergeFields = new Dictionary<string, object>();

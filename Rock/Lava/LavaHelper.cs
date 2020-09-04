@@ -87,7 +87,7 @@ namespace Rock.Lava
                 foreach ( var contextEntityType in rockPage.GetContextEntityTypes() )
                 {
                     var contextEntity = rockPage.GetCurrentContext( contextEntityType );
-                    if ( contextEntity != null && contextEntity is DotLiquid.ILiquidizable )
+                    if ( contextEntity != null && contextEntity is ILavaDataObject )
                     {
                         var type = Type.GetType( contextEntityType.AssemblyName ?? contextEntityType.Name );
                         if ( type != null )
@@ -322,25 +322,7 @@ namespace Rock.Lava
                 throw new ArgumentNullException( nameof( parms ) );
             }
 
-            var mergeFields = new Dictionary<string, object>();
-
-            // Get variables defined in the lava context.
-            foreach ( var scope in context.Scopes )
-            {
-                foreach ( var item in scope )
-                {
-                    mergeFields.AddOrReplace( item.Key, item.Value );
-                }
-            }
-
-            // Get merge fields loaded by the block or container.
-            foreach ( var environment in context.Environments )
-            {
-                foreach ( var item in environment )
-                {
-                    mergeFields.AddOrReplace( item.Key, item.Value );
-                }
-            }
+            var mergeFields = context.GetMergeFieldsForLocalScope();
 
             // Resolve merge fields.
             var resolvedMarkup = markup.ResolveMergeFields( mergeFields );
@@ -383,17 +365,7 @@ namespace Rock.Lava
         /// </returns>
         public static bool IsAuthorized( ILavaContext context, string command )
         {
-            if ( context?.Registers?.ContainsKey( "EnabledCommands" ) == true && command.IsNotNullOrWhiteSpace() )
-            {
-                var enabledCommands = context.Registers["EnabledCommands"].ToString().Split( ',' ).ToList();
-
-                if ( enabledCommands.Contains( "All" ) || enabledCommands.Contains( command ) )
-                {
-                    return true;
-                }
-            }
-
-            return false;
+            return LavaSecurityHelper.IsAuthorized( context, command );
         }
     }
 }

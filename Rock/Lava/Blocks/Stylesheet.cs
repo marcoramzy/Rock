@@ -25,8 +25,6 @@ using System.Web;
 using dotless.Core;
 using dotless.Core.configuration;
 
-using DotLiquid;
-
 using Rock.Utility;
 using Rock.Web.Cache;
 using Rock.Web.UI;
@@ -40,27 +38,11 @@ namespace Rock.Lava.Blocks
     /// SELECT [FirstName], [LastName] FROM [Person]
     /// {% endsql %}
     /// </summary>
-    public class Stylesheet : DotLiquid.Block, IRockStartup
+    public class Stylesheet : RockLavaBlockBase
     {
         private static readonly Regex Syntax = new Regex( @"(\w+)" );
 
         string _markup = string.Empty;
-
-        /// <summary>
-        /// Method that will be run at Rock startup
-        /// </summary>
-        public void OnStartup()
-        {
-            Template.RegisterTag<Stylesheet>( "stylesheet" );
-        }
-
-        /// <summary>
-        /// All IRockStartup classes will be run in order by this value. If class does not depend on an order, return zero.
-        /// </summary>
-        /// <value>
-        /// The order.
-        /// </value>
-        public int StartupOrder { get { return 0; } }
 
         /// <summary>
         /// Initializes the specified tag name.
@@ -81,7 +63,7 @@ namespace Rock.Lava.Blocks
         /// </summary>
         /// <param name="context">The context.</param>
         /// <param name="result">The result.</param>
-        public override void Render( Context context, TextWriter result )
+        public override void Render( ILavaContext context, TextWriter result )
         {
             RockPage page = HttpContext.Current.Handler as RockPage;
 
@@ -211,7 +193,7 @@ namespace Rock.Lava.Blocks
         /// <param name="markup">The markup.</param>
         /// <param name="context">The context.</param>
         /// <returns></returns>
-        private Dictionary<string, string> ParseMarkup( string markup, Context context )
+        private Dictionary<string, string> ParseMarkup( string markup, ILavaContext context )
         {
             // first run lava across the inputted markup
             var internalMergeFields = new Dictionary<string, object>();

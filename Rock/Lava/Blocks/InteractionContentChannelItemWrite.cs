@@ -19,8 +19,6 @@ using System.Data.Entity;
 using System.IO;
 using System.Linq;
 
-using DotLiquid;
-
 using Rock.Data;
 using Rock.Model;
 using Rock.Transactions;
@@ -32,7 +30,7 @@ namespace Rock.Lava.Blocks
     /// <summary>
     /// Tag which allows a Content Channel Item Interaction to be written.
     /// </summary>
-    public class InteractionContentChannelItemWrite : DotLiquid.Tag, IRockStartup, IRockLavaBlock
+    public class InteractionContentChannelItemWrite : RockLavaTagBase
     {
         #region Parameter Keys
 
@@ -47,22 +45,6 @@ namespace Rock.Lava.Blocks
         #endregion Parameter Keys
 
         private string _markup;
-
-        /// <summary>
-        /// Method that will be run at Rock startup
-        /// </summary>
-        public void OnStartup()
-        {
-            Template.RegisterTag<InteractionContentChannelItemWrite>( "interactioncontentchannelitemwrite" );
-        }
-
-        /// <summary>
-        /// All IRockStartup classes will be run in order by this value. If class does not depend on an order, return zero.
-        /// </summary>
-        /// <value>
-        /// The order.
-        /// </value>
-        public int StartupOrder { get { return 0; } }
 
         /// <summary>
         /// Initializes the specified tag name.
@@ -82,12 +64,12 @@ namespace Rock.Lava.Blocks
         /// </summary>
         /// <param name="context">The context.</param>
         /// <param name="result">The result.</param>
-        public override void Render( Context context, TextWriter result )
+        public override void Render( ILavaContext context, TextWriter result )
         {
             // First, ensure that this command is allowed in the context.
             if ( !LavaHelper.IsAuthorized( context, this.GetType().Name ) )
             {
-                result.Write( string.Format( RockLavaBlockBase.NotAuthorizedMessage, this.Name ) );
+                result.Write( string.Format( RockLavaBlockBase.NotAuthorizedMessage, this.TagName ) );
                 base.Render( context, result );
                 return;
             }

@@ -20,8 +20,6 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-using DotLiquid;
-
 using Rock.Data;
 
 namespace Rock.Lava.Blocks
@@ -38,14 +36,6 @@ namespace Rock.Lava.Blocks
         private static readonly Regex Syntax = new Regex( @"(\w+)" );
 
         string _markup = string.Empty;
-
-        /// <summary>
-        /// Method that will be run at Rock startup
-        /// </summary>
-        public override void OnStartup()
-        {
-            Template.RegisterTag<Sql>( "sql" );
-        }
 
         /// <summary>
         /// Initializes the specified tag name.
@@ -66,12 +56,12 @@ namespace Rock.Lava.Blocks
         /// </summary>
         /// <param name="context">The context.</param>
         /// <param name="result">The result.</param>
-        public override void Render( Context context, TextWriter result )
+        public override void Render( ILavaContext context, TextWriter result )
         {
             // first ensure that sql commands are allowed in the context
             if ( !this.IsAuthorized( context ) )
             {
-                result.Write( string.Format( RockLavaBlockBase.NotAuthorizedMessage, this.Name ) );
+                result.Write( string.Format( RockLavaBlockBase.NotAuthorizedMessage, this.BlockName ) );
                 base.Render( context, result );
                 return;
             }
@@ -126,7 +116,7 @@ namespace Rock.Lava.Blocks
         /// <param name="markup">The markup.</param>
         /// <param name="context">The context.</param>
         /// <returns></returns>
-        private Dictionary<string, string> ParseMarkup( string markup, Context context )
+        private Dictionary<string, string> ParseMarkup( string markup, ILavaContext context )
         {
             // first run lava across the inputted markup
             var internalMergeFields = new Dictionary<string, object>();

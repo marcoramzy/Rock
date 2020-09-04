@@ -28,7 +28,7 @@ namespace Rock.Lava.Blocks
     /// <summary>
     /// Tag which allows you to list all of the registered Lava commands on your server.
     /// </summary>
-    public class TagList : RockLavaTagBase, IRockStartup
+    public class TagList : RockLavaTagBase //, IRockStartup
     {
         private static readonly Regex Syntax = new Regex( @"(\w+)" );
 
@@ -37,10 +37,10 @@ namespace Rock.Lava.Blocks
         /// <summary>
         /// Method that will be run at Rock startup
         /// </summary>
-        public void OnStartup()
-        {
-            Template.RegisterTag<TagList>( "taglist" );
-        }
+        //public void OnStartup()
+        //{
+        //    //Template.RegisterTag<TagList>( "taglist" );
+        //}
 
         /// <summary>
         /// All IRockStartup classes will be run in order by this value. If class does not depend on an order, return zero.
@@ -48,7 +48,7 @@ namespace Rock.Lava.Blocks
         /// <value>
         /// The order.
         /// </value>
-        public int StartupOrder { get { return 0; } }
+        //public int StartupOrder { get { return 0; } }
 
         /// <summary>
         /// Initializes the specified tag name.
@@ -69,19 +69,21 @@ namespace Rock.Lava.Blocks
         /// </summary>
         /// <param name="context">The context.</param>
         /// <param name="result">The result.</param>
-        public override void Render( Context context, TextWriter result )
+        public override void Render( ILavaContext context, TextWriter result )
         {
-           if ( Template.Tags == null )
+           var tags = LavaEngine.Instance.GetRegisteredTags();
+
+           if ( !tags.Any() )
            {
                 return;
            }
 
-           StringBuilder tagList = new StringBuilder();
+           var tagList = new StringBuilder();
 
            tagList.Append( "<strong>Lava Tag List</strong>" );
            tagList.Append( "<ul>" );
 
-           foreach( var tag in Template.Tags.OrderBy( t => t.Key ) )
+           foreach( var tag in tags.OrderBy( t => t.Key ) )
            {
                 tagList.Append( $"<li>{tag.Key} - {tag.Value}</li>" );
            }

@@ -48,10 +48,10 @@ namespace Rock.Lava.Blocks
         /// <summary>
         /// Method that will be run at Rock startup
         /// </summary>
-        public override void OnStartup()
-        {
-            Template.RegisterTag<Cache>( "cache" );
-        }
+        //public override void OnStartup()
+        //{
+        //    Template.RegisterTag<Cache>( "cache" );
+        //}
 
         /// <summary>
         /// Initializes the specified tag name.
@@ -72,7 +72,7 @@ namespace Rock.Lava.Blocks
         /// Parses the specified tokens.
         /// </summary>
         /// <param name="tokens">The tokens.</param>
-        protected override void Parse( List<string> tokens )
+        protected override void Parse( List<string> tokens, out List<object> nodeList )
         {
             // Get the block markup. The list of tokens contains all of the lava from the start tag to
             // the end of the template. This will pull out just the internals of the block.
@@ -92,8 +92,7 @@ namespace Rock.Lava.Blocks
             Regex regExStart = new Regex( startTag );
             Regex regExEnd = new Regex( endTag );
 
-            NodeList = NodeList ?? new List<object>();
-            NodeList.Clear();
+            nodeList = new List<object>();
 
             string token;
             while ( ( token = tokens.Shift() ) != null )
@@ -140,12 +139,12 @@ namespace Rock.Lava.Blocks
         /// </summary>
         /// <param name="context">The context.</param>
         /// <param name="result">The result.</param>
-        public override void Render( Context context, TextWriter result )
+        public override void Render( ILavaContext context, TextWriter result )
         {
             // First ensure that cached commands are allowed in the context
             if ( !this.IsAuthorized( context ) )
             {
-                result.Write( string.Format( RockLavaBlockBase.NotAuthorizedMessage, this.Name ) );
+                result.Write( string.Format( RockLavaBlockBase.NotAuthorizedMessage, this.BlockName ) );
                 base.Render( context, result );
                 return;
             }
@@ -264,7 +263,7 @@ namespace Rock.Lava.Blocks
         /// <param name="lavaTemplate">The lava template.</param>
         /// <param name="context">The context.</param>
         /// <returns></returns>
-        private string MergeLava( string lavaTemplate, Context context )
+        private string MergeLava( string lavaTemplate, ILavaContext context )
         {
             // Get enabled commands
             var enabledCommands = context.Registers["EnabledCommands"].ToString();
@@ -297,7 +296,7 @@ namespace Rock.Lava.Blocks
         /// <param name="markup">The markup.</param>
         /// <param name="context">The context.</param>
         /// <returns></returns>
-        private Dictionary<string, string> ParseMarkup( string markup, Context context )
+        private Dictionary<string, string> ParseMarkup( string markup, ILavaContext context )
         {
             // first run lava across the inputted markup
             var internalMergeFields = new Dictionary<string, object>();

@@ -17,8 +17,6 @@
 using System.Collections.Generic;
 using System.IO;
 
-using DotLiquid;
-
 using Rock.Model;
 using Rock.Transactions;
 using Rock.Web.Cache;
@@ -62,14 +60,6 @@ namespace Rock.Lava.Blocks
         private string _markup;
 
         /// <summary>
-        /// Method that will be run at Rock startup
-        /// </summary>
-        public override void OnStartup()
-        {
-            Template.RegisterTag<InteractionWrite>( "interactionwrite" );
-        }
-
-        /// <summary>
         /// Initializes the specified tag name.
         /// </summary>
         /// <param name="tagName">Name of the tag.</param>
@@ -87,12 +77,12 @@ namespace Rock.Lava.Blocks
         /// </summary>
         /// <param name="context">The context.</param>
         /// <param name="result">The result.</param>
-        public override void Render( Context context, TextWriter result )
+        public override void Render( ILavaContext context, TextWriter result )
         {
             // First, ensure that this command is allowed in the context.
             if ( !this.IsAuthorized( context ) )
             {
-                result.Write( string.Format( RockLavaBlockBase.NotAuthorizedMessage, this.Name ) );
+                result.Write( string.Format( RockLavaBlockBase.NotAuthorizedMessage, this.BlockName ) );
                 base.Render( context, result );
                 return;
             }

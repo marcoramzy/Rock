@@ -25,8 +25,6 @@ using System.Text.RegularExpressions;
 using System.Web;
 using System.Web.UI.WebControls;
 
-using DotLiquid;
-
 using Rock.Data;
 using Rock.Model;
 using Rock.Reporting;
@@ -40,7 +38,6 @@ namespace Rock.Lava.Blocks
     /// <summary>
     ///
     /// </summary>
-    /// <seealso cref="DotLiquid.Block" />
     public class RockEntity : RockLavaBlockBase
     {
         string _entityName = string.Empty;
@@ -65,12 +62,12 @@ namespace Rock.Lava.Blocks
         /// <param name="context">The context.</param>
         /// <param name="result">The result.</param>
         /// <exception cref="System.Exception">Your Lava command must contain at least one valid filter. If you configured a filter it's possible that the property or attribute you provided does not exist.</exception>
-        public override void Render( Context context, TextWriter result )
+        public override void Render( ILavaContext context, TextWriter result )
         {
             // first ensure that entity commands are allowed in the context
             if ( !this.IsAuthorized( context ) )
             {
-                result.Write( string.Format( RockLavaBlockBase.NotAuthorizedMessage, this.Name ) );
+                result.Write( string.Format( RockLavaBlockBase.NotAuthorizedMessage, this.BlockName ) );
                 base.Render( context, result );
                 return;
             }
@@ -504,7 +501,7 @@ namespace Rock.Lava.Blocks
             var entityTypes = EntityTypeCache.All();
 
             // register a business entity
-            Template.RegisterTag<Rock.Lava.Blocks.RockEntity>( "business" );
+            LavaEngine.Instance.RegisterBlock( "business", ( name ) => { return new RockEntity(); } );
 
             // Register the core models first
             foreach ( var entityType in entityTypes
@@ -538,13 +535,15 @@ namespace Rock.Lava.Blocks
                 string entityName = entityType.FriendlyName.RemoveSpaces().ToLower();
 
                 // if entity name is already registered, use the full class name with namespace
-                Type tagType = Template.GetTagType( entityName );
-                if ( tagType != null )
+
+                var lavaEngine = LavaEngine.Instance;
+
+                if ( lavaEngine.GetRegisteredTags().ContainsKey( entityName ) )
                 {
                     entityName = entityType.Name.Replace( '.', '_' );
                 }
 
-                Template.RegisterTag<Rock.Lava.Blocks.RockEntity>( entityName );
+                lavaEngine.RegisterBlock( entityName, ( name ) => { return new RockEntity(); } );
             }
         }
 
@@ -587,7 +586,7 @@ namespace Rock.Lava.Blocks
         /// <param name="markup">The markup.</param>
         /// <param name="context">The context.</param>
         /// <returns></returns>
-        private Dictionary<string, string> ParseMarkup( string markup, Context context )
+        private Dictionary<string, string> ParseMarkup( string markup, ILavaContext context )
         {
             // first run lava across the inputted markup
             var internalMergeFields = new Dictionary<string, object>();

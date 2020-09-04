@@ -22,8 +22,6 @@ using System.Text.RegularExpressions;
 
 using CSScriptLibrary;
 
-using DotLiquid;
-
 namespace Rock.Lava.Blocks
 {
     /// <summary>
@@ -40,10 +38,10 @@ namespace Rock.Lava.Blocks
         /// <summary>
         /// Method that will be run at Rock startup
         /// </summary>
-        public override void OnStartup()
-        {
-            Template.RegisterTag<Execute>( "execute" );
-        }
+        //public override void OnStartup()
+        //{
+        //    Template.RegisterTag<Execute>( "execute" );
+        //}
 
         /// <summary>
         /// Initializes the specified tag name.
@@ -80,12 +78,12 @@ namespace Rock.Lava.Blocks
         /// </summary>
         /// <param name="context">The context.</param>
         /// <param name="result">The result.</param>
-        public override void Render( Context context, TextWriter result )
+        public override void Render( ILavaContext context, TextWriter result )
         {
             // first ensure that entity commands are allowed in the context
             if ( !this.IsAuthorized( context ) )
             {
-                result.Write( string.Format( RockLavaBlockBase.NotAuthorizedMessage, this.Name ) );
+                result.Write( string.Format( RockLavaBlockBase.NotAuthorizedMessage, this.BlockName ) );
                 base.Render( context, result );
                 return;
             }
@@ -147,6 +145,12 @@ namespace Rock.Lava.Blocks
 
 
             }
+        }
+
+        protected override void Parse( List<string> tokens, out List<object> nodes )
+        {
+            // No action required.
+            nodes = null;
         }
 
         /// <summary>

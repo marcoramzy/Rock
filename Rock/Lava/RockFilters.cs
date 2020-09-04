@@ -1147,7 +1147,7 @@ namespace Rock.Lava
                 return inputDateTime.Value.ToShortTimeString();
             }
 
-            return Liquid.UseRubyDateFormat ? inputDateTime.Value.ToStrFTime( format ).Trim() : inputDateTime.Value.ToString( format ).Trim();
+            return inputDateTime.Value.ToString( format ).Trim();
         }
 
 
@@ -2178,7 +2178,7 @@ namespace Rock.Lava
                     if ( theValue.HasMergeFields() )
                     {
                         // Global attributes may reference other global attributes, so try to resolve this value again
-                        var mergeFields = context.GetMergeFieldsInEnvironment();
+                        var mergeFields = context.GetMergeFieldsInContainerScope();
 
                         rawValue = theValue.ResolveMergeFields( mergeFields );
                     }
@@ -2203,14 +2203,7 @@ namespace Rock.Lava
                 if ( theValue.HasMergeFields() )
                 {
                     // SystemSetting attributes may reference other global attributes, so try to resolve this value again
-                    var mergeFields = new Dictionary<string, object>();
-                    if ( context.Environments.Count > 0 )
-                    {
-                        foreach ( var keyVal in context.Environments[0] )
-                        {
-                            mergeFields.Add( keyVal.Key, keyVal.Value );
-                        }
-                    }
+                    var mergeFields = context.GetMergeFieldsInContainerScope();
 
                     rawValue = theValue.ResolveMergeFields( mergeFields );
                 }
@@ -5025,14 +5018,17 @@ namespace Rock.Lava
             {
                 var result = new List<object>();
 
+                var lavaEngine = LavaEngine.Instance;
+
                 foreach ( var value in ( ( IEnumerable ) input ) )
                 {
                     if ( value is ILiquidizable )
                     {
                         var liquidObject = value as ILiquidizable;
-                        var condition = DotLiquid.Condition.Operators["=="];
+                        //var condition = DotLiquid.Condition.Operators["=="];
 
-                        if ( liquidObject.ContainsKey( filterKey ) && condition( liquidObject[filterKey], filterValue ) )
+                        if ( liquidObject.ContainsKey( filterKey )
+                             && lavaEngine.AreEqualValue( liquidObject[filterKey], filterValue ) )
                         {
                             result.Add( liquidObject );
                         }
@@ -6015,11 +6011,16 @@ namespace Rock.Lava
 
             while ( properties.Any() && obj != null )
             {
-                if ( obj is Drop drop )
-                {
-                    obj = drop.InvokeDrop( properties.First() );
-                }
-                else if ( obj is IDictionary dictionary )
+                /* [2020-09-01] DJL
+                 * Support for Liquid.Drop objects has been removed, replaced by the RockDynamic object.
+                 * RockDynamic does not support the late execution of methods to lazy-load data.
+                 * If this causes a problem, lazy-loading features may need to be added to RockDynamic.
+                 */
+                //if ( obj is RockDynamic drop )
+                //{
+                //    obj = drop.InvokeDrop( properties.First() );
+                //}
+                if ( obj is IDictionary dictionary )
                 {
                     obj = dictionary[properties.First()];
                 }
