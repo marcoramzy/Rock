@@ -14,6 +14,7 @@
 // limitations under the License.
 // </copyright>
 //
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
@@ -27,7 +28,7 @@ namespace Rock.Lava.Blocks
     /// 
     /// </summary>
     /// <seealso cref="DotLiquid.Block" />
-    public class RockLavaTagBase : global::DotLiquid.Tag //, IRockStartup
+    public abstract class RockLavaTagBase : IRockLavaTag //: global::DotLiquid.Tag //, IRockStartup
     {
         /// <summary>
         /// All IRockStartup classes will be run in order by this value. If class does not depend on an order, return zero.
@@ -35,14 +36,24 @@ namespace Rock.Lava.Blocks
         /// <value>
         /// The order.
         /// </value>
-        public int StartupOrder { get { return 0; } }
+        //public int StartupOrder { get { return 0; } }
 
-        /// <summary>
-        /// Method that will be run at Rock startup
-        /// </summary>
-        public virtual void OnStartup()
+        ///// <summary>
+        ///// Method that will be run at Rock startup
+        ///// </summary>
+        //public virtual void OnStartup()
+        //{
+        //}
+        public string TagName { get; private set; }
+
+        public virtual void Initialize( string tagName, string markup, List<string> tokens )
         {
+            this.TagName = tagName;
         }
 
+        public virtual void Render( ILavaContext context, TextWriter result )
+        {
+            //
+        }
     }
 }

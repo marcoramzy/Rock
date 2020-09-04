@@ -17,9 +17,28 @@
 
 using System;
 using System.Collections.Generic;
+using Rock.Lava.Blocks;
 
 namespace Rock.Lava
 {
+    public interface ILavaTagInfo
+    {
+        string Name { get; }
+        string SystemTypeName { get; }
+        string ToString();
+    }
+
+    public class LavaTagInfo : ILavaTagInfo
+    {
+        public string Name { get; set; }
+
+        public string SystemTypeName { get; set; }
+
+        public override string ToString()
+        {
+            return string.Format( "{0} [{1}]", Name, SystemTypeName );
+        }
+    }
 
     /// <summary>
     /// Represents a Lava Template.
@@ -31,14 +50,20 @@ namespace Rock.Lava
         /// </summary>
         string FrameworkName { get; }
 
+        void RegisterTag( string name, Func<string, IRockLavaTag> factoryMethod );
+        void RegisterBlock( string name, Func<string, IRockLavaBlock> factoryMethod );
+        void RegisterShortcode( IRockShortcode shortcode );
+
         /// <summary>
         /// Registers a shortcode with a factory method.
         /// </summary>
         /// <param name="name"></param>
-        /// <param name="shortcodeFactoryMethod"></param>
-        void RegisterShortcode( string name, Func<string, IRockShortcode> shortcodeFactoryMethod );
+        /// <param name="factoryMethod"></param>
+        void RegisterShortcode( string name, Func<string, IRockShortcode> factoryMethod );
 
-        void RegisterShortcode( IRockShortcode shortcode );
+        //bool TagIsRegistered( string name );
+
+        Dictionary<string, ILavaTagInfo> GetRegisteredTags();
 
         //void RegisterShortcode<T>( string name )
         //    where T : IRockShortcode;
@@ -88,6 +113,8 @@ namespace Rock.Lava
         bool TryParseTemplate( string inputTemplate, out ILavaTemplate template );
 
         ILavaTemplate ParseTemplate( string inputTemplate );
+
+        bool AreEqualValue( object left, object right );
     }
 
 }

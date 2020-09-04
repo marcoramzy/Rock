@@ -437,7 +437,7 @@ namespace Rock.Lava.DotLiquid
             }
 
             // get merge fields loaded by the block or container
-            foreach ( var item in context.GetMergeFieldsInEnvironment() )
+            foreach ( var item in context.GetMergeFieldsInContainerScope() )
             {
                 _internalMergeFields.AddOrReplace( item.Key, item.Value );
                 parms.AddOrReplace( item.Key, item.Value );

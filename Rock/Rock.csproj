@@ -905,7 +905,6 @@
     <Compile Include="Jobs\NoRetryException.cs" />
     <Compile Include="Jobs\PostV84DataMigrations.cs" />
     <Compile Include="Lava\Shortcodes\Scripturize.cs" />
-    <Compile Include="Lava\Shortcodes\LavaShortcodeMetaDataAttribute.cs" />
     <Compile Include="Badge\Component\Assessment.cs" />
     <Compile Include="Model\Step.cs" />
     <Compile Include="Model\Streak.cs" />

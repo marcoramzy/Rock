@@ -105,7 +105,7 @@ namespace Rock.Lava
                 }
             }
 
-            throw new Exception( "LavaFileSystem Template Not Found", templatePath );
+            throw new FileSystemException( "LavaFileSystem Template Not Found", templatePath );
         }
 
         protected abstract string OnResolveTemplatePath( string inputPath );

@@ -79,6 +79,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Constants.cs" />
+    <Compile Include="Core\Blocks\LavaSecurityHelper.cs" />
     <Compile Include="Core\Blocks\RockLavaBlockBase.cs" />
     <Compile Include="Core\LavaFileSystem.cs" />
     <Compile Include="Core\Shortcodes\IRockShortcode.cs" />
@@ -94,10 +95,12 @@
     <Compile Include="Liquid\Filters\DotLiquidFilters.cs" />
     <Compile Include="Liquid\ILiquidizable.cs" />
     <Compile Include="Liquid\DotLiquidLavaFileSystem.cs" />
-    <Compile Include="Liquid\RockLavaTagBase.cs" />
+    <Compile Include="Core\Tags\RockLavaTagBase.cs" />
+    <Compile Include="Liquid\DotLiquidLavaTagBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RockDynamic.cs" />
     <Compile Include="Shortcodes\LavaShortcodeMetaDataAttribute.cs" />
+    <Compile Include="Utilities\ListExtensionMethods.cs" />
     <Compile Include="Utilities\RockSerializableDictionary.cs" />
   </ItemGroup>
   <ItemGroup>

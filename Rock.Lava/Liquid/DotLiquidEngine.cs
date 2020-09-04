@@ -16,6 +16,7 @@
 //
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using DotLiquid;
 
@@ -276,6 +277,18 @@ namespace Rock.Lava.DotLiquid
             template.MakeThreadSafe();
 
             return new DotLiquidLavaTemplate( template );
+        }
+
+        public override bool AreEqualValue( object left, object right )
+        {
+            var condition = global::DotLiquid.Condition.Operators["=="];
+
+            return condition(  left, right );
+        }
+
+        public override Dictionary<string, ILavaTagInfo> GetRegisteredTags()
+        {
+            return Template.Tags.ToDictionary( k => k.Key, v => (ILavaTagInfo)( new LavaTagInfo { Name = v.Key, SystemTypeName = v.Value.Name } ) );
         }
     }
 }

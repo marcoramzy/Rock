@@ -14,6 +14,8 @@
 // limitations under the License.
 // </copyright>
 //
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
@@ -27,8 +29,10 @@ namespace Rock.Lava.Blocks
     /// 
     /// </summary>
     /// <seealso cref="DotLiquid.Block" />
-    public class RockLavaBlockBase : IRockLavaBlock // ILava DotLiquid.Block, IRockStartup
+    public abstract class RockLavaBlockBase : IRockLavaBlock // ILava DotLiquid.Block, IRockStartup
     {
+        public string BlockName { get; set; }
+
         /// <summary>
         /// Gets the not authorized message.
         /// </summary>
@@ -53,15 +57,34 @@ namespace Rock.Lava.Blocks
             return LavaSecurityHelper.IsAuthorized( context, this.GetType().Name );
         }
 
+        #region DotLiquid Block Implementation
+
+        public virtual void Initialize( string tagName, string markup, List<string> tokens )
+        {
+            //
+        }
+
         /// <summary>
         /// Renders the specified context.
         /// </summary>
         /// <param name="context">The context.</param>
         /// <param name="result">The result.</param>
-        public void Render( ILavaContext context, TextWriter result )
+        public virtual void Render( ILavaContext context, TextWriter result )
         {
             //base.Render( context, result );
         }
+
+        /// <summary>
+        /// Parse a set of Lava tokens into a set of document nodes that can be processed by the underlying rendering framework.
+        /// </summary>
+        /// <param name="tokens"></param>
+        /// <param name="nodes"></param>
+        protected virtual void Parse( List<string> tokens, out List<object> nodes )
+        {
+            nodes = null;
+        }
+
+        #endregion
 
         /// <summary>
         /// All IRockStartup classes will be run in order by this value. If class does not depend on an order, return zero.
@@ -78,29 +101,11 @@ namespace Rock.Lava.Blocks
         {
         }
 
-    }
 
-    public static class LavaSecurityHelper
-    {
-        /// <summary>
-        /// Determines whether the specified command is authorized within the context.
-        /// </summary>
-        /// <param name="context">The context.</param>
-        /// <param name="command">The command.</param>
-        /// <returns>
-        ///   <c>true</c> if the specified command is authorized; otherwise, <c>false</c>.
-        /// </returns>
-        public static bool IsAuthorized( ILavaContext context, string command )
+        protected virtual void AssertMissingDelimitation()
         {
-            if ( context.EnabledCommands.Any() )
-            {
-                if ( context.EnabledCommands.Contains( "All" ) || context.EnabledCommands.Contains( command ) )
-                {
-                    return true;
-                }
-            }
-
-            return false;
+            throw new Exception( string.Format( "BlockTagNotClosedException: {0}", BlockName ) );
+            //throw new SyntaxException( Liquid.ResourceManager.GetString( "BlockTagNotClosedException" ), BlockName );
         }
     }
 }

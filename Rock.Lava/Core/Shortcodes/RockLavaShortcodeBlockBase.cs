@@ -17,16 +17,31 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-
+using Rock.Lava.Blocks;
 using Rock.Utility;
 
 namespace Rock.Lava.Shortcodes
 {
     /// <summary>
+    /// A DotLiquid implementation of the Lava Shortcode block.
+    /// </summary>
+    public abstract class DotLiquidShortcodeBlock : global::DotLiquid.Block, IRockShortcode //, IRockStartup,
+    {
+        private IRockShortcode _shortcode;
+
+        public DotLiquidShortcodeBlock( IRockShortcode shortcode )
+        {
+            _shortcode = shortcode;
+        }
+
+        public string TemplateElementName => throw new NotImplementedException();
+    }
+
+    /// <summary>
     /// 
     /// </summary>
     /// <seealso cref="DotLiquid.Block" />
-    public class RockLavaShortcodeBlockBase : IRockShortcode //DotLiquid.Block, IRockStartup,
+    public abstract class RockLavaShortcodeBlockBase : RockLavaBlockBase // IRockShortcode //DotLiquid.Block, IRockStartup,
     {
         /// <summary>
         /// Get the name of the shortcode as it is used in the Liquid template.
@@ -38,11 +53,21 @@ namespace Rock.Lava.Shortcodes
                 return this.GetType().Name.ToLower();
             }
         }
-        public virtual void Initialize( string tagName, string markup, List<string> tokens )
-        {
-            //_markup = markup;
+        //public virtual void Initialize( string tagName, string markup, List<string> tokens )
+        //{
+        //    //_markup = markup;
 
-            //base.Initialize( tagName, markup, tokens );
+        //    //base.Initialize( tagName, markup, tokens );
+        //}
+
+        /// <summary>
+        /// Override this method to parses the supplied set of tokens into a set of nodes that can be processed by the rendering engine.
+        /// </summary>
+        /// <param name="tokens"></param>
+        /// <param name="templateNodes"></param>
+        protected override void Parse( List<string> tokens, out List<object> nodes )
+        {
+            nodes = null;
         }
 
         /// <summary>
@@ -50,12 +75,12 @@ namespace Rock.Lava.Shortcodes
         /// </summary>
         /// <param name="context">The context.</param>
         /// <param name="result">The result.</param>
-        public virtual void Render( ILavaContext context, TextWriter result )
-        {
-            //throw new NotImplementedException();
+        //public virtual void Render( ILavaContext context, TextWriter result )
+        //{
+        //    //throw new NotImplementedException();
 
-            //base.Render( context, result );
-        }
+        //    //base.Render( context, result );
+        //}
 
         /// <summary>
         /// All IRockStartup classes will be run in order by this value. If class does not depend on an order, return zero.

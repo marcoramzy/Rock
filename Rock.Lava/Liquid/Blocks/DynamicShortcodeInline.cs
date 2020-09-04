@@ -183,7 +183,7 @@ namespace Rock.Lava.DotLiquid
 
             //if ( context.Environments.Count > 0 )
             //{
-                foreach ( var item in context.GetMergeFieldsInEnvironment() )
+                foreach ( var item in context.GetMergeFieldsInContainerScope() )
                 {
                     _internalMergeFields.AddOrReplace( item.Key, item.Value );
                     parms.AddOrReplace( item.Key, item.Value );

@@ -18,6 +18,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using DotLiquid;
+using DotLiquid.Exceptions;
 
 //using DotLiquid;
 
@@ -36,30 +37,42 @@ namespace Rock.Lava.DotLiquid
             _context = context;
         }
 
-        public IList<IDictionary<string, object>> Environments
+        public object this[string key]
         {
             get
             {
-                var environments = new List<IDictionary<string, object>>();
+                return _context[key];
+            }
+            set
+            {
+                _context[key] = value;
+            }
+        }
+
+        public IList<LavaDictionary> Environments
+        {
+            get
+            {
+                var environments = new List<LavaDictionary>();
 
                 foreach ( var hash in _context.Environments )
                 {
-                    environments.Add( hash as IDictionary<string, object> );
+                    environments.Add( new LavaDictionary( hash ) );
                 }
 
                 return environments;
             }
         }
 
-        public IList<IDictionary<string, object>> Scopes
+        public IList<LavaDictionary> Scopes
         {
             get
             {
-                var environments = new List<IDictionary<string, object>>();
+                var environments = new List<LavaDictionary>();
 
                 foreach ( var hash in _context.Scopes )
                 {
-                    environments.Add( hash as IDictionary<string, object> );
+                    environments.Add( new LavaDictionary( hash ) );
                 }
 
                 return environments;
@@ -88,7 +101,16 @@ namespace Rock.Lava.DotLiquid
             }
         }
 
-        public IDictionary<string, object> GetMergeFieldsInEnvironment()
+        public LavaDictionary Registers
+        {
+            get
+            {
+                return LavaDictionary.FromDictionary( _context.Registers );
+            }
+        }
+
+
+        public IDictionary<string, object> GetMergeFieldsInContainerScope()
         {
             // get merge fields loaded by the block or container
             var internalMergeFields = new Dictionary<string, object>();
@@ -118,6 +140,39 @@ namespace Rock.Lava.DotLiquid
             }
 
             return internalMergeFields;
+        }
+
+        /// <summary>
+        /// Gets the dictionary of values that are active in the local scope.
+        /// Values are defined by the outermost container first, and overridden by values defined in a contained scope.
+        /// </summary>
+        /// <returns></returns>
+        public LavaDictionary GetMergeFieldsForLocalScope()
+        {
+            var fields = new LavaDictionary();
+
+            // First, get all of the variables defined in the local lava context
+            foreach ( var scope in _context.Scopes )
+            {
+                foreach ( var item in scope )
+                {
+                    fields.AddOrReplace( item.Key, item.Value );
+                }
+            }
+
+            // Second, apply overrides defined by the block or container
+            foreach ( var environment in _context.Environments )
+            {
+                foreach ( var item in environment )
+                {
+                    fields.AddOrReplace( item.Key, item.Value );
+                }
+            }
+
+            // TODO: Verify that this order is correct? It is the same order that is used in numerous places throughout Rock, but it seems to be inverted?
+            // Shouldn't the local scope override the container scope?
+
+            return fields;
         }
 
         public object GetValue( string key )
@@ -264,6 +319,69 @@ namespace Rock.Lava.DotLiquid
             //template.Errors.Clear();
 
             //return template;
+        }
+
+        /// <summary>
+        /// Push new local scope on the stack. use <tt>Context#stack</tt> instead
+        /// </summary>
+        /// <param name="newScope"></param>
+        public void Push( LavaDictionary newScope )
+        {
+            if ( Scopes.Count > 80 )
+            {
+                throw new StackLevelException( "ContextStackException" );
+            }
+
+            Scopes.Insert( 0, newScope );
+        }
+
+        /// <summary>
+        /// Pop from the stack. use <tt>Context#stack</tt> instead
+        /// </summary>
+        public LavaDictionary Pop()
+        {
+            if ( Scopes.Count == 1 )
+            {
+                throw new ContextException();
+            }
+
+            var result = Scopes[0];
+
+            Scopes.RemoveAt( 0 );
+
+            return result;
+        }
+
+        /// <summary>
+        /// pushes a new local scope on the stack, pops it at the end of the block
+        /// 
+        /// Example:
+        /// 
+        /// context.stack do
+        /// context['var'] = 'hi'
+        /// end
+        /// context['var] #=> nil
+        /// </summary>
+        /// <param name="newScope"></param>
+        /// <param name="callback"></param>
+        /// <returns></returns>
+        public void Stack( LavaDictionary newScope, Action callback )
+        {
+            Push( newScope );
+            try
+            {
+                callback();
+            }
+            finally
+            {
+                Pop();
+            }
+        }
+
+        public void Stack( Action callback )
+        {
+            Stack( new LavaDictionary(), callback );
+
         }
     }
 }

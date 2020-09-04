@@ -14,10 +14,12 @@
 // limitations under the License.
 // </copyright>
 //
-namespace Rock.Lava.Shortcodes
+namespace Rock.Lava
 {
-    public interface IRockShortcode
+    /// <summary>
+    /// Interface that classes can implement to be included when searching assemblies for custom Lava Commands.
+    /// </summary>
+    public interface IRockLavaTag
     {
-        string TemplateElementName { get; }
     }
 }

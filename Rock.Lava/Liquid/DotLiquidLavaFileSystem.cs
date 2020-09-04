@@ -14,9 +14,6 @@
 // limitations under the License.
 // </copyright>
 //
-using System;
-using System.IO;
-
 using DotLiquid;
 using DotLiquid.Exceptions;
 using DotLiquid.FileSystems;
@@ -24,65 +21,28 @@ using DotLiquid.FileSystems;
 namespace Rock.Lava
 {
     /// <summary>
-    /// Lava's <seealso cref="IFileSystem"/>. This is used when Lava templates retrieve other Lava templates when using the include tag.
+    /// Wraps a LavaFileSystem component so that it can be used by DotLiquid.
     /// </summary>
-    public class DotLiquidLavaFileSystem : LavaFileSystemBase, IFileSystem
+    internal class DotLiquidLavaFileSystem : IFileSystem
     {
-        string IFileSystem.ReadTemplateFile( Context context, string templateName );
+        private ILavaFileSystem _lavaFileSystem;
 
-        /// <summary>
-        /// Called by Liquid to retrieve a template file
-        /// </summary>
-        /// <param name="context"></param>
-        /// <param name="templateName"></param>
-        /// <returns></returns>
-        /// <exception cref="FileSystemException">LavaFileSystem Template Not Found</exception>
-
-        protected override string OnResolveTemplatePath( string inputPath )
+        public DotLiquidLavaFileSystem( ILavaFileSystem lavaFileSystem )
         {
-            string templatePath = ( string ) context[templateName];
+            _lavaFileSystem = lavaFileSystem;
+        }
 
-            // Try to find exact file specified
-            var file = new FileInfo( FullPath( templatePath ) );
-            if ( file.Exists )
+        string IFileSystem.ReadTemplateFile( Context context, string templateName )
+        {
+            try
             {
-                return File.ReadAllText( file.FullName );
+                return _lavaFileSystem.ReadTemplateFile( context as ILavaContext, templateName );
+            }
+            catch
+            {
+                throw new FileSystemException( "LavaFileSystem Template Not Found", templateName );
             }
 
-            // If requested template file does not include an extension
-            if ( string.IsNullOrWhiteSpace( file.Extension ) )
-            {
-                // Try to find file with .lava extension
-                string filePath = file.FullName + ".lava";
-                if ( File.Exists( filePath ) )
-                {
-                    return File.ReadAllText( filePath );
-                }
-
-                // Try to find file with .liquid extension
-                filePath = file.FullName + ".liquid";
-                if ( File.Exists( filePath ) )
-                {
-                    return File.ReadAllText( filePath );
-                }
-
-                // If file still not found, try prefixing filename with an underscore
-                if ( !file.Name.StartsWith( "_" ) )
-                {
-                    filePath = Path.Combine( file.DirectoryName, string.Format( "_{0}.lava", file.Name ) );
-                    if ( File.Exists( filePath ) )
-                    {
-                        return File.ReadAllText( filePath );
-                    }
-                    filePath = Path.Combine( file.DirectoryName, string.Format( "_{0}.liquid", file.Name ) );
-                    if ( File.Exists( filePath ) )
-                    {
-                        return File.ReadAllText( filePath );
-                    }
-                }
-            }
-
-            throw new FileSystemException( "LavaFileSystem Template Not Found", templatePath );
         }
     }
 }

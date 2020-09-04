@@ -15,6 +15,7 @@
 // </copyright>
 //
 
+using System;
 using System.Collections.Generic;
 
 namespace Rock.Lava
@@ -29,8 +30,14 @@ namespace Rock.Lava
         /// </summary>
         IList<string> EnabledCommands { get; }
 
-        //IList<IDictionary<string, object>> Environments { get; }
-        IList<IDictionary<string, object>> Scopes { get; }
+        IList<LavaDictionary> Environments { get; }
+
+        IList<LavaDictionary> Scopes { get; }
+
+        /// <summary>
+        /// Registers are local
+        /// </summary>
+        LavaDictionary Registers { get; }
 
         //IDictionary<string, object> GetInternalMergeFields();
 
@@ -41,10 +48,17 @@ namespace Rock.Lava
         IDictionary<string, object> GetMergeFieldsInScope();
 
         /// <summary>
+        /// Gets the dictionary of values that are active in the local scope.
+        /// Values are defined by the outermost container first, and overridden by values defined in a contained scope.
+        /// </summary>
+        /// <returns></returns>
+        LavaDictionary GetMergeFieldsForLocalScope();
+
+        /// <summary>
         /// Gets the set of merge fields in the current Lava block or container hierarchy.
         /// </summary>
         /// <returns></returns>
-        IDictionary<string, object> GetMergeFieldsInEnvironment();
+        IDictionary<string, object> GetMergeFieldsInContainerScope();
 
         string ResolveMergeFields( string content, IDictionary<string, object> mergeObjects, string enabledLavaCommands, bool encodeStrings = false, bool throwExceptionOnErrors = false );
         string ResolveMergeFields( string content, IDictionary<string, object> mergeObjects );
@@ -55,6 +69,35 @@ namespace Rock.Lava
         void SetValue( string key, object value );
 
         ILavaEngine LavaEngine { get; }
-    }
 
+
+        /// <summary>
+        /// pushes a new local scope on the stack, pops it at the end of the block
+        /// 
+        /// Example:
+        /// 
+        /// context.stack do
+        /// context['var'] = 'hi'
+        /// end
+        /// context['var] #=> nil
+        /// </summary>
+        /// <param name="newScope"></param>
+        /// <param name="callback"></param>
+        /// <returns></returns>
+        void Stack( LavaDictionary newScope, Action callback );
+
+        void Stack( Action callback );
+
+        /// <summary>
+        /// Push new local scope on the stack. use <tt>Context#stack</tt> instead
+        /// </summary>
+        /// <param name="newScope"></param>
+        void Push( LavaDictionary newScope );
+
+        /// <summary>
+        /// Pop from the stack. use <tt>Context#stack</tt> instead
+        /// </summary>
+        LavaDictionary Pop();
+
+    }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using Rock.Lava.Shortcodes;
 using Rock.Lava.DotLiquid;
+using Rock.Lava.Blocks;
 
 namespace Rock.Lava
 {
@@ -12,7 +13,7 @@ namespace Rock.Lava
     public static class LavaEngine
     {
         private static ILavaEngine _instance = null;
-            
+
         public static ILavaEngine Instance
         {
             get
@@ -47,6 +48,7 @@ namespace Rock.Lava
 
         public abstract void UnregisterShortcode( string name );
 
+        public abstract bool AreEqualValue( object left, object right );
         //
 
         /// <summary>
@@ -97,6 +99,17 @@ namespace Rock.Lava
         }
 
         public abstract ILavaTemplate ParseTemplate( string inputTemplate );
-    }
 
+        public void RegisterTag( string name, Func<string, IRockLavaTag> factoryMethod )
+        {
+            throw new NotImplementedException();
+        }
+
+        public void RegisterBlock( string name, Func<string, IRockLavaBlock> factoryMethod )
+        {
+            throw new NotImplementedException();
+        }
+
+        public abstract Dictionary<string, ILavaTagInfo> GetRegisteredTags();
+    }
 }
