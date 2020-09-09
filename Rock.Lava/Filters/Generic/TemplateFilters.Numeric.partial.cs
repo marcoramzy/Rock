@@ -18,6 +18,7 @@ using System;
 using System.Globalization;
 
 using Humanizer;
+using Rock.Common;
 
 namespace Rock.Lava.Filters
 {
@@ -72,11 +73,6 @@ namespace Rock.Lava.Filters
         /// <returns></returns>
         public static string Format( object input, string format )
         {
-            if ( input == null )
-            {
-                return null;
-            }
-
             var inputString = input.ToString();
             
             if ( string.IsNullOrWhiteSpace( format ) )
@@ -135,22 +131,24 @@ namespace Rock.Lava.Filters
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        public static string NumberToOrdinal( string input )
+        public static string NumberToOrdinal( object input )
         {
-            if ( input == null )
+            var inputString = input.ToString();
+
+            if ( string.IsNullOrWhiteSpace( inputString ) )
             {
-                return input;
+                return inputString;
             }
 
             int number;
 
-            if ( int.TryParse( input, out number ) )
+            if ( int.TryParse( inputString, out number ) )
             {
                 return number.Ordinalize();
             }
             else
             {
-                return input;
+                return inputString;
             }
         }
 
@@ -159,22 +157,24 @@ namespace Rock.Lava.Filters
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        public static string NumberToWords( string input )
+        public static string NumberToWords( object input )
         {
-            if ( input == null )
+            var inputString = input.ToString();
+
+            if ( string.IsNullOrWhiteSpace( inputString ) )
             {
-                return input;
+                return inputString;
             }
 
             int number;
 
-            if ( int.TryParse( input, out number ) )
+            if ( int.TryParse( inputString, out number ) )
             {
                 return number.ToWords();
             }
             else
             {
-                return input;
+                return inputString;
             }
         }
 
@@ -183,22 +183,24 @@ namespace Rock.Lava.Filters
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        public static string NumberToOrdinalWords( string input )
+        public static string NumberToOrdinalWords( object input )
         {
-            if ( input == null )
+            var stringInput = input.ToStringSafe();
+
+            if ( string.IsNullOrWhiteSpace( stringInput ) )
             {
-                return input;
+                return null;
             }
 
             int number;
 
-            if ( int.TryParse( input, out number ) )
+            if ( int.TryParse( stringInput, out number ) )
             {
                 return number.ToOrdinalWords();
             }
             else
             {
-                return input;
+                return stringInput;
             }
         }
 
@@ -207,22 +209,24 @@ namespace Rock.Lava.Filters
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        public static string NumberToRomanNumerals( string input )
+        public static string NumberToRomanNumerals( object input )
         {
-            if ( input == null )
+            var stringInput = input.ToStringSafe();
+
+            if ( string.IsNullOrWhiteSpace( stringInput ) )
             {
-                return input;
+                return null;
             }
 
             int number;
 
-            if ( int.TryParse( input, out number ) )
+            if ( int.TryParse( stringInput, out number ) )
             {
                 return number.ToRoman();
             }
             else
             {
-                return input;
+                return stringInput;
             }
         }
 
@@ -232,8 +236,15 @@ namespace Rock.Lava.Filters
         /// <param name="input">The input.</param>
         /// <param name="quantity">The quantity.</param>
         /// <returns></returns>
-        public static string ToQuantity( string input, object quantity )
+        public static string ToQuantity( object input, object quantity )
         {
+            var inputString = input.ToString();
+
+            if ( string.IsNullOrWhiteSpace( inputString ) )
+            {
+                return inputString;
+            }
+
             int numericQuantity;
             if ( quantity is string )
             {
@@ -244,9 +255,7 @@ namespace Rock.Lava.Filters
                 numericQuantity = Convert.ToInt32( quantity );
             }
 
-            return input == null
-                ? input
-                : input.ToQuantity( numericQuantity );
+            return inputString.ToQuantity( numericQuantity );
         }
     }
 }

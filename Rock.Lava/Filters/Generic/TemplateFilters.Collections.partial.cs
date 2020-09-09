@@ -19,6 +19,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
+using Rock.Common;
+
 namespace Rock.Lava.Filters
 {
     public static partial class TemplateFilters
@@ -164,17 +166,17 @@ namespace Rock.Lava.Filters
 
             foreach ( var value in enumerableInput )
             {
-                // TODO: Find a cross-framework solution to support ILiquidizable objects.
-
-                //if ( value is ILiquidizable )
-                //{
-                //    var liquidObject = value as ILiquidizable;
-                //    if ( liquidObject.ContainsKey( selectKey ) )
-                //    {
-                //        result.Add( liquidObject[selectKey] );
-                //    }
-                //}
-                //else
+                /* TODO: Reinstate after test.
+                                if ( value is ILiquidizable )
+                                {
+                                    var liquidObject = value as ILiquidizable;
+                                    if ( liquidObject.ContainsKey( selectKey ) )
+                                    {
+                                        result.Add( liquidObject[selectKey] );
+                                    }
+                                }
+                                else
+                */
                 if ( value is IDictionary<string, object> )
                 {
                     var dictionaryObject = value as IDictionary<string, object>;

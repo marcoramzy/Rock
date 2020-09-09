@@ -16,6 +16,8 @@
 //
 using System.Linq;
 
+using Rock.Common;
+
 namespace Rock.Lava
 {
     public static class LavaSecurityHelper

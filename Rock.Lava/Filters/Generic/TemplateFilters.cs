@@ -25,6 +25,11 @@ namespace Rock.Lava.Filters
     /// These filters are intended to be used in the context of a text templating engine, however their implementation should be engine-agnostic.
     /// This will allow the functions to be more easily wrapped and implemented elsewhere for specific templating engines.
     /// If these filters are found to have more general application, they should be moved to the Rock.Common library.
+    ///
+    /// Template filters must have the following properties:
+    /// 1. The filter function must have a return type of string.
+    /// 2. Input parameters should be of type string or object. Any parameter conversion should be performed in the function itself.
+    /// 3. No optional parameters. Some Liquid templating frameworks do not handle these correctly, so use an explicit function overloads to define different parameter sets.
     /// </remarks>
     public static partial class TemplateFilters
     {

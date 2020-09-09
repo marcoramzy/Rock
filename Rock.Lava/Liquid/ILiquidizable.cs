@@ -15,14 +15,14 @@
 // </copyright>
 //
 using System.Collections.Generic;
-using dotLiquid = global::DotLiquid;
 
 namespace Rock.Lava
 {
     /// <summary>
-    /// Represents an object model that can be used with Lava
+    /// Represents an object model that can be used with Lava.
+    /// This is a legacy interface, duplicated from the DotLiquid project.
     /// </summary>
-    public interface ILiquidizable //: dotLiquid.IIndexable dotLiquid.ILiquidizable
+    public interface ILiquidizable
     {
         object ToLiquid();
         object this[object key] { get; }

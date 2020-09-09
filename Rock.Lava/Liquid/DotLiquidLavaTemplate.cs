@@ -21,6 +21,8 @@ using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
 
+using Rock.Common;
+
 namespace Rock.Lava.DotLiquid
 {
     /// <summary>
@@ -107,7 +109,7 @@ namespace Rock.Lava.DotLiquid
         {
             get
             {
-                return new DotLiquidEngineManager();
+                return new DotLiquidEngine();
             }
         }
 

@@ -16,6 +16,7 @@
 //
 using System.Collections;
 using System.Collections.Generic;
+using Rock.Common;
 
 namespace Rock.Lava.Filters
 {

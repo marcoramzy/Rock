@@ -19,17 +19,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using DotLiquid;
+using Rock.Lava.Filters;
 
 namespace Rock.Lava.DotLiquid
 {
-    
     /// <summary>
     /// Initialization class for the DotLiquid Templating Engine.
     /// </summary>
-    public class DotLiquidEngineManager : LavaEngineBase //: ILavaEngine
+    public class DotLiquidEngine : LavaEngineBase
     {
+        public bool ThrowExceptions { get; set; } = true;
 
-        public override string FrameworkName
+        public override string EngineName
         {
             get
             {
@@ -37,135 +38,59 @@ namespace Rock.Lava.DotLiquid
             }
         }
 
-        /// <summary>
-        /// Initializes Rock's Fluid implementation of Lava.
-        /// </summary>
-        public void Initialize()
+        public override LavaEngineTypeSpecifier EngineType
         {
-            HideSnakeCaseFilters();
-            RegisterBaseFilters();
-
-            //
-            // Register the Rock filters.
-            //
-            //TemplateContext.GlobalFilters.RegisterFiltersFromType( typeof( Filters.FluidFilters ) );
-
-            // Set the default strategy for locating object properties to our custom implementation that adds
-            // the ability to resolve properties of nested anonymous Types using Reflection.
-            //TemplateContext.GlobalMemberAccessStrategy = new DynamicMemberAccessStrategy();
+            get
+            {
+                return LavaEngineTypeSpecifier.DotLiquid;
+            }
         }
 
         /// <summary>
-        /// This method hides the snake-case filters that are registered
-        /// by default. Rock uses CamelCase filter names and to ensure that
-        /// a mistype doesn't cause it to work anyway we hide these.
+        /// Initializes Rock's Lava system (which uses DotLiquid)
+        /// Doing this in startup will force the static Liquid class to get instantiated
+        /// so that the standard filters are loaded prior to the custom RockFilter.
+        /// This is to allow the custom 'Date' filter to replace the standard Date filter.
         /// </summary>
-        private void HideSnakeCaseFilters()
+        public void Initialize( ILavaFileSystem fileSystem, IList<Type> filterImplementationTypes = null )
         {
-            //TemplateContext.GlobalFilters.AddFilter( "join", NoOp );
-            //TemplateContext.GlobalFilters.AddFilter( "first", NoOp );
-            //TemplateContext.GlobalFilters.AddFilter( "last", NoOp );
-            //TemplateContext.GlobalFilters.AddFilter( "concat", NoOp );
-            //TemplateContext.GlobalFilters.AddFilter( "map", NoOp );
-            //TemplateContext.GlobalFilters.AddFilter( "reverse", NoOp );
-            //TemplateContext.GlobalFilters.AddFilter( "size", NoOp );
-            //TemplateContext.GlobalFilters.AddFilter( "sort", NoOp );
-            //TemplateContext.GlobalFilters.AddFilter( "sort_natural", NoOp );
-            //TemplateContext.GlobalFilters.AddFilter( "uniq", NoOp );
-            //TemplateContext.GlobalFilters.AddFilter( "where", NoOp );
+            // DotLiquid uses a RubyDateFormat by default,
+            // but since we aren't using Ruby, we want to disable that
+            Liquid.UseRubyDateFormat = false;
 
-            //TemplateContext.GlobalFilters.AddFilter( "default", NoOp );
-            //TemplateContext.GlobalFilters.AddFilter( "date", NoOp );
-            //TemplateContext.GlobalFilters.AddFilter( "format_date", NoOp );
-            //TemplateContext.GlobalFilters.AddFilter( "raw", NoOp );
-            //TemplateContext.GlobalFilters.AddFilter( "compact", NoOp );
-            //TemplateContext.GlobalFilters.AddFilter( "url_encode", NoOp );
-            //TemplateContext.GlobalFilters.AddFilter( "url_decode", NoOp );
-            //TemplateContext.GlobalFilters.AddFilter( "strip_html", NoOp );
-            //TemplateContext.GlobalFilters.AddFilter( "escape", NoOp );
-            //TemplateContext.GlobalFilters.AddFilter( "escape_once", NoOp );
-            //TemplateContext.GlobalFilters.AddFilter( "handle", NoOp );
-            //TemplateContext.GlobalFilters.AddFilter( "handleize", NoOp );
+            /* 2020-05-20 MDP (actually this comment was here a long time ago)
+                NOTE: This means that all the built in template filters,
+                and the RockFilters, will use CSharpNamingConvention.
 
-            //TemplateContext.GlobalFilters.AddFilter( "abs", NoOp );
-            //TemplateContext.GlobalFilters.AddFilter( "at_least", NoOp );
-            //TemplateContext.GlobalFilters.AddFilter( "at_most", NoOp );
-            //TemplateContext.GlobalFilters.AddFilter( "ceil", NoOp );
-            //TemplateContext.GlobalFilters.AddFilter( "divided_by", NoOp );
-            //TemplateContext.GlobalFilters.AddFilter( "floor", NoOp );
-            //TemplateContext.GlobalFilters.AddFilter( "minus", NoOp );
-            //TemplateContext.GlobalFilters.AddFilter( "modulo", NoOp );
-            //TemplateContext.GlobalFilters.AddFilter( "plus", NoOp );
-            //TemplateContext.GlobalFilters.AddFilter( "round", NoOp );
-            //TemplateContext.GlobalFilters.AddFilter( "times", NoOp );
+                For example the dotliquid documentation says to do this for formatting dates: 
+                {{ some_date_value | date:"MMM dd, yyyy" }}
 
-            //TemplateContext.GlobalFilters.AddFilter( "append", NoOp );
-            //TemplateContext.GlobalFilters.AddFilter( "capitalize", NoOp );
-            //TemplateContext.GlobalFilters.AddFilter( "downcase", NoOp );
-            //TemplateContext.GlobalFilters.AddFilter( "lstrip", NoOp );
-            //TemplateContext.GlobalFilters.AddFilter( "rstrip", NoOp );
-            //TemplateContext.GlobalFilters.AddFilter( "newline_to_br", NoOp );
-            //TemplateContext.GlobalFilters.AddFilter( "prepend", NoOp );
-            //TemplateContext.GlobalFilters.AddFilter( "removefirst", NoOp );
-            //TemplateContext.GlobalFilters.AddFilter( "remove", NoOp );
-            //TemplateContext.GlobalFilters.AddFilter( "replacefirst", NoOp );
-            //TemplateContext.GlobalFilters.AddFilter( "replace", NoOp );
-            //TemplateContext.GlobalFilters.AddFilter( "slice", NoOp );
-            //TemplateContext.GlobalFilters.AddFilter( "split", NoOp );
-            //TemplateContext.GlobalFilters.AddFilter( "strip", NoOp );
-            //TemplateContext.GlobalFilters.AddFilter( "strip_newlines", NoOp );
-            //TemplateContext.GlobalFilters.AddFilter( "truncate", NoOp );
-            //TemplateContext.GlobalFilters.AddFilter( "truncatewords", NoOp );
-            //TemplateContext.GlobalFilters.AddFilter( "upcase", NoOp );
+                However, if CSharpNamingConvention is enabled, it needs to be: 
+                {{ some_date_value | Date:"MMM dd, yyyy" }}
+            */
+
+            Template.NamingConvention = new global::DotLiquid.NamingConventions.CSharpNamingConvention();
+
+            Template.FileSystem = new DotLiquidLavaFileSystem( fileSystem );
+
+            Template.RegisterSafeType( typeof( Enum ), o => o.ToString() );
+            Template.RegisterSafeType( typeof( DBNull ), o => null );
+
+            Template.RegisterFilter( typeof( TemplateFilters ) );
+            Template.RegisterFilter( typeof( DotLiquidFilters ) );
+            
+            // Register custom filters last, so they can override built-in filters of the same name.
+            if ( filterImplementationTypes != null )
+            {
+                foreach ( var filterImplementationType in filterImplementationTypes )
+                {
+                    //Template.RegisterFilter( filterImplementationType );
+                }
+            }
         }
 
-        /// <summary>
-        /// Registers all the base Fluid filters with the proper CamelCase.
-        /// </summary>
-        private void RegisterBaseFilters()
+        private void RegisterFilterInternal( Type filterImplementationType )
         {
-            //TemplateContext.GlobalFilters.AddFilter( "Join", global::Fluid.Filters.ArrayFilters.Join );
-            //TemplateContext.GlobalFilters.AddFilter( "First", global::Fluid.Filters.ArrayFilters.First );
-            //TemplateContext.GlobalFilters.AddFilter( "Last", global::Fluid.Filters.ArrayFilters.Last );
-            //TemplateContext.GlobalFilters.AddFilter( "Map", global::Fluid.Filters.ArrayFilters.Map );
-            //TemplateContext.GlobalFilters.AddFilter( "Reverse", global::Fluid.Filters.ArrayFilters.Reverse );
-            //TemplateContext.GlobalFilters.AddFilter( "Size", global::Fluid.Filters.ArrayFilters.Size );
-            //TemplateContext.GlobalFilters.AddFilter( "Sort", global::Fluid.Filters.ArrayFilters.Sort );
-            //TemplateContext.GlobalFilters.AddFilter( "Uniq", global::Fluid.Filters.ArrayFilters.Uniq );
-            //TemplateContext.GlobalFilters.AddFilter( "Where", global::Fluid.Filters.ArrayFilters.Where );
-
-            //TemplateContext.GlobalFilters.AddFilter( "Default", global::Fluid.Filters.MiscFilters.Default );
-            //TemplateContext.GlobalFilters.AddFilter( "Date", global::Fluid.Filters.MiscFilters.Date );
-            //TemplateContext.GlobalFilters.AddFilter( "UnescapeDataString", global::Fluid.Filters.MiscFilters.UrlDecode );
-            //TemplateContext.GlobalFilters.AddFilter( "EscapeDataString", global::Fluid.Filters.MiscFilters.UrlEncode );
-            //TemplateContext.GlobalFilters.AddFilter( "StripHtml", global::Fluid.Filters.MiscFilters.StripHtml );
-            //TemplateContext.GlobalFilters.AddFilter( "Escape", global::Fluid.Filters.MiscFilters.Escape );
-
-            //TemplateContext.GlobalFilters.AddFilter( "AtLeast", global::Fluid.Filters.NumberFilters.AtLeast );
-            //TemplateContext.GlobalFilters.AddFilter( "AtMost", global::Fluid.Filters.NumberFilters.AtMost );
-            //TemplateContext.GlobalFilters.AddFilter( "Ceiling", global::Fluid.Filters.NumberFilters.Ceil );
-            //TemplateContext.GlobalFilters.AddFilter( "DividedBy", global::Fluid.Filters.NumberFilters.DividedBy );
-            //TemplateContext.GlobalFilters.AddFilter( "Floor", global::Fluid.Filters.NumberFilters.Floor );
-            //TemplateContext.GlobalFilters.AddFilter( "Minus", global::Fluid.Filters.NumberFilters.Minus );
-            //TemplateContext.GlobalFilters.AddFilter( "Modulo", global::Fluid.Filters.NumberFilters.Modulo );
-            //TemplateContext.GlobalFilters.AddFilter( "Plus", global::Fluid.Filters.NumberFilters.Plus );
-            //TemplateContext.GlobalFilters.AddFilter( "Times", global::Fluid.Filters.NumberFilters.Times );
-
-            //TemplateContext.GlobalFilters.AddFilter( "Append", global::Fluid.Filters.StringFilters.Append );
-            //TemplateContext.GlobalFilters.AddFilter( "Capitalize", global::Fluid.Filters.StringFilters.Capitalize );
-            //TemplateContext.GlobalFilters.AddFilter( "Downcase", global::Fluid.Filters.StringFilters.Downcase );
-            //TemplateContext.GlobalFilters.AddFilter( "NewlineToBr", global::Fluid.Filters.StringFilters.NewLineToBr );
-            //TemplateContext.GlobalFilters.AddFilter( "Prepend", global::Fluid.Filters.StringFilters.Prepend );
-            //TemplateContext.GlobalFilters.AddFilter( "RemoveFirst", global::Fluid.Filters.StringFilters.RemoveFirst );
-            //TemplateContext.GlobalFilters.AddFilter( "Remove", global::Fluid.Filters.StringFilters.Remove );
-            //TemplateContext.GlobalFilters.AddFilter( "ReplaceFirst", global::Fluid.Filters.StringFilters.ReplaceFirst );
-            //TemplateContext.GlobalFilters.AddFilter( "Replace", global::Fluid.Filters.StringFilters.Replace );
-            //TemplateContext.GlobalFilters.AddFilter( "Slice", global::Fluid.Filters.StringFilters.Slice );
-            //TemplateContext.GlobalFilters.AddFilter( "Split", global::Fluid.Filters.StringFilters.Split );
-            //TemplateContext.GlobalFilters.AddFilter( "StripNewlines", global::Fluid.Filters.StringFilters.StripNewLines );
-            //TemplateContext.GlobalFilters.AddFilter( "Truncate", global::Fluid.Filters.StringFilters.Truncate );
-            //TemplateContext.GlobalFilters.AddFilter( "Truncatewords", global::Fluid.Filters.StringFilters.TruncateWords );
-            //TemplateContext.GlobalFilters.AddFilter( "Upcase", global::Fluid.Filters.StringFilters.Upcase );
         }
 
         public override Type GetShortcodeType( string name )
@@ -175,7 +100,7 @@ namespace Rock.Lava.DotLiquid
 
         public override void RegisterSafeType( Type type, string[] allowedMembers = null )
         {
-            throw new NotImplementedException();
+            Template.RegisterSafeType( type, allowedMembers );
         }
 
         public override void RegisterShortcode( IRockShortcode shortcode )
@@ -251,9 +176,76 @@ namespace Rock.Lava.DotLiquid
             throw new NotImplementedException();
         }
 
-        public override bool TryRender( string inputTemplate, out string output )
+        private void VerifyMergeValueTypes( LavaDictionary mergeValues )
         {
-            throw new NotImplementedException();
+            object fieldValue;
+
+            foreach ( var key in mergeValues.Keys.ToList() )
+            {
+                fieldValue = mergeValues[key];
+
+                if ( fieldValue is Rock.Lava.ILiquidizable )
+                {
+                    var fieldType = fieldValue.GetType();
+                    if ( Template.GetSafeTypeTransformer( fieldType ) == null )
+                    {
+                        Template.RegisterSafeType( fieldType, ( x ) => { return ( (ILiquidizable)fieldValue ).ToLiquid(); } );
+                    }
+                }
+                else if ( fieldValue is Rock.Lava.ILavaDataObject )
+                {
+                    var fieldType = fieldValue.GetType();
+                    if ( Template.GetSafeTypeTransformer( fieldType ) == null )
+                    {
+                        Template.RegisterSafeType( fieldType, ( x ) => { return ( (ILavaDataObject)fieldValue ).ToLiquid(); } );
+                    }
+                }
+
+                //if ( fieldValue is IDictionary<string,object> )
+                //{
+                //    continue;
+                //}
+                //else
+                //{
+                //    mergeValues[key] = Hash.FromAnonymousObject( fieldValue );
+                //}
+            }
+        }
+
+        public override bool TryRender( string inputTemplate, out string output, LavaDictionary mergeValues )
+        {
+            try
+            {
+                var template = CreateNewDotLiquidTemplate( inputTemplate );
+
+                if ( mergeValues != null )
+                {
+                    VerifyMergeValueTypes( mergeValues );
+
+                    output = template.Render( Hash.FromDictionary( mergeValues ) );
+                }
+                else
+                {
+                    output = template.Render();
+                }
+
+                return true;
+            }
+            catch ( Exception ex )
+            {
+                ProcessException( ex );
+
+                output = null;
+                return false;
+            }            
+        }
+
+        private void ProcessException(Exception ex)
+        {
+            if ( this.ThrowExceptions )
+            {
+                throw ex;
+            }
         }
 
         public override void UnregisterShortcode( string name )
@@ -261,7 +253,7 @@ namespace Rock.Lava.DotLiquid
             throw new NotImplementedException();
         }
 
-        public override ILavaTemplate ParseTemplate( string inputTemplate )
+        private Template CreateNewDotLiquidTemplate( string inputTemplate )
         {
             var template = Template.Parse( inputTemplate );
 
@@ -276,7 +268,12 @@ namespace Rock.Lava.DotLiquid
              */
             template.MakeThreadSafe();
 
-            return new DotLiquidLavaTemplate( template );
+            return template;
+        }
+
+        public override ILavaTemplate ParseTemplate( string inputTemplate )
+        {
+            return new DotLiquidLavaTemplate( CreateNewDotLiquidTemplate( inputTemplate ) );
         }
 
         public override bool AreEqualValue( object left, object right )

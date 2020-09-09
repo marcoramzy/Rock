@@ -19,6 +19,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
+using Rock.Common;
+
 namespace Rock.Lava.Utility
 {
     /// <summary>

@@ -23,8 +23,9 @@ using System.Text;
 using System.Text.RegularExpressions;
 
 using DotLiquid;
-using DotLiquid.Util;
+
 using Rock.Lava.Utility;
+using Rock.Common;
 
 namespace Rock.Lava.DotLiquid
 {

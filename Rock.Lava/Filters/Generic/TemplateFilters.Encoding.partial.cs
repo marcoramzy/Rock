@@ -15,6 +15,8 @@
 // </copyright>
 //
 
+using Rock.Common;
+
 namespace Rock.Lava.Filters
 {
     public static partial class TemplateFilters

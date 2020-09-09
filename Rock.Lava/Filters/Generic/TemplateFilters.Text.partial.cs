@@ -22,7 +22,7 @@ using System.Text.RegularExpressions;
 using System.Web;
 using Humanizer;
 
-using Rock;
+using Rock.Common;
 
 namespace Rock.Lava.Filters
 {
@@ -316,17 +316,17 @@ namespace Rock.Lava.Filters
         /// <param name="input">The input.</param>
         /// <param name="expression">The regex expression.</param>
         /// <returns></returns>
-        public static bool RegExMatch( string input, string expression )
+        public static string RegExMatch( string input, string expression )
         {
             if ( input == null )
             {
-                return false;
+                return false.ToString();
             }
 
             var regex = new Regex( expression );
             var match = regex.Match( input );
 
-            return match.Success;
+            return match.Success.ToString();
         }
 
         /// <summary>

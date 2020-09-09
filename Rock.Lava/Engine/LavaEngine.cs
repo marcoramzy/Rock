@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using Rock.Lava.Shortcodes;
 using Rock.Lava.DotLiquid;
 using Rock.Lava.Blocks;
 
@@ -13,15 +11,52 @@ namespace Rock.Lava
     public static class LavaEngine
     {
         private static ILavaEngine _instance = null;
+        private static LavaEngineTypeSpecifier _liquidFramework = LavaEngineTypeSpecifier.DotLiquid;
 
+        public static LavaEngineTypeSpecifier LiquidFramework
+        {
+            get
+            {
+                return _liquidFramework;
+            }
+            set
+            {
+                if ( _liquidFramework != value )
+                {
+                    _liquidFramework = value;
+
+                    // Reset the existing instance so it can be re-created on next access.
+                    _instance = null;
+                }
+            }
+        }
+
+        public static void InitializeDotLiquidFramework( ILavaFileSystem fileSystem = null, IList<Type> filterImplementationTypes = null )
+        {
+            _liquidFramework = LavaEngineTypeSpecifier.DotLiquid;
+
+            var liquidEngine = new DotLiquidEngine();
+
+            liquidEngine.Initialize( fileSystem, filterImplementationTypes );
+
+            _instance = liquidEngine;
+        }
+        
         public static ILavaEngine Instance
         {
             get
             {
                 if ( _instance == null )
                 {
-                    // TODO: Add option to instantiate Fluid engine.
-                    _instance = new DotLiquidEngineManager();
+                    if ( _liquidFramework == LavaEngineTypeSpecifier.DotLiquid )
+                    {
+                        InitializeDotLiquidFramework();
+                    }
+                    else
+                    {
+                        throw new Exception( "Liquid Framework not implemented." );
+                        // TODO: Add option to instantiate Fluid engine.
+                    }                    
                 }
 
                 return _instance;
@@ -32,7 +67,8 @@ namespace Rock.Lava
     //TODO: Implement IRockStartup.
     public abstract class LavaEngineBase : ILavaEngine // ,IRockStartup
     {
-        public abstract string FrameworkName { get; }
+        public abstract string EngineName { get; }
+        public abstract LavaEngineTypeSpecifier EngineType { get; }
 
         public abstract Type GetShortcodeType( string name );
 
@@ -44,7 +80,12 @@ namespace Rock.Lava
 
         public abstract void SetContextValue( string key, object value );
 
-        public abstract bool TryRender( string inputTemplate, out string output );
+        public bool TryRender( string inputTemplate, out string output )
+        {
+            return TryRender( inputTemplate, out output, null );
+        }
+
+        public abstract bool TryRender( string inputTemplate, out string output, LavaDictionary mergeValues );
 
         public abstract void UnregisterShortcode( string name );
 
@@ -91,7 +132,7 @@ namespace Rock.Lava
                 template = this.ParseTemplate( inputTemplate );
                 return true;
             }
-            catch ( Exception ex )
+            catch
             {
                 template = null;
                 return false;
