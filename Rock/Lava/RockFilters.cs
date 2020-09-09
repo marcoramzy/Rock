@@ -1299,6 +1299,18 @@ namespace Rock.Lava
         /// <param name="amount">The amount.</param>
         /// <param name="interval">The interval.</param>
         /// <returns></returns>
+        public static DateTime? DateAdd( object input, object amount, string interval = "d" )
+        {
+            return DateAdd( input, amount.ToStringSafe().AsInteger(), interval );
+        }
+
+        /// <summary>
+        /// Adds a time interval to a date
+        /// </summary>
+        /// <param name="input">The input.</param>
+        /// <param name="amount">The amount.</param>
+        /// <param name="interval">The interval.</param>
+        /// <returns></returns>
         public static DateTime? DateAdd( object input, int amount, string interval = "d" )
         {
             DateTime? date = null;
@@ -1718,6 +1730,36 @@ namespace Rock.Lava
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Advances the date to a specific day in the next 7 days.
+        /// </summary>
+        /// <param name="input">The input.</param>
+        /// <param name="sDayOfWeek">The starting day of week.</param>
+        /// <param name="includeCurrentDay">if set to <c>true</c> includes the current day as the current week.</param>
+        /// <param name="numberOfWeeks">The number of weeks (must be non-zero).</param>
+        /// <returns></returns>
+        public static DateTime? NextDayOfTheWeek( object input, string sDayOfWeek, object includeCurrentDay, object numberOfWeeks )
+        {
+            int weeks = numberOfWeeks.ToStringSafe().AsIntegerOrNull() ?? 1;
+            bool includeCurrent = includeCurrentDay.ToStringSafe().AsBoolean( false );
+
+            return NextDayOfTheWeek( input, sDayOfWeek, includeCurrent, weeks );
+        }
+
+        /// <summary>
+        /// Advances the date to a specific day in the next 7 days.
+        /// </summary>
+        /// <param name="input">The input.</param>
+        /// <param name="sDayOfWeek">The starting day of week.</param>
+        /// <param name="includeCurrentDay">if set to <c>true</c> includes the current day as the current week.</param>
+        /// <returns></returns>
+        public static DateTime? NextDayOfTheWeek( object input, string sDayOfWeek, object includeCurrentDay )
+        {
+            bool includeCurrent = includeCurrentDay.ToStringSafe().AsBoolean( false );
+
+            return NextDayOfTheWeek( input, sDayOfWeek, includeCurrent, 1 );
         }
 
         /// <summary>
@@ -5575,6 +5617,18 @@ namespace Rock.Lava
             }
 
             return currentPerson;
+        }
+
+        /// <summary>
+        /// Base64 encodes a binary file
+        /// </summary>
+        /// <param name="context">The context.</param>
+        /// <param name="input">The input.</param>
+        /// <param name="resizeSettings">The resize settings.</param>
+        /// <returns></returns>
+        public static string Base64( ILavaContext context, object input, string resizeSettings )
+        {
+            return Base64Encode( context, input, resizeSettings );
         }
 
         /// <summary>
