@@ -26,7 +26,6 @@ using System.Linq;
 using System.Reflection;
 using System.Web;
 
-using DotLiquid;
 using Quartz;
 using Quartz.Impl;
 using Quartz.Impl.Matchers;
@@ -568,27 +567,37 @@ namespace Rock.WebStartup
         /// </summary>
         private static void InitializeLava()
         {
-            // DotLiquid uses a RubyDateFormat by default,
-            // but since we aren't using Ruby, we want to disable that
-            Liquid.UseRubyDateFormat = false;
+            var liquidEngineTypeValue = System.Configuration.ConfigurationManager.AppSettings["LavaEngineType"];
 
-            /* 2020-05-20 MDP (actually this comment was here a long time ago)
-                NOTE: This means that all the built in template filters,
-                and the RockFilters, will use CSharpNamingConvention.
-            
-                For example the dotliquid documentation says to do this for formatting dates: 
-                {{ some_date_value | date:"MMM dd, yyyy" }}
-           
-                However, if CSharpNamingConvention is enabled, it needs to be: 
-                {{ some_date_value | Date:"MMM dd, yyyy" }}
-            */
+            LavaEngineTypeSpecifier engineType;
+            bool isValid = false;
 
-            Template.NamingConvention = new DotLiquid.NamingConventions.CSharpNamingConvention();
+            if ( string.IsNullOrWhiteSpace( liquidEngineTypeValue ) )
+            {
+                // If no engine specified, use default.
+                engineType = LavaEngineTypeSpecifier.DotLiquid;
+                isValid = true;
+            }
+            else
+            {
+                isValid = Enum.TryParse<LavaEngineTypeSpecifier>( liquidEngineTypeValue, true, out engineType );
+            }
 
-            Template.FileSystem = new LavaFileSystem();
-            Template.RegisterSafeType( typeof( Enum ), o => o.ToString() );
-            Template.RegisterSafeType( typeof( DBNull ), o => null );
-            Template.RegisterFilter( typeof( Rock.Lava.RockFilters ) );
+            if ( engineType == LavaEngineTypeSpecifier.DotLiquid )
+            {
+                LavaEngine.InitializeDotLiquidFramework( new LavaFileSystem(), new List<Type> { typeof( Rock.Lava.RockFilters ) } );
+            }
+            else
+            {
+                // Specified engine is not implemented.
+                isValid = false;
+            }
+
+            if ( !isValid )
+            {
+                throw new RockStartupException( string.Format( "Invalid Lava Engine Type. The LavaEngineType configuration parameter \"{0}\" is not valid.", liquidEngineTypeValue ) );
+            }
+
         }
 
         /// <summary>
