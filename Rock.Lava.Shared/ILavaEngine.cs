@@ -40,6 +40,14 @@ namespace Rock.Lava
         }
     }
 
+    public enum LavaEngineTypeSpecifier
+    {
+        // DotLiquid is an open-source implementation of the Liquid templating language. [https://github.com/dotliquid/dotliquid]
+        DotLiquid = 1,
+        // Fluid is an open-source implementation of the Liquid templating language. [https://github.com/sebastienros/fluid]
+        Fluid = 2
+    }
+
     /// <summary>
     /// Represents a Lava Template.
     /// </summary>
@@ -48,7 +56,12 @@ namespace Rock.Lava
         /// <summary>
         /// The descriptive name of the templating framework on which Lava is currently operating.
         /// </summary>
-        string FrameworkName { get; }
+        string EngineName { get; }
+
+        /// <summary>
+        /// The Liquid template framework used to parse and render Lava templates.
+        /// </summary>
+        LavaEngineTypeSpecifier EngineType { get; }
 
         void RegisterTag( string name, Func<string, IRockLavaTag> factoryMethod );
         void RegisterBlock( string name, Func<string, IRockLavaBlock> factoryMethod );
@@ -103,6 +116,8 @@ namespace Rock.Lava
         /// <returns></returns>
         bool TryRender( string inputTemplate, out string output );
 
+        bool TryRender( string inputTemplate, out string output, LavaDictionary mergeValues );
+        
         /// <summary>
         /// 
         /// </summary>
