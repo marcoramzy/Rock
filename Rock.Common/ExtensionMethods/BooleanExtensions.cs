@@ -16,7 +16,7 @@
 //
 using System;
 
-namespace Rock
+namespace Rock.Common
 {
     /// <summary>
     /// Boolean Extensions

@@ -15,7 +15,7 @@
 // </copyright>
 //
 
-namespace Rock
+namespace Rock.Common
 {
     /// <summary>
     /// 

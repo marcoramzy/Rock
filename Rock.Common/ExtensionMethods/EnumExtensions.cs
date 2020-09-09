@@ -19,7 +19,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 
-namespace Rock
+namespace Rock.Common
 {
     /// <summary>
     /// System.Enum extensions

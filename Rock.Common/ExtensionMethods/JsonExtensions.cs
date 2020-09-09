@@ -23,7 +23,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
 
-namespace Rock
+namespace Rock.Common
 {
     /// <summary>
     /// JSON Extensions

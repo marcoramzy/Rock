@@ -24,7 +24,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
 
-namespace Rock
+namespace Rock.Common
 {
     /// <summary>
     /// Handy string extensions that don't require any nuget packages or Rock references

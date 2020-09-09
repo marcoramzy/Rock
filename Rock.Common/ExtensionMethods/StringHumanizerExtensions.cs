@@ -16,7 +16,7 @@
 //
 using Humanizer;
 
-namespace Rock
+namespace Rock.Common
 {
     /// <summary>
     /// Handy string extensions that require Humanizer

@@ -20,7 +20,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace Rock
+namespace Rock.Common
 {
     /// <summary>
     /// Object and Stream Extensions that don't require any nuget packages
@@ -154,6 +154,27 @@ namespace Rock
                 return obj.ToString();
             }
             return string.Empty;
+        }
+
+        /// <summary>
+        /// Safely attempt to convert any object to an integer value, or return a default value if unsuccessful.
+        /// </summary>
+        /// <param name="obj">an object</param>
+        /// <param name="defaultValue">the value to return if the conversion is unsuccessful</param>
+        /// <returns>The ToString or the empty string if the item is null.</returns>
+        public static int ToIntSafe( this object obj, int defaultValue = 0 )
+        {
+            if ( obj != null )
+            {
+                int value;
+
+                if ( int.TryParse( obj.ToString(), out value ) )
+                {
+                    return value;
+                }
+            }
+
+            return defaultValue;
         }
 
         /// <summary>

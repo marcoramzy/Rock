@@ -19,7 +19,7 @@ using System.Configuration;
 using System.Threading;
 
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo( "Rock.Lava.Tests" )]
-namespace Rock
+namespace Rock.Common
 {
     /// <summary>
     /// Special Class that returns current Current DateTime based on the TimeZone set in Web.Config

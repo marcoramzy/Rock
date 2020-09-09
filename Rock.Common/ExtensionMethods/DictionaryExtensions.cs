@@ -17,7 +17,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Rock
+namespace Rock.Common
 {
     /// <summary>
     /// Dictionary Extensions that don't reference Rock

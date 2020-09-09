@@ -19,7 +19,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 
-namespace Rock.Utility
+namespace Rock.Common
 {
     /// <summary>
     /// A utility class for color manipulations

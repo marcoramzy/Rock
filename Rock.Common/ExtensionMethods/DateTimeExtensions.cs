@@ -17,7 +17,7 @@
 using System;
 using System.Globalization;
 
-namespace Rock
+namespace Rock.Common
 {
     /// <summary>
     /// DateTime and TimeStamp Extensions
