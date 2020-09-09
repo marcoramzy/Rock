@@ -1144,8 +1144,6 @@
     <Compile Include="Data\IOrdered.cs" />
     <Compile Include="Data\IRockEntity.cs" />
     <Compile Include="Data\IService.cs" />
-    <Compile Include="Data\LavaIgnoreAttribute.cs" />
-    <Compile Include="Data\LavaIncludeAttribute.cs" />
     <Compile Include="Data\LinqRuntimeTypeBuilder.cs" />
     <Compile Include="Data\MigrationHelper.cs" />
     <Compile Include="Data\Model.cs" />
