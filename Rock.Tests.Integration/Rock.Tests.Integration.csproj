@@ -139,6 +139,8 @@
     <Compile Include="Jobs\SendPrayerCommentsJobTests.cs" />
     <Compile Include="Jobs\RockJobListenerTests.cs" />
     <Compile Include="Lava\CachingTests.cs" />
+    <Compile Include="Lava\Filters\DateFilterTests.cs" />
+    <Compile Include="Lava\LavaTestHelper.cs" />
     <Compile Include="Lava\SqlTests.cs" />
     <Compile Include="Lava\RockEntityTests.cs" />
     <Compile Include="Model\IdentityVerificationCodeTests.cs" />
@@ -218,6 +220,14 @@
     <ProjectReference Include="..\DotLiquid\DotLiquid.csproj">
       <Project>{00edcb8d-ef33-459c-ad62-02876bd24dff}</Project>
       <Name>DotLiquid</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Rock.Lava.Shared\Rock.Lava.Shared.csproj">
+      <Project>{8820cd93-70ee-496d-b17b-0c4c68dd4957}</Project>
+      <Name>Rock.Lava.Shared</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Rock.Lava\Rock.Lava.csproj">
+      <Project>{37e293dd-f282-4a34-91fa-5fb8503d5672}</Project>
+      <Name>Rock.Lava</Name>
     </ProjectReference>
     <ProjectReference Include="..\Rock.Mailgun\Rock.Mailgun.csproj">
       <Project>{d6b19c0d-da5e-4f75-8001-04ded86b741f}</Project>
