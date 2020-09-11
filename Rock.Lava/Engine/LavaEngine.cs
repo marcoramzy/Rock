@@ -77,6 +77,8 @@ namespace Rock.Lava
         public abstract void RegisterShortcode( string name, Func<string, IRockShortcode> shortcodeFactoryMethod );
 
         public abstract void RegisterShortcode( IRockShortcode shortcode );
+        public abstract void RegisterShortcode<T>( string name )
+            where T : IRockShortcode;
 
         public abstract void SetContextValue( string key, object value );
 

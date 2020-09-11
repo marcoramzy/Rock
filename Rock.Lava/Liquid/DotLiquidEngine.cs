@@ -78,7 +78,7 @@ namespace Rock.Lava.DotLiquid
 
             Template.RegisterFilter( typeof( TemplateFilters ) );
             Template.RegisterFilter( typeof( DotLiquidFilters ) );
-            
+
             // Register custom filters last, so they can override built-in filters of the same name.
             if ( filterImplementationTypes != null )
             {
@@ -161,8 +161,7 @@ namespace Rock.Lava.DotLiquid
             //throw new NotImplementedException();
         }
 
-        public void RegisterShortcode<T>( string name )
-            where T : IRockShortcode
+        public override void RegisterShortcode<T>( string name )
         {
             var shortcodesCollectionInfo = typeof( Template ).GetProperty( "Shortcodes", BindingFlags.Static | BindingFlags.NonPublic );
 
@@ -237,10 +236,10 @@ namespace Rock.Lava.DotLiquid
 
                 output = null;
                 return false;
-            }            
+            }
         }
 
-        private void ProcessException(Exception ex)
+        private void ProcessException( Exception ex )
         {
             if ( this.ThrowExceptions )
             {
@@ -280,12 +279,13 @@ namespace Rock.Lava.DotLiquid
         {
             var condition = global::DotLiquid.Condition.Operators["=="];
 
-            return condition(  left, right );
+            return condition( left, right );
         }
 
         public override Dictionary<string, ILavaTagInfo> GetRegisteredTags()
         {
             return Template.Tags.ToDictionary( k => k.Key, v => (ILavaTagInfo)( new LavaTagInfo { Name = v.Key, SystemTypeName = v.Value.Name } ) );
         }
+
     }
 }

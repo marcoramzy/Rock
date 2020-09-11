@@ -23,7 +23,7 @@ using System.Reflection;
 
 using Rock.Data;
 
-namespace Rock.Utility
+namespace Rock.Lava
 {
     /// <summary>
     /// RockDynamic can be as a base class for C# POCO objects that need to be available to Lava.
@@ -359,7 +359,7 @@ namespace Rock.Utility
         /// <returns>
         /// true if the operation is successful; otherwise, false. If this method returns false, the run-time binder of the language determines the behavior. (In most cases, a run-time exception is thrown.)
         /// </returns>
-        private bool TryGetMember( string memberName, out object result )
+        protected virtual bool TryGetMember( string memberName, out object result )
         {
             result = null;
 

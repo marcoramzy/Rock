@@ -19,7 +19,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Rock.Common;
-using Rock.Utility;
 
 namespace Rock.Lava.Filters
 {

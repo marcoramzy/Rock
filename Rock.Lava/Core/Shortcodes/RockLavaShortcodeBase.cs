@@ -18,8 +18,6 @@ using System.IO;
 
 using DotLiquid;
 
-using Rock.Utility;
-
 namespace Rock.Lava.Shortcodes
 {
     /// <summary>

@@ -21,8 +21,6 @@ using System.Linq;
 
 using DotLiquid;
 
-using Rock.Utility;
-
 namespace Rock.Lava.Blocks
 {
     /// <summary>

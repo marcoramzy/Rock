@@ -18,7 +18,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Rock.Lava.Blocks;
-using Rock.Utility;
 
 namespace Rock.Lava.Shortcodes
 {

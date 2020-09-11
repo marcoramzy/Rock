@@ -31,14 +31,14 @@ namespace Rock.Lava
         /// <param name="key"></param>
         /// <param name="value"></param>
         void SetContextValue( string key, object value );
-        
+
         /// <summary>
-        /// Try to render the provided template
+        /// Try to render the template using the provided context values.
+        /// Errors will be included in the rendered output.
         /// </summary>
-        /// <param name="inputTemplate"></param>
-        /// <param name="output"></param>
-        /// <returns></returns>
-        //bool TryRender( string inputTemplate, out string output );
+        /// <param name="values"></param>
+        /// <returns></returns>        
+        string Render( IDictionary<string, object> values );
 
         /// <summary>
         /// Try to render the template using the provided context values.
@@ -49,13 +49,18 @@ namespace Rock.Lava
         bool TryRender( IDictionary<string, object> values, out string output, out IList<Exception> errors );
 
         bool TryRender( LavaRenderParameters parameters, out string output, out IList<Exception> errors );
-        
+
+        /// <summary>
+        /// The set of Lava commands permitted for this template.
+        /// </summary>
+        IList<string> EnabledCommands { get; set; }
+
         /// <summary>
         /// 
         /// </summary>
         /// <param name="type"></param>
         /// <param name="allowedMembers"></param>
-        void RegisterSafeType( Type type, string[] allowedMembers = null );
+        //void RegisterSafeType( Type type, string[] allowedMembers = null );
 
         ILavaEngine LavaEngine { get;  }
         //ILavaContext Context { get; }
