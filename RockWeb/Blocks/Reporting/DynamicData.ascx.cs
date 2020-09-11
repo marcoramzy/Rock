@@ -26,6 +26,7 @@ using System.Web.UI.WebControls;
 using Rock;
 using Rock.Attribute;
 using Rock.Data;
+using Rock.Lava;
 using Rock.Model;
 using Rock.Web.Cache;
 using Rock.Web.UI;
@@ -969,7 +970,7 @@ namespace RockWeb.Blocks.Reporting
         /// <summary>
         ///
         /// </summary>
-        private class DataRowDrop : DotLiquid.Drop
+        private class DataRowDrop : RockDynamic
         {
             private readonly DataRow _dataRow;
 
@@ -978,14 +979,16 @@ namespace RockWeb.Blocks.Reporting
                 _dataRow = dataRow;
             }
 
-            public override object BeforeMethod( string method )
+            protected override bool TryGetMember( string memberName, out object result )
             {
-                if ( _dataRow.Table.Columns.Contains( method ) )
+                if ( _dataRow.Table.Columns.Contains( memberName ) )
                 {
-                    return _dataRow[method];
+                    result = _dataRow[memberName];
+                    return true;
                 }
 
-                return null;
+                result = null;
+                return false;
             }
         }
     }

@@ -24,9 +24,10 @@ using Rock.Model;
 using Rock.Web.UI;
 using System.ComponentModel;
 using Rock.Security;
-using DotLiquid;
+
 using System.Web.UI.WebControls;
 using Rock.Lava.Shortcodes;
+using Rock.Lava;
 
 namespace RockWeb.Blocks.Cms
 {
@@ -144,7 +145,7 @@ namespace RockWeb.Blocks.Cms
             if ( lavaShortcode != null )
             {
                 // unregister the shortcode
-                Template.UnregisterShortcode( lavaShortcode.TagName );
+                LavaEngine.Instance.UnregisterShortcode( lavaShortcode.TagName );
 
                 lavaShortcodeService.Delete( lavaShortcode );
                 rockContext.SaveChanges();

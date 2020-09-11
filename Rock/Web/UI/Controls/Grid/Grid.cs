@@ -33,6 +33,7 @@ using OfficeOpenXml;
 using Rock;
 using Rock.Attribute;
 using Rock.Data;
+using Rock.Lava;
 using Rock.Utility;
 using Rock.Web.Cache;
 

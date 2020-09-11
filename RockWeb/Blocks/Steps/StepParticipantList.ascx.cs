@@ -27,6 +27,7 @@ using Newtonsoft.Json;
 using Rock;
 using Rock.Attribute;
 using Rock.Data;
+using Rock.Lava;
 using Rock.Model;
 using Rock.Security;
 using Rock.Utility;
@@ -1115,7 +1116,7 @@ namespace RockWeb.Blocks.Steps
         /// <summary>
         /// A view-model that represents a single row on the Steps Participant grid.
         /// </summary>
-        /// <seealso cref="DotLiquid.Drop" />
+        /// <seealso cref="RockDynamic" />
         public class StepParticipantListViewModel : RockDynamic
         {
             public int Id { get; set; }

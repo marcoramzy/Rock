@@ -14,7 +14,7 @@
 // limitations under the License.
 // </copyright>
 //
-using Rock.Utility;
+using Rock.Lava;
 using UAParser;
 
 namespace Rock.Web

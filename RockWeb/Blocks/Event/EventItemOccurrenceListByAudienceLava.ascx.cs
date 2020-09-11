@@ -30,6 +30,7 @@ using Rock.Web.Cache;
 using Rock.Web.UI.Controls;
 using Rock.Attribute;
 using Rock.Security;
+using Rock.Lava;
 
 namespace RockWeb.Blocks.Event
 {
@@ -186,7 +187,7 @@ namespace RockWeb.Blocks.Event
                 foreach (var contextEntityType in RockPage.GetContextEntityTypes())
                 {
                     var contextEntity = RockPage.GetCurrentContext(contextEntityType);
-                    if (contextEntity != null && contextEntity is DotLiquid.ILiquidizable)
+                    if (contextEntity != null && contextEntity is ILavaContext)
                     {
                         var type = Type.GetType(contextEntityType.AssemblyName ?? contextEntityType.Name);
                         if (type != null)

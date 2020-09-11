@@ -21,10 +21,10 @@ using System.Data.Entity;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using DotLiquid;
 using Rock;
 using Rock.Attribute;
 using Rock.Data;
+using Rock.Lava;
 using Rock.Model;
 using Rock.Web.UI;
 
@@ -272,7 +272,7 @@ namespace RockWeb.Blocks.Reporting
         /// <summary>
         /// POCO class for return interaction counts
         /// </summary>
-        class InteractionCount : DotLiquid.Drop, Rock.Lava.ILiquidizable
+        class InteractionCount : RockDynamic, Rock.Lava.ILiquidizable
         {
             /// <summary>
             /// Gets or sets the component identifier.
@@ -288,21 +288,7 @@ namespace RockWeb.Blocks.Reporting
             /// <value>
             /// The count.
             /// </value>
-            public int Count { get; set; }
-
-            /// <summary>
-            /// Gets the available keys (for debuging info).
-            /// </summary>
-            /// <value>
-            /// The available keys.
-            /// </value>
-            public List<string> AvailableKeys
-            {
-                get
-                {
-                    return new List<string> { "ComponentId", "Count" };
-                }
-            }
+            public new int Count { get; set; }
         }
     }
 }

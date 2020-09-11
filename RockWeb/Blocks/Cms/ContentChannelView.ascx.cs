@@ -26,11 +26,12 @@ using System.Web;
 using System.Web.UI;
 using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
-using DotLiquid;
+
 using Rock;
 using Rock.Attribute;
 using Rock.Data;
 using Rock.Field.Types;
+using Rock.Lava;
 using Rock.Model;
 using Rock.Reporting;
 using Rock.Security;
@@ -832,7 +833,7 @@ $(document).ready(function() {
 
                 var template = GetTemplate();
 
-                outputContents = template.Render( Hash.FromDictionary( mergeFields ) );
+                outputContents = template.Render( mergeFields );
 
                 if ( OutputCacheDuration.HasValue && OutputCacheDuration.Value > 0 )
                 {
@@ -873,23 +874,23 @@ $(document).ready(function() {
         /// <summary>
         /// Gets the template.
         /// </summary>
-        /// <returns>a DotLiquid Template</returns>
-        /// <returns>A <see cref="DotLiquid.Template"/></returns>
-        private Template GetTemplate()
+        /// <returns>a Lava Template</returns>
+        /// <returns>A <see cref="Rock.Lava.ILavaTemplate"/></returns>
+        private ILavaTemplate GetTemplate()
         {
-            Template template = null;
+            ILavaTemplate template = null;
 
             try
             {
                 // only load from the cache if a cacheDuration was specified
                 if ( ItemCacheDuration.HasValue && ItemCacheDuration.Value > 0 )
                 {
-                    template = GetCacheItem( TEMPLATE_CACHE_KEY ) as Template;
+                    template = GetCacheItem( TEMPLATE_CACHE_KEY ) as ILavaTemplate;
                 }
 
                 if ( template == null )
                 {
-                    template = Template.Parse( GetAttributeValue( AttributeKey.Template ) );
+                    template = LavaEngine.Instance.ParseTemplate( GetAttributeValue( AttributeKey.Template ) );
 
                     if ( ItemCacheDuration.HasValue && ItemCacheDuration.Value > 0 )
                     {
@@ -897,13 +898,12 @@ $(document).ready(function() {
                         AddCacheItem( TEMPLATE_CACHE_KEY, template, ItemCacheDuration.Value, cacheTags );
                     }
 
-                    var enabledLavaCommands = GetAttributeValue( AttributeKey.EnabledLavaCommands );
-                    template.Registers.AddOrReplace( "EnabledCommands", enabledLavaCommands );
+                    template.EnabledCommands = GetAttributeValue( AttributeKey.EnabledLavaCommands ).SplitDelimitedValues();
                 }
             }
             catch ( Exception ex )
             {
-                template = Template.Parse( string.Format( "Lava error: {0}", ex.Message ) );
+                template = LavaEngine.Instance.ParseTemplate( string.Format( "Lava error: {0}", ex.Message ) );
             }
 
             return template;
@@ -1477,7 +1477,7 @@ $(document).ready(function() {
 
         #region Helper Classes
 
-        private class TagModel : DotLiquid.Drop
+        private class TagModel : RockDynamic
         {
             public int Id { get; set; }
             public Guid Guid { get; set; }
@@ -1500,7 +1500,7 @@ $(document).ready(function() {
             public List<ArchiveSummaryModel> ArchiveSumaries { get; set; }
         }
 
-        public class Pagination : DotLiquid.Drop
+        public class Pagination : RockDynamic
         {
 
             /// <summary>
@@ -1623,7 +1623,7 @@ $(document).ready(function() {
         /// <summary>
         /// 
         /// </summary>
-        public class PaginationPage : DotLiquid.Drop
+        public class PaginationPage : RockDynamic
         {
             /// <summary>
             /// Initializes a new instance of the <see cref="PaginationPage"/> class.
