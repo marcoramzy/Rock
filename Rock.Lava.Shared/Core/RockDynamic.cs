@@ -15,7 +15,6 @@
 // </copyright>
 //
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
@@ -31,7 +30,7 @@ namespace Rock.Lava
     /// </summary>
     /// <seealso cref="System.Dynamic.DynamicObject" />
     /// <seealso cref="Rock.Lava.ILiquidizable" />
-    public class RockDynamic : DynamicObject, Lava.ILiquidizable, IDictionary<string, object>
+    public class RockDynamic : DynamicObject, Lava.ILiquidizable
     {
         private Dictionary<string, object> _members = new Dictionary<string, object>();
 
@@ -468,11 +467,6 @@ namespace Rock.Lava
         }
 
         public IEnumerator<KeyValuePair<string, object>> GetEnumerator()
-        {
-            return this.GetValueDictionary().GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
         {
             return this.GetValueDictionary().GetEnumerator();
         }
