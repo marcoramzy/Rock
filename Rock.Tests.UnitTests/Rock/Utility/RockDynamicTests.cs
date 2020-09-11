@@ -1,8 +1,8 @@
 ﻿using System;
 using Microsoft.CSharp.RuntimeBinder;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Rock.Lava;
 using Rock.Tests.Shared;
-using Rock.Utility;
 
 namespace Rock.Tests.Rock.Utility
 {

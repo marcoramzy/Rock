@@ -14,8 +14,8 @@
 // limitations under the License.
 // </copyright>
 //
+using Rock.Lava;
 using Rock.UniversalSearch.IndexModels;
-using Rock.Utility;
 
 namespace Rock.UniversalSearch
 {
