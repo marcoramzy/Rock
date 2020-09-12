@@ -191,6 +191,12 @@ namespace Rock.Lava
             var wordsPerSecond = wordPerMinute / 60;
             var wordsInString = inputString.WordCount();
 
+            // Verify that the reading speed is set to a reasonable minimum.
+            if ( wordsPerSecond < 1 )
+            {
+                wordsPerSecond = 1;
+            }
+
             var readTimeInSeconds = wordsInString / wordsPerSecond;
 
             // Adjust the read time for images. We will start with the provided seconds per image (default 12) and subject a second for each additional image until we reach 10 then every image is 3 seconds.
