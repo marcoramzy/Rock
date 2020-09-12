@@ -712,7 +712,7 @@ namespace Rock.Lava
             }
 
             int place = inputAsString.LastIndexOf( search );
-            if ( place > 0 )
+            if ( place >= 0 )
             {
                 return inputAsString.Remove( place, search.Length ).Insert( place, replacement );
             }
