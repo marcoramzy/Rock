@@ -505,22 +505,22 @@ namespace Rock.Lava
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        public static string NumberToOrdinal( string input )
+        public static string NumberToOrdinal( object input )
         {
             if ( input == null )
             {
-                return input;
+                return string.Empty;
             }
 
             int number;
 
-            if ( int.TryParse( input, out number ) )
+            if ( int.TryParse( input.ToString(), out number ) )
             {
                 return number.Ordinalize();
             }
             else
             {
-                return input;
+                return input.ToString();
             }
         }
 
@@ -529,22 +529,22 @@ namespace Rock.Lava
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        public static string NumberToWords( string input )
+        public static string NumberToWords( object input )
         {
             if ( input == null )
             {
-                return input;
+                return string.Empty;
             }
 
             int number;
 
-            if ( int.TryParse( input, out number ) )
+            if ( int.TryParse( input.ToString(), out number ) )
             {
                 return number.ToWords();
             }
             else
             {
-                return input;
+                return input.ToString();
             }
         }
 
@@ -553,22 +553,22 @@ namespace Rock.Lava
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        public static string NumberToOrdinalWords( string input )
+        public static string NumberToOrdinalWords( object input )
         {
             if ( input == null )
             {
-                return input;
+                return string.Empty;
             }
 
             int number;
 
-            if ( int.TryParse( input, out number ) )
+            if ( int.TryParse( input.ToString(), out number ) )
             {
                 return number.ToOrdinalWords();
             }
             else
             {
-                return input;
+                return input.ToString();
             }
         }
 
@@ -577,22 +577,22 @@ namespace Rock.Lava
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        public static string NumberToRomanNumerals( string input )
+        public static string NumberToRomanNumerals( object input )
         {
             if ( input == null )
             {
-                return input;
+                return string.Empty;
             }
 
             int number;
 
-            if ( int.TryParse( input, out number ) )
+            if ( int.TryParse( input.ToString(), out number ) )
             {
                 return number.ToRoman();
             }
             else
             {
-                return input;
+                return input.ToString();
             }
         }
 
@@ -602,8 +602,13 @@ namespace Rock.Lava
         /// <param name="input">The input.</param>
         /// <param name="quantity">The quantity.</param>
         /// <returns></returns>
-        public static string ToQuantity( string input, object quantity )
+        public static string ToQuantity( object input, object quantity )
         {
+            if ( input == null )
+            {
+                return string.Empty;
+            }
+
             int numericQuantity;
             if ( quantity is string )
             {
@@ -614,9 +619,7 @@ namespace Rock.Lava
                 numericQuantity = Convert.ToInt32( quantity );
             }
 
-            return input == null
-                ? input
-                : input.ToQuantity( numericQuantity );
+            return input.ToString().ToQuantity( numericQuantity );
         }
 
         /// <summary>
@@ -6080,7 +6083,13 @@ namespace Rock.Lava
                 //{
                 //    obj = drop.InvokeDrop( properties.First() );
                 //}
-                if ( obj is IDictionary dictionary )
+                if ( obj is RockDynamic rockDynamic )
+                {
+                    rockDynamic.TryGetMember( properties.First(), out obj );
+
+                    //.TryInvoke( InvokeBinder. new InvokeBinder(.InvokeDrop( properties.First() );
+                }
+                else if ( obj is IDictionary dictionary )
                 {
                     obj = dictionary[properties.First()];
                 }
