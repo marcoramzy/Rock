@@ -1906,16 +1906,23 @@ namespace Rock.Lava
         /// <returns></returns>
         public static string Format( object input, string format )
         {
-            if ( input == null )
+            var inputString = input.ToStringSafe();
+
+            if ( string.IsNullOrWhiteSpace( format ) )
             {
-                return null;
-            }
-            else if ( string.IsNullOrWhiteSpace( format ) )
-            {
-                return input.ToString();
+                return inputString;
             }
 
-            return string.Format( "{0:" + format + "}", input );
+            var decimalValue = inputString.AsDecimalOrNull();
+
+            if ( decimalValue == null )
+            {
+                return string.Format( "{0:" + format + "}", inputString );
+            }
+            else
+            {
+                return string.Format( "{0:" + format + "}", decimalValue );
+            }
         }
 
         /// <summary>
