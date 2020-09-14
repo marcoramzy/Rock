@@ -26,6 +26,17 @@ namespace DotLiquid
 		public List<Exception> Errors { get; private set; }
         public Dictionary<Type, Func<object, object>> ValueTypeTransformers;
 
+        /// <summary>
+        /// The system type that identifies the Context input parameter in a custom filter.
+        /// If not specified, the DotLiquid.Context Type is assumed.
+        /// </summary>
+        public Type FilterContextParameterType { get; set; }
+
+        /// <summary>
+        /// A transformation function that accepts a DotLiquid.Context object and returns the context input parameter that can be injected into a custom filter.
+        /// </summary>
+        public Func<Context, object> FilterContextParameterTransformer { get; set; }
+
         public Func<object, object> GetValueTypeTransformer( Type type )
         {
             if (ValueTypeTransformers == null)
@@ -106,10 +117,10 @@ namespace DotLiquid
 
 		public object Invoke(string method, List<object> args)
 		{
-			if (Strainer.RespondTo(method))
-				return Strainer.Invoke(method, args);
+            if (Strainer.RespondTo(method))
+                return Strainer.Invoke(method, args, this.FilterContextParameterType, this.FilterContextParameterTransformer);
 
-			return args.First();
+            return args.First();
 			//throw new FilterNotFoundException("Filter not found: '{0}'", method);
 		}
 

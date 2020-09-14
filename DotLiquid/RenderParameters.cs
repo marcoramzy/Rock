@@ -65,6 +65,8 @@ namespace DotLiquid
                 environments.Add(template.Assigns);
                 context = new Context(environments, template.InstanceAssigns, template.Registers, RethrowErrors);
             }
+            context.FilterContextParameterType = Template.FilterContextParameterType;
+            context.FilterContextParameterTransformer = Template.FilterContextParameterTransformer;
             context.ValueTypeTransformers = ValueTypeTransformers;
 			registers = Registers;
 			filters = Filters;

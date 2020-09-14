@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -127,7 +127,20 @@ namespace DotLiquid
             ValueTypeTransformers[type] = func;
         }
 
-		public static Func<object, object> GetValueTypeTransformer(Type type)
+        /// <summary>
+        /// The system type that identifies the Context input parameter in a custom filter function.
+        /// If not specified, the DotLiquid.Context Type is assumed.
+        /// </summary>
+        public static Type FilterContextParameterType { get; set; }
+
+        /// <summary>
+        /// Registers a context parameter transformation function.
+        /// Used to change the type of the context parameter injected into callback functions such as filters.
+        /// </summary>
+        /// <param name="value">Function that converts the specified context into a type that can be consumed by a callback function.</param>
+        public static Func<Context, object> FilterContextParameterTransformer { get; set; } = null;
+
+        public static Func<object, object> GetValueTypeTransformer(Type type)
 		{
             // Check for concrete types
 			if (ValueTypeTransformers.ContainsKey(type))

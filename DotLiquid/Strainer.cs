@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -71,8 +71,13 @@ namespace DotLiquid
 			return _methods.ContainsKey(method);
 		}
 
-		public object Invoke(string method, List<object> args)
+		public object Invoke(string method, List<object> args, Type filterParameterType = null, Func<Context, object> filterContextParameterTransformer = null )
 		{
+            if (filterParameterType == null)
+            {
+                filterParameterType = typeof(Context);
+            }
+
             ParameterInfo[] parameterInfos = null;
 
             // First, try to find a method with the same number of arguments.
@@ -81,7 +86,7 @@ namespace DotLiquid
             {
                 // If this method's first parameter is a context, ignore this method for now
                 parameterInfos = methodInfo.GetParameters();
-                if ( parameterInfos.Length > 0 && parameterInfos[0].ParameterType == typeof( Context ) )
+                if ( parameterInfos.Length > 0 && parameterInfos[0].ParameterType == filterParameterType )
                 {
                     methodInfo = null;
                 }
@@ -95,7 +100,7 @@ namespace DotLiquid
                 {
                     // If this method's first parameter is NOT a context, ignore this method for now
                     parameterInfos = methodInfo.GetParameters();
-                    if ( parameterInfos.Length <= 0 || parameterInfos[0].ParameterType != typeof( Context ) )
+                    if ( parameterInfos.Length <= 0 || parameterInfos[0].ParameterType != filterParameterType )
                     {
                         methodInfo = null;
                     }
@@ -112,8 +117,19 @@ namespace DotLiquid
             }
 
             // If first parameter is Context, send in actual context.
-            if ( parameterInfos.Length > 0 && parameterInfos[0].ParameterType == typeof( Context ) )
+            if ( parameterInfos.Length > 0 && parameterInfos[0].ParameterType == filterParameterType )
             {
+                object context;
+
+                if ( filterContextParameterTransformer != null )
+                {
+                    context = filterContextParameterTransformer( _context );
+                }
+                else
+                {
+                    context = _context;
+                }
+
                 args.Insert( 0, _context );
             }
 
