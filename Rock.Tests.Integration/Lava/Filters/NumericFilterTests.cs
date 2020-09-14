@@ -16,11 +16,13 @@
 //
 using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Rock.Tests.Integration.Lava;
+using Rock.Tests.Shared;
 
-namespace Rock.Tests.Integration.Lava
+namespace Rock.Tests.UnitTests.Lava
 {
     [TestClass]
-    public class DateFilterTests
+    public class NumericFilterTests
     {
         private static LavaTestHelper _helper;
 
@@ -34,40 +36,24 @@ namespace Rock.Tests.Integration.Lava
 
         #endregion
 
-        #region Filter Tests: SundayDate
-
         /// <summary>
-        /// Applying the filter to a Friday returns the following Sunday.
+        /// Decimal input should be formatted using the supplied currency symbol.
         /// </summary>
         [TestMethod]
-        public void SundayDate_InputDateIsFriday_YieldsNextSunday()
+        public void FormatAsCurrency_DecimalInputWithSpecifiedSymbol_ProducesValidCurrencyFormat()
         {
-            _helper.AssertTemplateOutputDate( "3-May-2020",
-                                      "{{ '1-May-2020' | SundayDate }}" );
+            _helper.AssertTemplateOutput( "AUD1,234,567.89", "{{ '1234567.89' | FormatAsCurrency:'AUD' }}" );
         }
 
         /// <summary>
-        /// Applying the filter to a Sunday returns the same day.
+        /// Decimal input should be formatted using the supplied currency symbol.
         /// </summary>
         [TestMethod]
-        public void SundayDate_InputDateIsSunday_YieldsSameDay()
+        public void FormatAsCurrency_DecimalInputWithNoSymbol_ProducesDefaultCurrencyFormat()
         {
-            _helper.AssertTemplateOutputDate( "3-May-2020",
-                                      "{{ '3-May-2020' | SundayDate }}" );
+            _helper.AssertTemplateOutput( "$1,234,567.89", "{{ '1234567.89' | FormatAsCurrency }}" );
         }
 
-        /// <summary>
-        /// Applying the filter to the 'Now' keyword yields the next Sunday from today.
-        /// </summary>
-        [TestMethod]
-        public void SundayDate_InputParameterIsNow_YieldsNextSunday()
-        {
-            var nextSunday = RockDateTime.Now.SundayDate();
-
-            _helper.AssertTemplateOutputDate( nextSunday,
-                                      "{{ 'Now' | SundayDate }}" );
-        }
-
-        #endregion
     }
+
 }

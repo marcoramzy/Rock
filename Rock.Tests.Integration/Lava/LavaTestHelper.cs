@@ -21,7 +21,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Rock.Lava;
 using Rock.Tests.Shared;
 
-namespace Rock.Tests.Lava
+namespace Rock.Tests.Integration.Lava
 {
     public class LavaTestHelper
     {
