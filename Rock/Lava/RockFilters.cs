@@ -5629,15 +5629,17 @@ namespace Rock.Lava
         }
 
         /// <summary>
-        /// Base64 encodes a binary file
+        /// Converts a string into a Base64 encoding.
         /// </summary>
-        /// <param name="context">The context.</param>
-        /// <param name="input">The input.</param>
-        /// <param name="resizeSettings">The resize settings.</param>
+        /// <param name="input"></param>
         /// <returns></returns>
-        public static string Base64( ILavaContext context, object input, string resizeSettings )
+        public static string Base64( object input )
         {
-            return Base64Encode( context, input, resizeSettings );
+            var bytes = System.Text.Encoding.UTF8.GetBytes( input.ToStringSafe() );
+
+            var result = System.Convert.ToBase64String( bytes );
+
+            return result;
         }
 
         /// <summary>
