@@ -48,6 +48,7 @@ namespace Rock.Tests.UnitTests.Lava
         {
             var mergeValues = new LavaDictionary { { "CurrentPerson", _helper.GetTestPersonTedDecker() } };
 
+            //TODO: This stopped working after removing the IDictionary implementation from RockDynamic.
             _helper.AssertTemplateOutput( "Decker", "{{ CurrentPerson | Property:'LastName' }}", mergeValues );
         }
 

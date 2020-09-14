@@ -14,6 +14,8 @@
 // limitations under the License.
 // </copyright>
 //
+using System;
+using System.Globalization;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Rock.Lava;
 using Rock.Tests.Shared;
@@ -193,6 +195,8 @@ namespace Rock.Tests.UnitTests.Lava
 
         #region Filter Tests: Read Time
 
+        private static readonly string[] _timeSpanOutputFormats = new string[] { "m' mins'", "m' min'", "s' secs'", "s' sec'" };
+
         /// <summary>
         /// The read time for a known piece of text using the default settings should return a number of minutes.
         /// </summary>
@@ -207,7 +211,11 @@ namespace Rock.Tests.UnitTests.Lava
 
             var output = _helper.GetTemplateOutput( template );
 
-            Assert.That.AreEqual( "1 min", output );
+            Assert.That.False( string.IsNullOrWhiteSpace( output ) );
+
+            var readTime = TimeSpan.ParseExact( output, _timeSpanOutputFormats, CultureInfo.CurrentCulture );
+
+            Assert.That.AreProximate( 120, readTime.TotalSeconds, 10 );
         }
 
         /// <summary>
@@ -224,7 +232,11 @@ namespace Rock.Tests.UnitTests.Lava
 
             var output = _helper.GetTemplateOutput( template );
 
-            Assert.That.Equal( "1 hr 16 mins", output );
+            Assert.That.False( string.IsNullOrWhiteSpace( output ) );
+
+            var readTime = TimeSpan.ParseExact( output, _timeSpanOutputFormats, CultureInfo.CurrentCulture );
+
+            Assert.That.AreProximate( 360, readTime.TotalSeconds, 10 );
         }
 
         /// <summary>
@@ -241,7 +253,9 @@ namespace Rock.Tests.UnitTests.Lava
 
             var output = _helper.GetTemplateOutput( template );
 
-            Assert.That.Equal( "45 secs", output );
+            var readTime = TimeSpan.ParseExact( output, _timeSpanOutputFormats, CultureInfo.CurrentCulture );
+
+            Assert.That.AreProximate( 50, readTime.TotalSeconds, 10 );
         }
 
         /// <summary>
@@ -280,7 +294,7 @@ namespace Rock.Tests.UnitTests.Lava
             var template = @"{{ '<input>' | RegExMatch:'\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*' }}"
                            .Replace( "<input>", input );
 
-            _helper.AssertTemplateOutput( isMatch.ToString(), template );
+            _helper.AssertTemplateOutput( isMatch.ToString().ToLower(), template );
         }
 
         /// <summary>
@@ -461,7 +475,7 @@ namespace Rock.Tests.UnitTests.Lava
         [TestMethod]
         public void WithFallback_InputTextContainsValue_SuccessTextIsAppended()
         {
-            _helper.AssertTemplateOutput( "Ted, are you interested in baptism?", "{{ 'Ted' | WithFallback:', are', 'Are' }} you interested in baptism?" );
+            _helper.AssertTemplateOutput( "Ted, are you interested in baptism?", "{{ 'Ted' | WithFallback:', are', 'Are', 'append' }} you interested in baptism?" );
         }
 
         /// <summary>
