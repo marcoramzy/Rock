@@ -79,12 +79,19 @@ namespace Rock.Lava.DotLiquid
             Template.RegisterFilter( typeof( TemplateFilters ) );
             Template.RegisterFilter( typeof( DotLiquidFilters ) );
 
+            Template.FilterContextParameterType = typeof( ILavaContext );
+            Template.FilterContextParameterTransformer = ( context ) =>
+            {
+                // Wrap the DotLiquid context in a framework-agnostic Lava context.
+                return new DotLiquidLavaContext( context as Context );
+            };
+
             // Register custom filters last, so they can override built-in filters of the same name.
             if ( filterImplementationTypes != null )
             {
                 foreach ( var filterImplementationType in filterImplementationTypes )
                 {
-                    //Template.RegisterFilter( filterImplementationType );
+                    Template.RegisterFilter( filterImplementationType );
                 }
             }
         }
