@@ -358,7 +358,7 @@ namespace Rock.Lava
         /// <returns>
         /// true if the operation is successful; otherwise, false. If this method returns false, the run-time binder of the language determines the behavior. (In most cases, a run-time exception is thrown.)
         /// </returns>
-        protected virtual bool TryGetMember( string memberName, out object result )
+        public virtual bool TryGetMember( string memberName, out object result )
         {
             result = null;
 
