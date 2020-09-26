@@ -71,11 +71,11 @@ namespace DotLiquid
 			return _methods.ContainsKey(method);
 		}
 
-		public object Invoke(string method, List<object> args, Type filterParameterType = null, Func<Context, object> filterContextParameterTransformer = null )
+		public object Invoke(string method, List<object> args, Type filterContextParameterType = null, Func<Context, object> filterContextParameterTransformer = null )
 		{
-            if (filterParameterType == null)
+            if (filterContextParameterType == null)
             {
-                filterParameterType = typeof(Context);
+                filterContextParameterType = typeof(Context);
             }
 
             ParameterInfo[] parameterInfos = null;
@@ -86,7 +86,7 @@ namespace DotLiquid
             {
                 // If this method's first parameter is a context, ignore this method for now
                 parameterInfos = methodInfo.GetParameters();
-                if ( parameterInfos.Length > 0 && parameterInfos[0].ParameterType == filterParameterType )
+                if ( parameterInfos.Length > 0 && parameterInfos[0].ParameterType == filterContextParameterType )
                 {
                     methodInfo = null;
                 }
@@ -100,7 +100,7 @@ namespace DotLiquid
                 {
                     // If this method's first parameter is NOT a context, ignore this method for now
                     parameterInfos = methodInfo.GetParameters();
-                    if ( parameterInfos.Length <= 0 || parameterInfos[0].ParameterType != filterParameterType )
+                    if ( parameterInfos.Length <= 0 || parameterInfos[0].ParameterType != filterContextParameterType )
                     {
                         methodInfo = null;
                     }
@@ -117,7 +117,7 @@ namespace DotLiquid
             }
 
             // If first parameter is Context, send in actual context.
-            if ( parameterInfos.Length > 0 && parameterInfos[0].ParameterType == filterParameterType )
+            if ( parameterInfos.Length > 0 && parameterInfos[0].ParameterType == filterContextParameterType )
             {
                 object context;
 
@@ -130,7 +130,7 @@ namespace DotLiquid
                     context = _context;
                 }
 
-                args.Insert( 0, _context );
+                args.Insert( 0, context );
             }
 
             // Add in any default parameters - .NET won't do this for us.
