@@ -112,7 +112,7 @@ namespace DotLiquid
             // by default values
             if ( methodInfo == null )
             {
-                methodInfo = _methods[method].OrderByDescending( m => m.GetParameters().Length ).First();
+                methodInfo = GetBestMatchedMethod( method, args.Count );
                 parameterInfos = methodInfo.GetParameters();
             }
 
@@ -153,5 +153,44 @@ namespace DotLiquid
 				throw ex.InnerException;
 			}
 		}
-	}
+
+        /// <summary>
+        /// Get the filter method that best matches the supplied argument list.
+        /// </summary>
+        /// <param name="method"></param>
+        /// <param name="suppliedArgsCount"></param>
+        /// <returns></returns>
+        private MethodInfo GetBestMatchedMethod( string method, int suppliedArgsCount )
+        {
+            var candidateMethodInfoList = _methods[method].OrderByDescending( m => m.GetParameters().Length );
+
+            foreach ( var methodInfo in candidateMethodInfoList )
+            {
+                bool isMatch = true;
+
+                var parameterInfos = methodInfo.GetParameters();
+
+                if ( parameterInfos.Length > suppliedArgsCount )
+                {
+                    for ( int i = suppliedArgsCount; i < parameterInfos.Length; ++i )
+                    {
+                        if ( ( parameterInfos[i].Attributes & ParameterAttributes.HasDefault ) != ParameterAttributes.HasDefault )
+                        {
+                            // No match
+                            isMatch = false;
+                            continue;
+                        }
+                    }
+
+                    if ( isMatch )
+                    {
+                        return methodInfo;
+                    }
+                }
+
+            }
+
+            return candidateMethodInfoList.FirstOrDefault();
+        }
+    }
 }
