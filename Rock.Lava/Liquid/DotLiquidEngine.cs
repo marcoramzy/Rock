@@ -15,6 +15,7 @@
 // </copyright>
 //
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -94,6 +95,9 @@ namespace Rock.Lava.DotLiquid
                     Template.RegisterFilter( filterImplementationType );
                 }
             }
+
+            Template.RegisterSafeType( typeof( Rock.Lava.ILiquidizable ), ( x ) => { return ( (Rock.Lava.ILiquidizable)x ).ToLiquid(); } );
+            Template.RegisterSafeType( typeof( Rock.Lava.ILavaDataObject ), ( x ) => { return ( (ILavaDataObject)x ).ToLiquid(); } );
         }
 
         private void RegisterFilterInternal( Type filterImplementationType )
@@ -107,7 +111,19 @@ namespace Rock.Lava.DotLiquid
 
         public override void RegisterSafeType( Type type, string[] allowedMembers = null )
         {
-            Template.RegisterSafeType( type, allowedMembers );
+            if ( type is Rock.Lava.ILiquidizable )
+            {
+                Template.RegisterSafeType( type, ( x ) => { return ( (Rock.Lava.ILiquidizable)x ).ToLiquid(); } );
+            }
+            else if ( type is Rock.Lava.ILiquidizable )
+            {
+                Template.RegisterSafeType( typeof( Rock.Lava.ILavaDataObject ), ( x ) => { return ( (ILavaDataObject)x ).ToLiquid(); } );
+            }
+            else
+            {
+                // Wrap the object in a RockDynamic proxy.
+                Template.RegisterSafeType( type, ( x ) => { return new RockDynamic( x ).ToLiquid(); } );
+            }
         }
 
         public override void RegisterShortcode( IRockShortcode shortcode )
@@ -182,40 +198,32 @@ namespace Rock.Lava.DotLiquid
             throw new NotImplementedException();
         }
 
-        private void VerifyMergeValueTypes( LavaDictionary mergeValues )
+        private object GetDotLiquidCompatibleValue( object value )
         {
-            object fieldValue;
-
-            foreach ( var key in mergeValues.Keys.ToList() )
+            if ( value == null
+                 || value is string
+                 || value is IEnumerable
+                 || value is decimal
+                 || value is DateTime
+                 || value is DateTimeOffset
+                 || value is TimeSpan
+                 || value is Guid
+                 || value is Enum
+                 || value is KeyValuePair<string, object>
+                 || value.GetType().IsPrimitive
+                 )
             {
-                fieldValue = mergeValues[key];
-
-                if ( fieldValue is Rock.Lava.ILiquidizable )
-                {
-                    var fieldType = fieldValue.GetType();
-                    if ( Template.GetSafeTypeTransformer( fieldType ) == null )
-                    {
-                        Template.RegisterSafeType( fieldType, ( x ) => { return ( (ILiquidizable)fieldValue ).ToLiquid(); } );
-                    }
-                }
-                else if ( fieldValue is Rock.Lava.ILavaDataObject )
-                {
-                    var fieldType = fieldValue.GetType();
-                    if ( Template.GetSafeTypeTransformer( fieldType ) == null )
-                    {
-                        Template.RegisterSafeType( fieldType, ( x ) => { return ( (ILavaDataObject)fieldValue ).ToLiquid(); } );
-                    }
-                }
-
-                //if ( fieldValue is IDictionary<string,object> )
-                //{
-                //    continue;
-                //}
-                //else
-                //{
-                //    mergeValues[key] = Hash.FromAnonymousObject( fieldValue );
-                //}
+                return value;
             }
+
+            var safeTypeTransformer = Template.GetSafeTypeTransformer( value.GetType() );
+
+            if ( safeTypeTransformer != null )
+            {
+                return safeTypeTransformer( value );
+            }
+
+            return value;
         }
 
         public override bool TryRender( string inputTemplate, out string output, LavaDictionary mergeValues )
@@ -226,7 +234,16 @@ namespace Rock.Lava.DotLiquid
 
                 if ( mergeValues != null )
                 {
-                    VerifyMergeValueTypes( mergeValues );
+                    object fieldValue;
+
+                    // We want to avoid DotLiquid wrapping any values as a DropProxy object,
+                    // because we want to avoid any framework-specific Types being passed to our framework-agnostic filters.
+                    foreach ( var key in mergeValues.Keys.ToList() )
+                    {
+                        fieldValue = GetDotLiquidCompatibleValue( mergeValues[key] );
+
+                        mergeValues[key] = fieldValue;
+                    }
 
                     output = template.Render( Hash.FromDictionary( mergeValues ) );
                 }
