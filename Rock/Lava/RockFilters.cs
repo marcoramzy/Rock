@@ -32,30 +32,23 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
 using System.Web.UI.HtmlControls;
-
-using Ical.Net;
-using Ical.Net.DataTypes;
-using Calendar = Ical.Net.Calendar;
-
 using Humanizer;
 using Humanizer.Localisation;
-
+using Ical.Net;
+using Ical.Net.DataTypes;
 using ImageResizer;
-
 using Newtonsoft.Json;
-
 using Rock;
 using Rock.Attribute;
 using Rock.Data;
-using Rock.Lava;
 using Rock.Logging;
 using Rock.Model;
 using Rock.Security;
 using Rock.Utility;
 using Rock.Web.Cache;
 using Rock.Web.UI;
-
 using UAParser;
+using Calendar = Ical.Net.Calendar;
 
 namespace Rock.Lava
 {
@@ -2385,21 +2378,69 @@ namespace Rock.Lava
         /// <returns></returns>
         public static object Property( ILavaContext context, object input, string propertyKey, string qualifier = "" )
         {
-            if ( input != null )
+            if ( input == null )
             {
-                if ( input is IDictionary<string, object> )
+                return string.Empty;
+            }
+
+            var propertyNames = propertyKey.Split( new char[] { '.' }, StringSplitOptions.RemoveEmptyEntries ).ToList<string>();
+
+            object propertyValue = input;
+            var valueType = input.GetType();
+
+            while ( propertyNames.Any() && propertyValue != null )
+            {
+                var propName = propertyNames.First();
+
+                if ( propertyValue is IDictionary<string, object> )
                 {
                     var dictionaryObject = input as IDictionary<string, object>;
-                    if ( dictionaryObject.ContainsKey( propertyKey ) )
+                    if ( dictionaryObject.ContainsKey( propName ) )
                     {
-                        return dictionaryObject[propertyKey];
+                        propertyValue = dictionaryObject[propName];
+                        if ( propertyValue != null )
+                        {
+                            valueType = propertyValue.GetType();
+                        }
+                    }
+                    else
+                    {
+                        propertyValue = null;
+                    }
+                }
+                else if ( propertyValue is RockDynamic dynamicObject )
+                {
+                    if ( dynamicObject.ContainsKey( propName ) )
+                    {
+                        propertyValue = dynamicObject[propName];
+                        if ( propertyValue != null )
+                        {
+                            valueType = propertyValue.GetType();
+                        }
+                    }
+                    else
+                    {
+                        propertyValue = null;
+                    }
+                }
+                else
+                {
+                    var property = valueType.GetProperty( propName );
+                    if ( property != null )
+                    {
+                        propertyValue = property.GetValue( propertyValue );
+                        valueType = property.PropertyType;
+                    }
+                    else
+                    {
+                        propertyValue = null;
                     }
                 }
 
-                return input.GetPropertyValue( propertyKey );
+                propertyNames = propertyNames.Skip( 1 ).ToList();
             }
 
-            return string.Empty;
+            return propertyValue;
         }
 
         #endregion Attribute Filters
