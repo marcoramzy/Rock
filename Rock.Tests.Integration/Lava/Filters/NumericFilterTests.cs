@@ -16,10 +16,8 @@
 //
 using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Rock.Tests.Integration.Lava;
-using Rock.Tests.Shared;
 
-namespace Rock.Tests.UnitTests.Lava
+namespace Rock.Tests.Integration.Lava
 {
     [TestClass]
     public class NumericFilterTests

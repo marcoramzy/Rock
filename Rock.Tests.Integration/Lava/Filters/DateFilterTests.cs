@@ -37,12 +37,14 @@ namespace Rock.Tests.Integration.Lava
         #region Filter Tests: SundayDate
 
         /// <summary>
-        /// Applying the filter to a Friday returns the following Sunday.
+        /// Applying the filter to a Friday returns the previous Sunday if the week starts on a Sunday.
         /// </summary>
         [TestMethod]
-        public void SundayDate_InputDateIsFriday_YieldsNextSunday()
+        public void SundayDate_InputDateIsFriday_YieldsPreviousSunday()
         {
-            _helper.AssertTemplateOutputDate( "3-May-2020",
+            // The filter returns the Sunday associated with the current week.
+            // If Sunday is considered to be the first day of the week, any other day should return a prior date.
+            _helper.AssertTemplateOutputDate( "26-Apr-2020",
                                       "{{ '1-May-2020' | SundayDate }}" );
         }
 
@@ -57,7 +59,7 @@ namespace Rock.Tests.Integration.Lava
         }
 
         /// <summary>
-        /// Applying the filter to the 'Now' keyword yields the next Sunday from today.
+        /// Applying the filter to the 'Now' keyword yields the Sunday of the current week.
         /// </summary>
         [TestMethod]
         public void SundayDate_InputParameterIsNow_YieldsNextSunday()
