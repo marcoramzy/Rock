@@ -74,6 +74,29 @@ namespace Rock.Lava
         }
 
         /// <summary>
+        /// Return a string representation of the dynamic object.
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString()
+        {
+            // If we are wrapping an object instance, return the ToString() for the object,
+            // otherwise return the first value in the property dictionary.
+            if ( _instance != null )
+            {
+                return _instance.ToString();
+            }
+
+            var firstKey = _members.Keys.FirstOrDefault();
+            if ( firstKey != null )
+            {
+                var firstValue = _members[firstKey] ?? string.Empty;
+                return firstValue.ToString();
+            }
+
+            return base.ToString();
+        }
+
+        /// <summary>
         /// Provides the implementation for operations that get member values. Classes derived from the <see cref="T:System.Dynamic.DynamicObject" /> class can override this method to specify dynamic behavior for operations such as getting a value for a property.
         /// </summary>
         /// <param name="binder">Provides information about the object that called the dynamic operation. The binder.Name property provides the name of the member on which the dynamic operation is performed. For example, for the Console.WriteLine(sampleObject.SampleProperty) statement, where sampleObject is an instance of the class derived from the <see cref="T:System.Dynamic.DynamicObject" /> class, binder.Name returns "SampleProperty". The binder.IgnoreCase property specifies whether the member name is case-sensitive.</param>
