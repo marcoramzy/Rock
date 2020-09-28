@@ -310,10 +310,6 @@ namespace Rock.Tests.UnitTests.Lava
         [TestMethod]
         public void DaysInMonth_InputKeywordNow_YieldsDaysInCurrentMonth()
         {
-            //var template = "{{ 'Now' | DaysInMonth }}";
-
-            //template = template.Replace( "<compareDate>", RockDateTime.Now.AddDays( -14 ).ToString( "dd-MMM-yyyy" ) );
-
             var currentDateTime = RockDateTime.Now;
 
             var targetDate = new DateTime( currentDateTime.Year, currentDateTime.Month + 1, 1 );

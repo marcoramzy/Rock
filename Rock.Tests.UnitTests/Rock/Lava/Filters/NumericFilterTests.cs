@@ -167,8 +167,7 @@ namespace Rock.Tests.UnitTests.Lava
         [DataRow( "1,234,567.89", 1234567.89 )]
         [DataRow( "-987.65", -987.65 )]
         [DataRow( "0", 0 )]
-        [DataRow( "xyzzy", 0 )]
-        public void AsDecimal_Theory_CanConvertText( string input, double expectedResult )
+        public void AsDecimal_NumericInput_ReturnsDecimal( string input, double expectedResult )
         {
             // Convert to a decimal here, because the DataRow Attribute does not allow a decimal parameter to be explicitly specified.
             var expectedDecimal = Convert.ToDecimal( expectedResult );
@@ -176,6 +175,17 @@ namespace Rock.Tests.UnitTests.Lava
             var result = _helper.GetTemplateOutput( "{{ '" + input + "' | AsDecimal }}" );
 
             Assert.That.Equal( expectedDecimal, result.AsDecimalOrNull() );
+        }
+
+        /// <summary>
+        /// Non-numeric text should return a null value.
+        /// </summary>
+        [TestMethod]
+        public void AsDecimal_NonNumericInput_ReturnsEmptyString()
+        {
+            var result = _helper.GetTemplateOutput( "{{ 'xyzzy' | AsDecimal }}" );
+
+            Assert.That.Equal( string.Empty, result );
         }
 
         /// <summary>
@@ -187,12 +197,22 @@ namespace Rock.Tests.UnitTests.Lava
         [DataRow( "1,234,567.89", 1234567.89 )]
         [DataRow( "-987.65", -987.65 )]
         [DataRow( "0", 0 )]
-        [DataRow( "xyzzy", 0 )]
-        public void AsDouble_Theory_CanConvertText( string input, double expectedResult )
+        public void AsDouble_NumericText_ReturnsNumber( string input, double expectedResult )
         {
             var result = _helper.GetTemplateOutput( "{{ '" + input + "' | AsDouble }}" );
 
             Assert.That.Equal( expectedResult, result.AsDoubleOrNull() );
+        }
+
+        /// <summary>
+        /// Non-numeric text should return an empty string.
+        /// </summary>
+        [TestMethod]
+        public void AsDouble_NonNumericInput_ReturnsEmptyString()
+        {
+            var result = _helper.GetTemplateOutput( "{{ 'xyzzy' | AsDouble }}" );
+
+            Assert.That.Equal( string.Empty, result );
         }
 
         /// <summary>
@@ -202,28 +222,107 @@ namespace Rock.Tests.UnitTests.Lava
         [DataRow( "123", 123 )]
         [DataRow( "-987", -987 )]
         [DataRow( "0", 0 )]
-        [DataRow( "xyzzy", 0 )]
-        public void AsInteger_Theory_CanConvertText( string input, int expectedResult )
+        [DataRow( "10.4", 10 )]
+        [DataRow( "1,234,567", 1234567 )]
+        [DataRow( "$1000", 1000 )]
+        public void AsInteger_FormattedNumericInput_ReturnsNumber( string input, int expectedResult )
         {
-            var result = _helper.GetTemplateOutput( "{{ '" + input + "' | AsInteger }}" );
-
-            Assert.That.Equal( expectedResult, result.AsIntegerOrNull() );
+            _helper.AssertTemplateOutput( expectedResult.ToString(), "{{ '" + input + "' | AsInteger }}" );
         }
 
         /// <summary>
-        /// Common text representations of integer values should return an integer.
+        /// Non-numeric text input should return a null value.
         /// </summary>
-        [DataTestMethod]
-        [DataRow( "10.4" )]
-        [DataRow( "1,234,567" )]
-        [DataRow( "$1000" )]
-        public void AsInteger_Theory_PunctuatedNumbersReturn0( string input )
+        [TestMethod]
+        public void AsInteger_NonNumericInput_ReturnsEmptyString()
         {
-            var result = _helper.GetTemplateOutput( "{{ '" + input + "' | AsInteger }}" );
-
-            Assert.That.Equal( 0, result.AsIntegerOrNull() );
+            _helper.AssertTemplateOutput( string.Empty, "{{ 'xyzzy' | AsInteger }}" );
         }
 
+        /// <summary>
+        /// Valid numeric values should return a numeric result.
+        /// </summary>
+        [DataTestMethod]
+        [DataRow( "3", "2", "1" )]
+        [DataRow( "3.0", "2.0","1.0" )]
+        [DataRow( "3.1", "2", "1.1" )]
+        [DataRow( "3", "2.1", "0.9" )]
+        public void Minus_ValidNumericOperands_ReturnsNumericResult( string input1, string input2, string expectedResult )
+        {
+            _helper.AssertTemplateOutput( expectedResult, "{{ " + input1 + " | Minus: " + input2 + " }}" );
+        }
+
+        /// <summary>
+        /// String representations of valid numeric values should return a numeric result.
+        /// </summary>
+        [DataTestMethod]
+        [DataRow( "3", "2", "1" )]
+        [DataRow( "3.0", "2.0", "1.0" )]
+        public void Minus_ValidNumericStringOperands_ReturnsNumericResult( string input1, string input2, string expectedResult )
+        {
+            // Insert the operands as string values.
+            _helper.AssertTemplateOutput( expectedResult, "{{ '" + input1 + "' | Minus: '" + input2 + "' }}" );
+        }
+
+        /// <summary>
+        /// Valid numeric values should return a numeric result.
+        /// </summary>
+        [DataTestMethod]
+        [DataRow( "3", "2", "5" )]
+        [DataRow( "3.0", "2.0", "5.0" )]
+        [DataRow( "3.1", "2", "5.1" )]
+        [DataRow( "3", "2.1", "5.1" )]
+        public void Plus_ValidNumericOperands_ReturnsNumericResult( string input1, string input2, string expectedResult )
+        {
+            _helper.AssertTemplateOutput( expectedResult, "{{ " + input1 + " | Plus: " + input2 + " }}" );
+        }
+
+        /// <summary>
+        /// String representations of valid numeric values should return a numeric result.
+        /// </summary>
+        [DataTestMethod]
+        [DataRow( "3", "2", "5" )]
+        [DataRow( "3.0", "2.0", "5.0" )]
+        public void Plus_ValidNumericStringOperands_ReturnsNumericResult( string input1, string input2, string expectedResult )
+        {
+            // Insert the operands as string values.
+            _helper.AssertTemplateOutput( expectedResult, "{{ '" + input1 + "' | Plus: '" + input2 + "' }}" );
+        }
+
+        /// <summary>
+        /// Valid numeric values should return a numeric result.
+        /// </summary>
+        [DataTestMethod]
+        [DataRow( "3", "2", "6" )]
+        [DataRow( "3.0", "2.0", "6.00" )]
+        public void Times_ValidNumericOperands_ReturnsNumericResult( string input1, string input2, string expectedResult )
+        {
+            _helper.AssertTemplateOutput( expectedResult, "{{ " + input1 + " | Times: " + input2 + " }}" );
+        }
+
+        /// <summary>
+        /// String representations of valid numeric values should return a numeric result.
+        /// </summary>
+        [DataTestMethod]
+        [DataRow( "3", "2", "6" )]
+        [DataRow( "3.0", "2.0", "6.00" )]
+        public void Times_ValidNumericStringOperands_ReturnsNumericResult( string input1, string input2, string expectedResult )
+        {
+            // Insert the operands as string values.
+            _helper.AssertTemplateOutput( expectedResult, "{{ '" + input1 + "' | Times: '" + input2 + "' }}" );
+        }
+
+        /// <summary>
+        /// String representations of valid numeric values should return a numeric result.
+        /// </summary>
+        [DataTestMethod]
+        [DataRow( "Repeat", "3", "RepeatRepeatRepeat" )]
+        [DataRow( "NoRepeat", "0", "" )]
+        public void Times_StringAndNumericOperand_ReturnsRepeatedString( string input1, string input2, string expectedResult )
+        {
+            // Insert the operands as string values.
+            _helper.AssertTemplateOutput( expectedResult, "{{ '" + input1 + "' | Times: " + input2 + " }}" );
+        }
     }
 
 }
