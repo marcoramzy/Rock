@@ -142,6 +142,7 @@
     <Compile Include="Lava\Filters\DateFilterTests.cs" />
     <Compile Include="Lava\Filters\NumericFilterTests.cs" />
     <Compile Include="Lava\LavaTestHelper.cs" />
+    <Compile Include="Lava\Shortcodes\ShortcodeTests.cs" />
     <Compile Include="Lava\SqlTests.cs" />
     <Compile Include="Lava\RockEntityTests.cs" />
     <Compile Include="Model\IdentityVerificationCodeTests.cs" />
