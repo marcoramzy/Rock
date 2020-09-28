@@ -2040,7 +2040,7 @@ namespace Rock.Lava
             }
             else
             {
-                return Enumerable.Repeat( ( string ) input, ( int ) operand );
+                return Enumerable.Repeat( input.ToString(), operand.ToString().AsInteger() );
             }
         }
 
