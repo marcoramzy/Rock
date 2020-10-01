@@ -15,6 +15,7 @@
 // </copyright>
 //
 using System.Collections.Generic;
+using System.IO;
 
 namespace Rock.Lava
 {
@@ -35,6 +36,9 @@ namespace Rock.Lava
         Block = 2
     }
 
+    /// <summary>
+    /// Represents a Lava shortcode definition.
+    /// </summary>
     public interface IRockShortcode
     {
         string Name
@@ -44,6 +48,13 @@ namespace Rock.Lava
 
         void Initialize( string tagName, string markup, IEnumerable<string> tokens );
 
+        void Render( ILavaContext context, TextWriter result );
+
         LavaElementTypeSpecifier ElementType { get; }
     }
+
+    //public class RockShortcodeDefinition
+    //{
+
+    //}
 }

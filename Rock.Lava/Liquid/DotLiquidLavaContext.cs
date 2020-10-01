@@ -16,6 +16,7 @@
 //
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using DotLiquid;
 using DotLiquid.Exceptions;
@@ -31,6 +32,14 @@ namespace Rock.Lava.DotLiquid
         public DotLiquidLavaContext( Context context )
         {
             _context = context;
+        }
+
+        public Context DotLiquidContext
+        {
+            get
+            {
+                return _context;
+            }
         }
 
         public object this[string key]
@@ -84,16 +93,31 @@ namespace Rock.Lava.DotLiquid
             }
         }
 
+        private List<string> _enabledCommands = new List<string>();
+
         public IList<string> EnabledCommands
         {
             get
             {
-                if ( _context.Registers?.ContainsKey( "EnabledCommands" ) == true )
-                {
-                    return _context.Registers["EnabledCommands"].ToString().Split( ',' ).ToList();
-                }
+                return _enabledCommands;
+                //_enabledCommands
+                //if ( _context.Registers?.ContainsKey( "EnabledCommands" ) == true )
+                //{
+                //    return _context.Registers["EnabledCommands"].ToString().Split( ',' ).ToList();
+                //}
 
-                return new List<string>();
+                //return new List<string>();
+            }
+            set
+            {
+                if ( value == null )
+                {
+                    _enabledCommands = new List<string>();
+                }
+                else
+                {
+                    _enabledCommands = value.ToList();
+                }
             }
         }
 
@@ -171,9 +195,14 @@ namespace Rock.Lava.DotLiquid
             return fields;
         }
 
-        public object GetValue( string key )
+        public object GetValue( string key, object defaultValue )
         {
-            throw new NotImplementedException();
+            if ( !_context.HasKey(key) )
+            {
+                return defaultValue;
+            }
+
+            return _context[key];
         }
 
         public string ResolveMergeFields( string content, IDictionary<string, object> mergeObjects, string enabledLavaCommands, bool encodeStrings = false, bool throwExceptionOnErrors = false )

@@ -14,29 +14,33 @@
 // limitations under the License.
 // </copyright>
 //
+using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
+using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
+
+//using DotLiquid;
+
+using Rock.Lava.Blocks;
+using Rock.Lava.Shortcodes;
 
 namespace Rock.Lava
 {
+
     /// <summary>
-    /// Interface that classes can implement to be included when searching assemblies for custom Lava Commands.
+    /// Defines the properties of a Dynamic Shortcode.
     /// </summary>
-    public interface IRockLavaTag
+    public class DynamicShortcodeDefinition //: RockLavaBlockBase, IRockShortcode
     {
-        /// <summary>
-        /// The name of the tag.
-        /// </summary>
-        string TagName { get; }
+        public string Name { get; set; }
 
-        void Initialize( string tagName, string markup, IEnumerable<string> tokens );
+        public string TemplateMarkup { get; set; }
 
-        void Render( ILavaContext context, TextWriter result );
+        public List<string> Tokens { get; set; }
 
-
-        /// <summary>
-        /// Executed when the tag is first loaded during application startup.
-        /// </summary>
-        void OnStartup();
+        LavaElementTypeSpecifier ElementType { get; set; }
     }
 }

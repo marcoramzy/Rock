@@ -52,7 +52,7 @@ namespace Rock.Lava.Blocks
         /// <param name="tagName">Name of the tag.</param>
         /// <param name="markup">The markup.</param>
         /// <param name="tokens">The tokens.</param>
-        public override void Initialize( string tagName, string markup, List<string> tokens )
+        public override void OnInitialize( string tagName, string markup, List<string> tokens )
         {
             _markup = markup;
 
@@ -64,7 +64,7 @@ namespace Rock.Lava.Blocks
         /// </summary>
         /// <param name="context">The context.</param>
         /// <param name="result">The result.</param>
-        public override void Render( ILavaContext context, TextWriter result )
+        public override void OnRender( ILavaContext context, TextWriter result )
         {
             // First, ensure that this command is allowed in the context.
             if ( !LavaHelper.IsAuthorized( context, this.GetType().Name ) )

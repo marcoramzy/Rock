@@ -14,27 +14,12 @@
 // limitations under the License.
 // </copyright>
 //
-using System;
 using System.Collections.Generic;
 using System.IO;
 using Rock.Lava.Blocks;
 
 namespace Rock.Lava.Shortcodes
 {
-    /// <summary>
-    /// A DotLiquid implementation of the Lava Shortcode block.
-    /// </summary>
-    public abstract class DotLiquidShortcodeBlock : global::DotLiquid.Block, IRockShortcode //, IRockStartup,
-    {
-        private IRockShortcode _shortcode;
-
-        public DotLiquidShortcodeBlock( IRockShortcode shortcode )
-        {
-            _shortcode = shortcode;
-        }
-
-        public string TemplateElementName => throw new NotImplementedException();
-    }
 
     /// <summary>
     /// 
@@ -60,7 +45,7 @@ namespace Rock.Lava.Shortcodes
         //}
 
         /// <summary>
-        /// Override this method to parses the supplied set of tokens into a set of nodes that can be processed by the rendering engine.
+        /// Override this method to parse the supplied set of tokens into a set of nodes that can be processed by the rendering engine.
         /// </summary>
         /// <param name="tokens"></param>
         /// <param name="templateNodes"></param>
@@ -70,31 +55,10 @@ namespace Rock.Lava.Shortcodes
         }
 
         /// <summary>
-        /// Renders the specified context.
+        /// Renders the specified context to a text stream.
         /// </summary>
         /// <param name="context">The context.</param>
         /// <param name="result">The result.</param>
-        //public virtual void Render( ILavaContext context, TextWriter result )
-        //{
-        //    //throw new NotImplementedException();
-
-        //    //base.Render( context, result );
-        //}
-
-        /// <summary>
-        /// All IRockStartup classes will be run in order by this value. If class does not depend on an order, return zero.
-        /// </summary>
-        /// <value>
-        /// The order.
-        /// </value>
-        //public int StartupOrder { get { return 0; } }
-
-        /// <summary>
-        /// Method that will be run at Rock startup
-        /// </summary>
-        //public virtual void OnStartup()
-        //{
-        //}
-
+        //public abstract void Render( ILavaContext context, TextWriter result );
     }
 }

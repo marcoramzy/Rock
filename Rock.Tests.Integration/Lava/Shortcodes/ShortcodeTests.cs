@@ -15,7 +15,11 @@
 // </copyright>
 //
 using System;
+using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Rock.Lava;
+using Rock.Model;
+using Rock.Web.Cache;
 
 namespace Rock.Tests.Integration.Lava
 {
@@ -30,6 +34,8 @@ namespace Rock.Tests.Integration.Lava
         public static void Initialize( TestContext context )
         {
             _helper = LavaTestHelper.NewForDotLiquidProcessor();
+
+
         }
 
         #endregion
@@ -37,7 +43,7 @@ namespace Rock.Tests.Integration.Lava
         #region Scripturize
 
         /// <summary>
-        /// Applying the filter to a Friday returns the previous Sunday if the week starts on a Sunday.
+        /// Using the Scripturize shortcode produces the expected output.
         /// </summary>
         [DataTestMethod]
         [DataRow( "John 3:16", "<a href=\"https://www.bible.com/bible/116/JHN.3.16.NLT\"  title=\"YouVersion\">John 3:16</a>" )]
@@ -47,7 +53,7 @@ namespace Rock.Tests.Integration.Lava
         public void Scripturize_YouVersion_SimpleCase( string input, string expectedResult )
         {
             _helper.AssertTemplateOutput( expectedResult,
-                                          "{% scripturize: '" + input + "' %}" );
+                                          "{[ scripturize defaulttranslation:'NLT' landingsite:'YouVersion' cssclass:'scripture' ]}" + input + "{[ endscripturize ]}" );
 
             //var output = Scripturize.Parse( "John 3:16" );
             //var expected = "<a href=\"https://www.bible.com/bible/116/JHN.3.16.NLT\"  title=\"YouVersion\">John 3:16</a>";

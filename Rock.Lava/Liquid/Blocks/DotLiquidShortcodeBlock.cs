@@ -14,29 +14,22 @@
 // limitations under the License.
 // </copyright>
 //
-using System.Collections.Generic;
-using System.IO;
+using System;
 
-namespace Rock.Lava
+namespace Rock.Lava.Shortcodes
 {
     /// <summary>
-    /// Interface that classes can implement to be included when searching assemblies for custom Lava Commands.
+    /// A DotLiquid implementation of the Lava Shortcode block.
     /// </summary>
-    public interface IRockLavaTag
+    public abstract class DotLiquidShortcodeBlock : global::DotLiquid.Block, IRockShortcode //, IRockStartup,
     {
-        /// <summary>
-        /// The name of the tag.
-        /// </summary>
-        string TagName { get; }
+        private IRockShortcode _shortcode;
 
-        void Initialize( string tagName, string markup, IEnumerable<string> tokens );
+        public DotLiquidShortcodeBlock( IRockShortcode shortcode )
+        {
+            _shortcode = shortcode;
+        }
 
-        void Render( ILavaContext context, TextWriter result );
-
-
-        /// <summary>
-        /// Executed when the tag is first loaded during application startup.
-        /// </summary>
-        void OnStartup();
+        public string TemplateElementName => throw new NotImplementedException();
     }
 }

@@ -53,11 +53,11 @@ namespace Rock.Lava.Blocks
         /// <param name="markup">The markup.</param>
         /// <param name="tokens">The tokens.</param>
         /// <exception cref="System.Exception">Could not find the variable to place results in.</exception>
-        public override void Initialize( string tagName, string markup, List<string> tokens )
+        public override void OnInitialize( string tagName, string markup, List<string> tokens )
         {
             _markup = markup;
 
-            base.Initialize( tagName, markup, tokens );
+            base.OnInitialize( tagName, markup, tokens );
         }
 
         /// <summary>
@@ -65,13 +65,13 @@ namespace Rock.Lava.Blocks
         /// </summary>
         /// <param name="context">The context.</param>
         /// <param name="result">The result.</param>
-        public override void Render( ILavaContext context, TextWriter result )
+        public override void OnRender( ILavaContext context, TextWriter result )
         {
             // first ensure that search commands are allowed in the context
             if ( !this.IsAuthorized( context ) )
             {
                 result.Write( string.Format( RockLavaBlockBase.NotAuthorizedMessage, this.BlockName ) );
-                base.Render( context, result );
+                base.OnRender( context, result );
                 return;
             }
 
@@ -169,10 +169,10 @@ namespace Rock.Lava.Blocks
 
             context.Scopes.Last()[parms["iterator"]] = results;
 
-            base.Render( context, result );
+            base.OnRender( context, result );
         }
 
-        protected override void Parse( List<string> tokens, out List<object> nodes )
+        protected override void OnParse( List<string> tokens, out List<object> nodes )
         {
             // No action required.
             nodes = null;

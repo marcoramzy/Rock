@@ -84,11 +84,11 @@ namespace Rock.Lava.Blocks
         /// <param name="tagName">Name of the tag.</param>
         /// <param name="markup">The markup.</param>
         /// <param name="tokens">The tokens.</param>
-        public override void Initialize( string tagName, string markup, List<string> tokens )
+        public override void OnInitialize( string tagName, string markup, List<string> tokens )
         {
             _markup = markup;
 
-            base.Initialize( tagName, markup, tokens );
+            base.OnInitialize( tagName, markup, tokens );
         }
 
         /// <summary>
@@ -96,13 +96,13 @@ namespace Rock.Lava.Blocks
         /// </summary>
         /// <param name="context">The context.</param>
         /// <param name="result">The result.</param>
-        public override void Render( ILavaContext context, TextWriter result )
+        public override void OnRender( ILavaContext context, TextWriter result )
         {
             // first ensure that entity commands are allowed in the context
             if ( !this.IsAuthorized( context ) )
             {
                 result.Write( string.Format( RockLavaBlockBase.NotAuthorizedMessage, this.BlockName ) );
-                base.Render( context, result );
+                base.OnRender( context, result );
                 return;
             }
 
@@ -303,7 +303,7 @@ namespace Rock.Lava.Blocks
                         context["Error"] = "Must specify one of WorkflowType or WorkflowId.";
                     }
 
-                    base.Render( context, result );
+                    base.OnRender( context, result );
                     //RenderAll( NodeList, context, result );
                     // TODO: Test this! - NodeList is empty here, so the call to RenderAll seems unnecessary?
                 }

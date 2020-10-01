@@ -17,7 +17,6 @@
 
 using System;
 using System.Collections.Generic;
-using Rock.Lava.Blocks;
 
 namespace Rock.Lava
 {
@@ -63,16 +62,24 @@ namespace Rock.Lava
         /// </summary>
         LavaEngineTypeSpecifier EngineType { get; }
 
+        /// <summary>
+        /// Get a new context instance.
+        /// </summary>
+        /// <returns></returns>
+        ILavaContext NewContext();
+
         void RegisterTag( string name, Func<string, IRockLavaTag> factoryMethod );
         void RegisterBlock( string name, Func<string, IRockLavaBlock> factoryMethod );
-        void RegisterShortcode( IRockShortcode shortcode );
+        //void RegisterShortcode( IRockShortcode shortcode );
 
         /// <summary>
-        /// Registers a shortcode with a factory method.
+        /// Registers a shortcode with a factory method that provides the definition of the shortcode dynamically.
         /// </summary>
         /// <param name="name"></param>
         /// <param name="factoryMethod"></param>
-        void RegisterShortcode( string name, Func<string, IRockShortcode> factoryMethod );
+        void RegisterDynamicShortcode( string name, Func<string, DynamicShortcodeDefinition> factoryMethod );
+
+        void RegisterStaticShortcode( string name, Func<string, IRockShortcode> factoryMethod );
 
         //bool TagIsRegistered( string name );
 
@@ -117,6 +124,8 @@ namespace Rock.Lava
         bool TryRender( string inputTemplate, out string output );
 
         bool TryRender( string inputTemplate, out string output, LavaDictionary mergeValues );
+
+        bool TryRender( string inputTemplate, out string output, ILavaContext context );
         
         /// <summary>
         /// 

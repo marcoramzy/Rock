@@ -44,14 +44,38 @@ namespace Rock.Lava.Blocks
         //}
         public string TagName { get; private set; }
 
-        public virtual void Initialize( string tagName, string markup, List<string> tokens )
+        //public string Name => throw new System.NotImplementedException();
+
+        public void Initialize( string tagName, string markup, List<string> tokens )
         {
             this.TagName = tagName;
+
+            OnInitialize( tagName, markup, tokens );
         }
 
-        public virtual void Render( ILavaContext context, TextWriter result )
+        public virtual void OnInitialize( string tagName, string markup, List<string> tokens )
         {
             //
+        }
+
+        public void Render( ILavaContext context, TextWriter result )
+        {
+            OnRender( context, result );
+        }
+
+        public virtual void OnRender( ILavaContext context, TextWriter result )
+        {
+            //
+        }
+
+        public void Initialize( string tagName, string markup, IEnumerable<string> tokens )
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public virtual void OnStartup()
+        {
+            //throw new System.NotImplementedException();
         }
     }
 }

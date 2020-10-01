@@ -33,6 +33,7 @@ using Rock.Configuration;
 using Rock.Data;
 using Rock.Jobs;
 using Rock.Lava;
+using Rock.Lava.Blocks;
 using Rock.Model;
 using Rock.Web.Cache;
 
@@ -580,7 +581,7 @@ namespace Rock.WebStartup
             }
             else
             {
-                isValid = Enum.TryParse<LavaEngineTypeSpecifier>( liquidEngineTypeValue, true, out engineType );
+                isValid = Enum.TryParse( liquidEngineTypeValue, true, out engineType );
             }
 
             if ( engineType == LavaEngineTypeSpecifier.DotLiquid )
@@ -598,6 +599,84 @@ namespace Rock.WebStartup
                 throw new RockStartupException( string.Format( "Invalid Lava Engine Type. The LavaEngineType configuration parameter \"{0}\" is not valid.", liquidEngineTypeValue ) );
             }
 
+            var engine = LavaEngine.Instance;
+
+            InitializeLavaShortcodes( engine );
+
+            InitializeLavaBlocks( engine );
+        }
+
+        private static void InitializeLavaShortcodes( ILavaEngine engine )
+        {
+            // Register dynamic shortcodes with a factory method to ensure that the latest definition is retrieved from the global cache.
+            Func<string, DynamicShortcodeDefinition> shortCodeFactory = ( shortcodeName ) =>
+            {
+                DynamicShortcodeDefinition newShortcode = null;
+
+                var shortcodeDefinition = LavaShortcodeCache.All().Where( c => c.TagName == shortcodeName ).FirstOrDefault();
+
+                if ( shortcodeDefinition != null )
+                {
+                    newShortcode = new DynamicShortcodeDefinition();
+
+                    newShortcode.Name = shortcodeDefinition.Name;
+                    newShortcode.TemplateMarkup = shortcodeDefinition.Markup;
+                    newShortcode.Tokens = shortcodeDefinition.Parameters.SplitDelimitedValues( ";" ).ToList();
+
+                    if ( shortcodeDefinition.TagType == TagType.Block )
+                    {
+                        newShortcode.ElementType = LavaElementTypeSpecifier.Block;
+                    }
+                    else
+                    {
+                        newShortcode.ElementType = LavaElementTypeSpecifier.Inline;
+                    }
+                }
+
+                return newShortcode;
+            };
+
+            var blockShortCodes = LavaShortcodeCache.All();
+            //.Where( s => s.TagType == TagType.Block );
+
+            foreach ( var shortcode in blockShortCodes )
+            {
+                // register this shortcode
+                engine.RegisterDynamicShortcode( shortcode.TagName, shortCodeFactory );
+            }
+        }
+
+        private static void InitializeLavaBlocks( ILavaEngine engine )
+        {
+            // Get all blocks and call OnStartup methods
+            try
+            {
+                var blockTypes = Rock.Reflection.FindTypes( typeof( IRockLavaBlock ) ).Select( a => a.Value ).ToList();
+                    
+                foreach ( var blockType in blockTypes )
+                {
+                    var blockInstance = Activator.CreateInstance( blockType ) as IRockLavaBlock;
+
+                    engine.RegisterBlock( blockInstance.BlockName, ( blockName ) =>
+                    {
+                        return Activator.CreateInstance( blockType ) as IRockLavaBlock;
+                    } );
+
+                    try
+                    {
+                        blockInstance.OnStartup();
+                    }
+                    catch ( Exception ex )
+                    {
+                        ExceptionLogService.LogException( ex, null );
+                    }
+
+                }
+            }
+            catch ( Exception ex )
+            {
+                ExceptionLogService.LogException( ex, null );
+            }
         }
 
         /// <summary>

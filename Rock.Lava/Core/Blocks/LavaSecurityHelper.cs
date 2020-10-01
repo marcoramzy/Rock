@@ -14,6 +14,8 @@
 // limitations under the License.
 // </copyright>
 //
+using System;
+using System.Collections.Generic;
 using System.Linq;
 
 using Rock.Common;
@@ -37,9 +39,17 @@ namespace Rock.Lava
                 return false;
             }
 
-            if ( context.EnabledCommands.Any() )
+            var enabledCommands = context.EnabledCommands ?? new List<string>();
+
+            if ( !enabledCommands.Any() )
             {
-                if ( context.EnabledCommands.Contains( "All" ) || context.EnabledCommands.Contains( command ) )
+                enabledCommands = context.GetValue( "EnabledCommands", string.Empty ).ToString().SplitDelimitedValues( "," );
+            }
+
+            if ( enabledCommands.Any() )
+            {            
+                if ( enabledCommands.Contains( "All", StringComparer.OrdinalIgnoreCase )
+                     || enabledCommands.Contains( command, StringComparer.OrdinalIgnoreCase ) )                    
                 {
                     return true;
                 }

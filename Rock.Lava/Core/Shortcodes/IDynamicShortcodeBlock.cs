@@ -14,29 +14,16 @@
 // limitations under the License.
 // </copyright>
 //
-using System.Collections.Generic;
-using System.IO;
+
+//using DotLiquid;
 
 namespace Rock.Lava
 {
-    /// <summary>
-    /// Interface that classes can implement to be included when searching assemblies for custom Lava Commands.
-    /// </summary>
-    public interface IRockLavaTag
+    public interface IDynamicShortcodeBlock
     {
-        /// <summary>
-        /// The name of the tag.
-        /// </summary>
-        string TagName { get; }
 
-        void Initialize( string tagName, string markup, IEnumerable<string> tokens );
-
-        void Render( ILavaContext context, TextWriter result );
-
-
-        /// <summary>
-        /// Executed when the tag is first loaded during application startup.
-        /// </summary>
-        void OnStartup();
     }
+
+
+
 }

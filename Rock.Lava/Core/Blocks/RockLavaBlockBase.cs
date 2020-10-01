@@ -17,19 +17,49 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-
-using DotLiquid;
+using Rock.Lava.DotLiquid;
 
 namespace Rock.Lava.Blocks
 {
+
     /// <summary>
     /// 
     /// </summary>
     /// <seealso cref="DotLiquid.Block" />
     public abstract class RockLavaBlockBase : IRockLavaBlock // ILava DotLiquid.Block, IRockStartup
     {
-        public string BlockName { get; set; }
+        private string _blockName = null;
+
+        
+
+        /// <summary>
+        /// The name of the block.
+        /// </summary>
+        public string BlockName
+        {
+            get
+            {
+                if ( _blockName == null )
+                {
+                    return this.GetType().Name;
+                }
+
+                return _blockName;
+            }
+
+            set
+            {
+                _blockName = value;
+            }
+        }
+
+        public LavaElementTypeSpecifier ElementType
+        {
+            get
+            {
+                return LavaElementTypeSpecifier.Block;
+            }
+        }
 
         /// <summary>
         /// Gets the not authorized message.
@@ -44,7 +74,7 @@ namespace Rock.Lava.Blocks
                 return "The Lava command '{0}' is not configured for this template.";
             }
         }
-        
+
         /// <summary>
         /// Determines whether the specified command is authorized.
         /// </summary>
@@ -57,9 +87,34 @@ namespace Rock.Lava.Blocks
 
         #region DotLiquid Block Implementation
 
-        public virtual void Initialize( string tagName, string markup, List<string> tokens )
+
+
+        public virtual void OnInitialize( string tagName, string markup, List<string> tokens )
         {
             //
+        }
+
+        //public void Render( ILavaContext context, TextWriter result )
+        //{
+        //    OnRender( context, result);
+        //}
+
+        public class ILiquidElementRenderer
+        {
+            public void RenderBase( ILavaContext context, TextWriter result )
+            {
+
+            }
+
+        }
+
+        private ILiquidElementRenderer _engine;
+
+        internal void RenderInternal( ILavaContext context, TextWriter result, ILiquidElementRenderer engine )
+        {
+            _engine = engine;
+
+            this.OnRender( context, result );
         }
 
         /// <summary>
@@ -67,9 +122,23 @@ namespace Rock.Lava.Blocks
         /// </summary>
         /// <param name="context">The context.</param>
         /// <param name="result">The result.</param>
-        public virtual void Render( ILavaContext context, TextWriter result )
+        public virtual void OnRender( ILavaContext context, TextWriter result )
+    {
+            _engine.RenderBase();
+
+            // Call the underlying engine to render this element.
+            //var engine = Rock.Lava.LavaEngine.Instance as DotLiquidEngine;
+
+            //engine.
+
+    }
+        //{
+        //base.Render( context, result );
+        //}
+
+        public void Parse( List<string> tokens, out List<object> nodes )
         {
-            //base.Render( context, result );
+            OnParse( tokens, out nodes );
         }
 
         /// <summary>
@@ -77,7 +146,7 @@ namespace Rock.Lava.Blocks
         /// </summary>
         /// <param name="tokens"></param>
         /// <param name="nodes"></param>
-        protected virtual void Parse( List<string> tokens, out List<object> nodes )
+        protected virtual void OnParse( List<string> tokens, out List<object> nodes )
         {
             nodes = null;
         }
@@ -90,19 +159,20 @@ namespace Rock.Lava.Blocks
         /// <value>
         /// The order.
         /// </value>
-        public int StartupOrder { get { return 0; } }
+        //public int StartupOrder { get { return 0; } }
 
         /// <summary>
         /// Method that will be run at Rock startup
         /// </summary>
         public virtual void OnStartup()
         {
+            //
         }
 
 
         protected virtual void AssertMissingDelimitation()
         {
-            throw new Exception( string.Format( "BlockTagNotClosedException: {0}", BlockName ) );
+            throw new Exception( string.Format( "BlockTagNotClosedException: {0}", this.BlockName ) );
             //throw new SyntaxException( Liquid.ResourceManager.GetString( "BlockTagNotClosedException" ), BlockName );
         }
     }

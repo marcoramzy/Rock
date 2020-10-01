@@ -49,11 +49,11 @@ namespace Rock.Lava.Blocks
         /// <param name="tagName">Name of the tag.</param>
         /// <param name="markup">The markup.</param>
         /// <param name="tokens">The tokens.</param>
-        public override void Initialize( string tagName, string markup, List<string> tokens )
+        public override void OnInitialize( string tagName, string markup, List<string> tokens )
         {
             _entityName = tagName;
             _markup = markup;
-            base.Initialize( tagName, markup, tokens );
+            base.OnInitialize( tagName, markup, tokens );
         }
 
         /// <summary>
@@ -62,13 +62,13 @@ namespace Rock.Lava.Blocks
         /// <param name="context">The context.</param>
         /// <param name="result">The result.</param>
         /// <exception cref="System.Exception">Your Lava command must contain at least one valid filter. If you configured a filter it's possible that the property or attribute you provided does not exist.</exception>
-        public override void Render( ILavaContext context, TextWriter result )
+        public override void OnRender( ILavaContext context, TextWriter result )
         {
             // first ensure that entity commands are allowed in the context
             if ( !this.IsAuthorized( context ) )
             {
                 result.Write( string.Format( RockLavaBlockBase.NotAuthorizedMessage, this.BlockName ) );
-                base.Render( context, result );
+                base.OnRender( context, result );
                 return;
             }
 
@@ -431,10 +431,10 @@ namespace Rock.Lava.Blocks
             else
             {
                 result.Write( string.Format( "Could not find a model for {0}.", _entityName ) );
-                base.Render( context, result );
+                base.OnRender( context, result );
             }
 
-            base.Render( context, result );
+            base.OnRender( context, result );
         }
 
         #region Entity Specific Filters

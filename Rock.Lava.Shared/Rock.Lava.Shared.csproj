@@ -80,6 +80,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Core\CommonMergeFieldsOptions.cs" />
+    <Compile Include="Core\DynamicShortcodeDefinition.cs" />
     <Compile Include="Core\ILavaDataObject.cs" />
     <Compile Include="Core\IRockLavaTag.cs" />
     <Compile Include="Core\IRockLavaBlock.cs" />

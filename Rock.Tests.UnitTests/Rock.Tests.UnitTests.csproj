@@ -98,7 +98,6 @@
     <Compile Include="Rock\Lava\Filters\TextFilterTests.cs" />
     <Compile Include="Rock\Utilities\DateTimeAssert.cs" />
     <Compile Include="Rock\Lava\Filters\TestPerson.cs" />
-    <Compile Include="Rock\Lava\ShortcodeTests.cs" />
     <Compile Include="Rock\Model\BlockTests.cs" />
     <Compile Include="Rock\Model\BlockTypeTests.cs" />
     <Compile Include="Rock\Model\CommunicationTemplateTests.cs" />

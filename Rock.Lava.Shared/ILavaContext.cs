@@ -30,14 +30,23 @@ namespace Rock.Lava
         /// </summary>
         IList<string> EnabledCommands { get; }
 
-        IList<LavaDictionary> Environments { get; }
-
-        IList<LavaDictionary> Scopes { get; }
+        /// <summary>
+        /// Registers are user-defined variables in the current context that are internally available to custom filters and tags.
+        /// </summary>
+        /// <remarks>
+        /// Usages: Stores the EnabledCommands setting.
+        /// </remarks>
+        LavaDictionary Registers { get; }
 
         /// <summary>
-        /// Registers are local
+        /// ???
         /// </summary>
-        LavaDictionary Registers { get; }
+        IList<LavaDictionary> Environments { get; }
+
+        /// <summary>
+        /// ???
+        /// </summary>
+        IList<LavaDictionary> Scopes { get; }
 
         //IDictionary<string, object> GetInternalMergeFields();
 
@@ -65,7 +74,7 @@ namespace Rock.Lava
 
         object this[string key] { get; set; }
 
-        object GetValue( string key );
+        object GetValue( string key, object defaultValue );
         void SetValue( string key, object value );
 
         ILavaEngine LavaEngine { get; }

@@ -69,7 +69,7 @@ namespace Rock.Lava.Shortcodes
         </ul>",
         "defaulttranslation,landingsite,cssclass",
         "" )]
-    public class Scripturize : RockLavaShortcodeBlockBase
+    public class Scripturize : RockLavaShortcodeBase
     {
         private static readonly Regex Syntax = new Regex( @"(\w+)" );
 
@@ -84,17 +84,28 @@ namespace Rock.Lava.Shortcodes
         //}
 
         /// <summary>
+        /// Specifies the type of Liquid element for this shortcode.
+        /// </summary>
+        public override LavaElementTypeSpecifier ElementType
+        {
+            get
+            {
+                return LavaElementTypeSpecifier.Block;
+            }
+        }
+
+        /// <summary>
         /// Initializes the specified tag name.
         /// </summary>
         /// <param name="tagName">Name of the tag.</param>
         /// <param name="markup">The markup.</param>
         /// <param name="tokens">The tokens.</param>
         /// <exception cref="System.Exception">Could not find the variable to place results in.</exception>
-        public override void Initialize( string tagName, string markup, List<string> tokens )
+        public override void OnInitialize( string tagName, string markup, List<string> tokens )
         {
             _markup = markup;
 
-            base.Initialize( tagName, markup, tokens );
+            //base.Initialize( tagName, markup, tokens );
         }
 
         /// <summary>
@@ -102,12 +113,12 @@ namespace Rock.Lava.Shortcodes
         /// </summary>
         /// <param name="context">The context.</param>
         /// <param name="result">The result.</param>
-        public override void Render( ILavaContext context, TextWriter result )
+        public override void OnRender( ILavaContext context, TextWriter result )
         {
 
             using ( TextWriter writer = new StringWriter() )
             {
-                base.Render( context, writer );
+                base.OnRender( context, writer );
 
                 var parms = ParseMarkup( _markup, context );
 

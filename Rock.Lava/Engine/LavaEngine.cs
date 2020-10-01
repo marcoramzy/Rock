@@ -68,13 +68,17 @@ namespace Rock.Lava
     public abstract class LavaEngineBase : ILavaEngine // ,IRockStartup
     {
         public abstract string EngineName { get; }
+
+        public abstract ILavaContext NewContext();
+
         public abstract LavaEngineTypeSpecifier EngineType { get; }
 
         public abstract Type GetShortcodeType( string name );
 
         public abstract void RegisterSafeType( Type type, string[] allowedMembers = null );
 
-        public abstract void RegisterShortcode( string name, Func<string, IRockShortcode> shortcodeFactoryMethod );
+        public abstract void RegisterStaticShortcode( string name, Func<string, IRockShortcode> shortcodeFactoryMethod );
+        public abstract void RegisterDynamicShortcode( string name, Func<string, DynamicShortcodeDefinition> shortcodeFactoryMethod );
 
         public abstract void RegisterShortcode( IRockShortcode shortcode );
         public abstract void RegisterShortcode<T>( string name )
@@ -84,12 +88,27 @@ namespace Rock.Lava
 
         public bool TryRender( string inputTemplate, out string output )
         {
-            return TryRender( inputTemplate, out output, null );
+            return TryRender( inputTemplate, out output, context: null );
         }
 
-        public abstract bool TryRender( string inputTemplate, out string output, LavaDictionary mergeValues );
+        public bool TryRender( string inputTemplate, out string output, LavaDictionary mergeValues )
+        {
+            var context = NewContext();
 
-        public abstract void UnregisterShortcode( string name );
+            if ( mergeValues != null )
+            {
+                foreach ( var key in mergeValues.Keys )
+                {
+                    context.Registers.Add( key, mergeValues[key] );
+                }
+            }
+
+            return TryRender( inputTemplate, out output, context );
+        }
+
+        public abstract bool TryRender( string inputTemplate, out string output, ILavaContext context );
+
+    public abstract void UnregisterShortcode( string name );
 
         public abstract bool AreEqualValue( object left, object right );
         //
@@ -143,15 +162,9 @@ namespace Rock.Lava
 
         public abstract ILavaTemplate ParseTemplate( string inputTemplate );
 
-        public void RegisterTag( string name, Func<string, IRockLavaTag> factoryMethod )
-        {
-            throw new NotImplementedException();
-        }
+        public abstract void RegisterTag( string name, Func<string, IRockLavaTag> factoryMethod );
 
-        public void RegisterBlock( string name, Func<string, IRockLavaBlock> factoryMethod )
-        {
-            throw new NotImplementedException();
-        }
+        public abstract void RegisterBlock( string name, Func<string, IRockLavaBlock> factoryMethod );
 
         public abstract Dictionary<string, ILavaTagInfo> GetRegisteredTags();
     }

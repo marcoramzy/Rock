@@ -25,9 +25,8 @@ using CSScriptLibrary;
 namespace Rock.Lava.Blocks
 {
     /// <summary>
-    ///
+    /// Renders a Lava template as a C# function with a string return value, executes the function and returns the output.
     /// </summary>
-    /// <seealso cref="DotLiquid.Block" />
     public class Execute : RockLavaBlockBase
     {
         private RuntimeType _runtimeType = RuntimeType.SCRIPT;
@@ -49,7 +48,7 @@ namespace Rock.Lava.Blocks
         /// <param name="tagName">Name of the tag.</param>
         /// <param name="markup">The markup.</param>
         /// <param name="tokens">The tokens.</param>
-        public override void Initialize( string tagName, string markup, List<string> tokens )
+        public override void OnInitialize( string tagName, string markup, List<string> tokens )
         {
             var parms = ParseMarkup( markup );
 
@@ -70,7 +69,7 @@ namespace Rock.Lava.Blocks
                 _imports = parms["import"].Split( ',' ).ToList();
             }
 
-            base.Initialize( tagName, markup, tokens );
+            base.OnInitialize( tagName, markup, tokens );
         }
 
         /// <summary>
@@ -78,13 +77,13 @@ namespace Rock.Lava.Blocks
         /// </summary>
         /// <param name="context">The context.</param>
         /// <param name="result">The result.</param>
-        public override void Render( ILavaContext context, TextWriter result )
+        public override void OnRender( ILavaContext context, TextWriter result )
         {
             // first ensure that entity commands are allowed in the context
             if ( !this.IsAuthorized( context ) )
             {
                 result.Write( string.Format( RockLavaBlockBase.NotAuthorizedMessage, this.BlockName ) );
-                base.Render( context, result );
+                base.OnRender( context, result );
                 return;
             }
 
@@ -92,7 +91,7 @@ namespace Rock.Lava.Blocks
 
             using ( TextWriter temp = new StringWriter() )
             {
-                base.Render( context, temp );
+                base.OnRender( context, temp );
 
                 userScript = temp.ToString();
 
@@ -147,7 +146,7 @@ namespace Rock.Lava.Blocks
             }
         }
 
-        protected override void Parse( List<string> tokens, out List<object> nodes )
+        protected override void OnParse( List<string> tokens, out List<object> nodes )
         {
             // No action required.
             nodes = null;

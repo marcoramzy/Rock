@@ -60,19 +60,19 @@ namespace Rock.Lava.Blocks
         /// <param name="markup">The markup.</param>
         /// <param name="tokens">The tokens.</param>
         /// <exception cref="System.Exception">Could not find the variable to place results in.</exception>
-        public override void Initialize( string tagName, string markup, List<string> tokens )
+        public override void OnInitialize( string tagName, string markup, List<string> tokens )
         {
             _markup = markup;
             _tagName = tagName;
 
-            base.Initialize( tagName, markup, tokens );
+            base.OnInitialize( tagName, markup, tokens );
         }
 
         /// <summary>
         /// Parses the specified tokens.
         /// </summary>
         /// <param name="tokens">The tokens.</param>
-        protected override void Parse( List<string> tokens, out List<object> nodeList )
+        protected override void OnParse( List<string> tokens, out List<object> nodeList )
         {
             // Get the block markup. The list of tokens contains all of the lava from the start tag to
             // the end of the template. This will pull out just the internals of the block.
@@ -139,13 +139,13 @@ namespace Rock.Lava.Blocks
         /// </summary>
         /// <param name="context">The context.</param>
         /// <param name="result">The result.</param>
-        public override void Render( ILavaContext context, TextWriter result )
+        public override void OnRender( ILavaContext context, TextWriter result )
         {
             // First ensure that cached commands are allowed in the context
             if ( !this.IsAuthorized( context ) )
             {
                 result.Write( string.Format( RockLavaBlockBase.NotAuthorizedMessage, this.BlockName ) );
-                base.Render( context, result );
+                base.OnRender( context, result );
                 return;
             }
 
@@ -157,7 +157,7 @@ namespace Rock.Lava.Blocks
             if ( cacheKey == string.Empty )
             {
                 result.Write( "* No cache key provided. *" );
-                base.Render( context, result );
+                base.OnRender( context, result );
                 return;
             }
 
@@ -186,7 +186,7 @@ namespace Rock.Lava.Blocks
                     result.Write( cachedResult.Content );
                 }
 
-                base.Render( context, result );
+                base.OnRender( context, result );
                 return;
             }
 
@@ -218,7 +218,7 @@ namespace Rock.Lava.Blocks
 
 
 
-            base.Render( context, result );
+            base.OnRender( context, result );
         }
 
         /// <summary>
