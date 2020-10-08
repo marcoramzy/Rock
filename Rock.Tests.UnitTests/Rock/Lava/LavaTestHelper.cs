@@ -131,6 +131,8 @@ namespace Rock.Tests.UnitTests.Lava
             AssertTemplateOutputDate( expectedDate, inputTemplate, maximumDelta );
         }
 
+        #region Test Data
+
         /// <summary>
         /// Return an initialized Person object for test subject Ted Decker.
         /// </summary>
@@ -144,7 +146,7 @@ namespace Rock.Tests.UnitTests.Lava
         }
 
         /// <summary>
-        /// Return an initialized Person object for test subject Ted Decker.
+        /// Return an initialized Person object for test subject Alisha Marble.
         /// </summary>
         /// <returns></returns>
         public TestPerson GetTestPersonAlishaMarble()
@@ -170,5 +172,32 @@ namespace Rock.Tests.UnitTests.Lava
 
             return personList;
         }
+
+        /// <summary>
+        /// A representation of a Person used for testing purposes.
+        /// </summary>
+        public class TestPerson : RockDynamic
+        {
+            public int Id { get; set; }
+            public string NickName { get; set; }
+            public string FirstName { get; set; }
+            public string LastName { get; set; }
+            public TestCampus Campus { get; set; }
+
+            public override string ToString()
+            {
+                return $"{NickName} {LastName}";
+            }
+        }
+
+        /// <summary>
+        /// A representation of a Campus used for testing purposes.
+        /// </summary>
+        public class TestCampus : RockDynamic
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
+        }
+        #endregion
     }
 }
