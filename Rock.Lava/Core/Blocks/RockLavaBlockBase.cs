@@ -94,25 +94,11 @@ namespace Rock.Lava.Blocks
             //
         }
 
-        //public void Render( ILavaContext context, TextWriter result )
-        //{
-        //    OnRender( context, result);
-        //}
+        private IRockLavaBlock _blockProxy;
 
-        public class ILiquidElementRenderer
+        internal void RenderInternal( ILavaContext context, TextWriter result, IRockLavaBlock proxy )
         {
-            public void RenderBase( ILavaContext context, TextWriter result )
-            {
-
-            }
-
-        }
-
-        private ILiquidElementRenderer _engine;
-
-        internal void RenderInternal( ILavaContext context, TextWriter result, ILiquidElementRenderer engine )
-        {
-            _engine = engine;
+            _blockProxy = proxy;
 
             this.OnRender( context, result );
         }
@@ -123,18 +109,10 @@ namespace Rock.Lava.Blocks
         /// <param name="context">The context.</param>
         /// <param name="result">The result.</param>
         public virtual void OnRender( ILavaContext context, TextWriter result )
-    {
-            _engine.RenderBase();
-
-            // Call the underlying engine to render this element.
-            //var engine = Rock.Lava.LavaEngine.Instance as DotLiquidEngine;
-
-            //engine.
-
-    }
-        //{
-        //base.Render( context, result );
-        //}
+        {
+            // By default, call the underlying engine to render this element.
+            _blockProxy.OnRender( context, result );
+        }
 
         public void Parse( List<string> tokens, out List<object> nodes )
         {

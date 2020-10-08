@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Rock.Lava.DotLiquid;
 using Rock.Lava.Blocks;
+using System.IO;
 
 namespace Rock.Lava
 {
@@ -167,5 +168,7 @@ namespace Rock.Lava
         public abstract void RegisterBlock( string name, Func<string, IRockLavaBlock> factoryMethod );
 
         public abstract Dictionary<string, ILavaTagInfo> GetRegisteredTags();
+
+        public abstract void RenderTag( IRockLavaBlock tag, ILavaContext context, TextWriter result );
     }
 }

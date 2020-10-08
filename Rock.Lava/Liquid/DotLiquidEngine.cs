@@ -17,6 +17,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -479,6 +480,12 @@ namespace Rock.Lava.DotLiquid
             //    //}
 
             //}
+        }
+
+        public override void RenderTag( IRockLavaBlock tag, ILavaContext context, TextWriter result )
+        {
+            //global::DotLiquid.Block.
+            throw new NotImplementedException();
         }
     }
 }

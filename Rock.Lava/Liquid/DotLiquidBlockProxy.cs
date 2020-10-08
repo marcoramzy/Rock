@@ -18,6 +18,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using DotLiquid;
+using Rock.Lava.Blocks;
 
 namespace Rock.Lava.DotLiquid
 {
@@ -25,9 +26,9 @@ namespace Rock.Lava.DotLiquid
     /// Represents an implementation of a Lava Block for the DotLiquid Templating Framework.
     /// </summary>
     /// <remarks>
-    /// This class wraps a Lava Shortcode in a DotLiquid.Block Type that can be processed by the DotLiquid framework.
+    /// This class implements a Lava Shortcode using a DotLiquid.Block Type that can be processed by the DotLiquid framework.
     /// </remarks>
-    internal class DotLiquidBlockProxy : Block
+    internal class DotLiquidBlockProxy : Block, IRockLavaBlock
     {
         private static Dictionary<string, Func<string, IRockLavaBlock>> _tagFactoryMethods = new Dictionary<string, Func<string, IRockLavaBlock>>( StringComparer.OrdinalIgnoreCase );
 
@@ -37,6 +38,14 @@ namespace Rock.Lava.DotLiquid
         }
 
         private IRockLavaBlock _block = null;
+
+        public string BlockName
+        {
+            get
+            {
+                return _block.BlockName;
+            }
+        }
 
         public override void Initialize( string tagName, string markup, List<string> tokens )
         {
@@ -57,10 +66,33 @@ namespace Rock.Lava.DotLiquid
         {
             var lavaContext = new DotLiquidLavaContext( context );
 
+            var block = _block as RockLavaBlockBase;
+
+            //block.RenderInternal( lavaContext, result, LavaEngine.Instance );
             // Call the Lava block renderer.
-            _block.OnRender( lavaContext, result );
+            block.RenderInternal( lavaContext, result, this );
+
+            //_block.OnRender( lavaContext, result );
 
             //base.Render( context, result );
+        }
+
+        public void OnInitialize( string tagName, string markup, List<string> tokens )
+        {
+            this.Initialize( tagName, markup, tokens );
+        }
+
+        public void OnRender( ILavaContext context, TextWriter result )
+        {
+            var dotLiquidContext = ( (DotLiquidLavaContext)context ).DotLiquidContext;
+
+            base.Render( dotLiquidContext, result );
+            //this.Render( dotLiquidContext, result );
+        }
+
+        public void OnStartup()
+        {
+            //
         }
     }
 }

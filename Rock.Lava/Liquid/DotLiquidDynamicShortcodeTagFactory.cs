@@ -21,42 +21,38 @@ using DotLiquid;
 
 namespace Rock.Lava.DotLiquid
 {
-    public partial class DotLiquidEngine
+    //private static DotLiquidDynamicShortcodeTagFactory _dynamicShortcodeTag = new DotLiquidDynamicShortcodeTagFactory();
+
+    /// <summary>
+    /// Represents an implementation of a DotLiquid Tag that can be configured dynamically at runtime.
+    /// </summary>
+    /// <remarks>
+    /// This class wraps a Lava Shortcode in a Tag Type that can be registered with the DotLiquid framework.
+    /// </remarks>
+    internal class DotLiquidDynamicShortcodeTagFactory : Tag
     {
-        //private static DotLiquidDynamicShortcodeTagFactory _dynamicShortcodeTag = new DotLiquidDynamicShortcodeTagFactory();
-
-        /// <summary>
-        /// Represents an implementation of a DotLiquid Tag that can be configured dynamically at runtime.
-        /// </summary>
-        /// <remarks>
-        /// This class wraps a Lava Shortcode in a Tag Type that can be registered with the DotLiquid framework.
-        /// </remarks>
-        private class DotLiquidDynamicShortcodeTagFactory : Tag
+        public static Dictionary<string, Func<string, DynamicShortcodeDefinition>> TagFactoryMethods
         {
-            public static Dictionary<string, Func<string, DynamicShortcodeDefinition>> TagFactoryMethods
+            get
             {
-                get
-                {
-                    return _tagFactoryMethods;
-                }
-            }
-
-            private static Dictionary<string, Func<string, DynamicShortcodeDefinition>> _tagFactoryMethods = new Dictionary<string, Func<string, DynamicShortcodeDefinition>>();
-
-            public override void Initialize( string tagName, string markup, List<string> tokens )
-            {
-                var factoryMethod = _tagFactoryMethods[tagName];
-
-                var shortcode = factoryMethod( tagName );
-
-                base.Initialize( tagName, shortcode.TemplateMarkup, shortcode.Tokens );
-            }
-
-            public override void Render( Context context, TextWriter result )
-            {
-                base.Render( context, result );
+                return _tagFactoryMethods;
             }
         }
 
+        private static Dictionary<string, Func<string, DynamicShortcodeDefinition>> _tagFactoryMethods = new Dictionary<string, Func<string, DynamicShortcodeDefinition>>();
+
+        public override void Initialize( string tagName, string markup, List<string> tokens )
+        {
+            var factoryMethod = _tagFactoryMethods[tagName];
+
+            var shortcode = factoryMethod( tagName );
+
+            base.Initialize( tagName, shortcode.TemplateMarkup, shortcode.Tokens );
+        }
+
+        public override void Render( Context context, TextWriter result )
+        {
+            base.Render( context, result );
+        }
     }
 }

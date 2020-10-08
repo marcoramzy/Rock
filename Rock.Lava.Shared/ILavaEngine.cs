@@ -17,6 +17,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace Rock.Lava
 {
@@ -139,6 +140,8 @@ namespace Rock.Lava
         ILavaTemplate ParseTemplate( string inputTemplate );
 
         bool AreEqualValue( object left, object right );
+
+        void RenderTag( IRockLavaBlock tag, ILavaContext context, TextWriter result );
     }
 
 }
