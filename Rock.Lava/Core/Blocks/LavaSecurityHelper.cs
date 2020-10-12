@@ -39,11 +39,11 @@ namespace Rock.Lava
                 return false;
             }
 
-            var enabledCommands = context.EnabledCommands ?? new List<string>();
+            var enabledCommands = context.GetEnabledCommands();
 
             if ( !enabledCommands.Any() )
             {
-                enabledCommands = context.GetValue( "EnabledCommands", string.Empty ).ToString().SplitDelimitedValues( "," );
+                enabledCommands = context.GetMergeFieldValue( "EnabledCommands", string.Empty ).ToString().SplitDelimitedValues( "," ).ToList();
             }
 
             if ( enabledCommands.Any() )

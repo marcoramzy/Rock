@@ -3555,16 +3555,16 @@ namespace Rock.Lava
         /// <returns></returns>
         private static RockContext GetRockContext( ILavaContext context )
         {
-            if ( context.Registers.ContainsKey( "rock_context" ) )
-            {
-                return context.Registers["rock_context"] as RockContext;
+            var rockContext = context.GetMergeFieldValue( "rock_context", null ) as RockContext;
+
+            if ( rockContext == null )
+            { 
+                rockContext = new RockContext();
+
+                context.SetMergeFieldValue( "rock_context", rockContext );                
             }
-            else
-            {
-                var rockContext = new RockContext();
-                context.Registers["rock_context"] = rockContext;
-                return rockContext;
-            }
+
+            return rockContext;
         }
 
         /// <summary>
@@ -3837,9 +3837,9 @@ namespace Rock.Lava
                 }
             }
 
-            var mergeFields = context.Environments.SelectMany( a => a ).ToDictionary( k => k.Key, v => v.Value );
+            var mergeFields = context.GetEnvironments().SelectMany( a => a ).ToDictionary( k => k.Key, v => v.Value );
 
-            var allFields = mergeFields.Union( context.Scopes.SelectMany( a => a ).DistinctBy( x => x.Key ).ToDictionary( k => k.Key, v => v.Value ) );
+            var allFields = mergeFields.Union( context.GetScopes().SelectMany( a => a ).DistinctBy( x => x.Key ).ToDictionary( k => k.Key, v => v.Value ) );
 
             // if a specific MergeField was specified as the Input, limit the help to just that MergeField
             if ( input != null && allFields.Any( a => a.Value == input ) )
@@ -5653,16 +5653,7 @@ namespace Rock.Lava
             Person currentPerson = null;
 
             // First check for a person override value included in lava context
-            if ( context.Scopes != null )
-            {
-                foreach ( var scopeHash in context.Scopes )
-                {
-                    if ( scopeHash.ContainsKey( "CurrentPerson" ) )
-                    {
-                        currentPerson = scopeHash["CurrentPerson"] as Person;
-                    }
-                }
-            }
+            currentPerson = context.GetMergeFieldValue( "CurrentPerson", null ) as Person;
 
             if ( currentPerson == null )
             {

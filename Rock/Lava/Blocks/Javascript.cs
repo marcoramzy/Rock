@@ -56,7 +56,13 @@ namespace Rock.Lava.Blocks
         /// <param name="result">The result.</param>
         public override void OnRender( ILavaContext context, TextWriter result )
         {
-            RockPage page = HttpContext.Current.Handler as RockPage;
+            // Get the current page object if it is available.
+            RockPage page = null;
+
+            if ( HttpContext.Current != null )
+            {
+                page = HttpContext.Current.Handler as RockPage;
+            }
 
             var parms = ParseMarkup( _markup, context );
 
@@ -79,50 +85,85 @@ namespace Rock.Lava.Blocks
                         javascript = twJavascript.ToString();
                     }
 
+                    var scriptText = $"{Environment.NewLine}<script>{javascript}</script>{Environment.NewLine}";
+
                     if ( parms.ContainsKey( "id" ) )
                     {
                         var identifier = parms["id"];
                         if ( identifier.IsNotNullOrWhiteSpace() )
                         {
                             var controlId = "js-" + identifier;
+                            System.Web.UI.Control scriptControl = null;
 
-                            var scriptControl = page.Header.FindControl( controlId );
-                            if ( scriptControl == null )
+                            if ( page != null )
                             {
-                                scriptControl = new System.Web.UI.LiteralControl( $"{Environment.NewLine}<script>{javascript}</script>{Environment.NewLine}" );
-                                scriptControl.ID = controlId;
-                                page.Header.Controls.Add( scriptControl );
+                                scriptControl = page.Header.FindControl( controlId );
+
+                                if ( scriptControl == null )
+                                {
+                                    scriptControl = new System.Web.UI.LiteralControl( scriptText );
+                                    scriptControl.ID = controlId;
+                                    page.Header.Controls.Add( scriptControl );
+                                }
+                            }
+                            else
+                            {
+                                result.Write( scriptText );
                             }
                         }
                     }
                     else
                     {
-                        page.Header.Controls.Add( new System.Web.UI.LiteralControl( $"{Environment.NewLine}<script>{javascript}</script>{Environment.NewLine}" ) );
+                        if ( page != null )
+                        {
+                            page.Header.Controls.Add( new System.Web.UI.LiteralControl( scriptText ) );
+                        }
+                        else
+                        {
+                            result.Write( scriptText );
+                        }
                     }
                 }
                 else
                 {
                     var url = ResolveRockUrl( parms["url"] );
 
+                    var scriptText = $"{Environment.NewLine}<script src='{url}' type='text/javascript'></script>{Environment.NewLine}";
                     if ( parms.ContainsKey( "id" ) )
                     {
                         var identifier = parms["id"];
                         if ( identifier.IsNotNullOrWhiteSpace() )
                         {
                             var controlId = "js-" + identifier;
+                            System.Web.UI.Control scriptControl = null;
 
-                            var scriptControl = page.Header.FindControl( controlId );
-                            if ( scriptControl == null )
+                            if ( page != null )
                             {
-                                scriptControl = new System.Web.UI.LiteralControl( $"{Environment.NewLine}<script src='{url}' type='text/javascript'></script>{Environment.NewLine}" );
-                                scriptControl.ID = controlId;
-                                page.Header.Controls.Add( scriptControl );
+                                scriptControl = page.Header.FindControl( controlId );
+
+                                if ( scriptControl == null )
+                                {
+                                    scriptControl = new System.Web.UI.LiteralControl( scriptText );
+                                    scriptControl.ID = controlId;
+                                    page.Header.Controls.Add( scriptControl );
+                                }
+                            }
+                            else
+                            {
+                                result.Write( scriptText );
                             }
                         }
                     }
                     else
                     {
-                        page.Header.Controls.Add( new System.Web.UI.LiteralControl( $"{Environment.NewLine}<script src='{url}' type='text/javascript'></script>{Environment.NewLine}" ) );
+                        if ( page != null )
+                        {
+                            page.Header.Controls.Add( new System.Web.UI.LiteralControl( scriptText ) );
+                        }
+                        else
+                        {
+                            result.Write( scriptText );
+                        }
                     }
                 }
             }
@@ -164,25 +205,8 @@ namespace Rock.Lava.Blocks
         private Dictionary<string, string> ParseMarkup( string markup, ILavaContext context )
         {
             // first run lava across the inputted markup
-            var internalMergeFields = new Dictionary<string, object>();
+            var internalMergeFields = context.GetMergeFieldsForLocalScope();
 
-            // get variables defined in the lava source
-            foreach ( var scope in context.Scopes )
-            {
-                foreach ( var item in scope )
-                {
-                    internalMergeFields.AddOrReplace( item.Key, item.Value );
-                }
-            }
-
-            // get merge fields loaded by the block or container
-            if ( context.Environments.Count > 0 )
-            {
-                foreach ( var item in context.Environments[0] )
-                {
-                    internalMergeFields.AddOrReplace( item.Key, item.Value );
-                }
-            }
             var resolvedMarkup = markup.ResolveMergeFields( internalMergeFields );
 
             var parms = new Dictionary<string, string>();

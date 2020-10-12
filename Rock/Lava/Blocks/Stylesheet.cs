@@ -65,7 +65,13 @@ namespace Rock.Lava.Blocks
         /// <param name="result">The result.</param>
         public override void OnRender( ILavaContext context, TextWriter result )
         {
-            RockPage page = HttpContext.Current.Handler as RockPage;
+            // Get the current page object if it is available.
+            RockPage page = null;
+
+            if ( HttpContext.Current != null )
+            {
+                page = HttpContext.Current.Handler as RockPage;
+            }
 
             var parms = ParseMarkup( _markup, context );
 
@@ -103,14 +109,18 @@ namespace Rock.Lava.Blocks
                                     filePath = importFile;
                                 }
 
-                                filePath = page.ResolveRockUrl( filePath );
-
-                                var fullPath = page.MapPath( "~/" ) + filePath;
-
-                                if (File.Exists( fullPath ) )
+                                if ( page != null )
                                 {
-                                    importStatements = $"{importStatements}{Environment.NewLine}@import \"{fullPath}\";";
+                                    filePath = page.ResolveRockUrl( filePath );
+
+                                    var fullPath = page.MapPath( "~/" ) + filePath;
+
+                                    if ( File.Exists( fullPath ) )
+                                    {
+                                        importStatements = $"{importStatements}{Environment.NewLine}@import \"{fullPath}\";";
+                                    }
                                 }
+                                
                             }
 
                             stylesheet = $"{stylesheet}{Environment.NewLine}{importStatements}";
@@ -164,25 +174,34 @@ namespace Rock.Lava.Blocks
                     }
                 }
 
-                if ( parms.ContainsKey("id") )
-                {
-                    var identifier = parms["id"];
-                    if ( identifier.IsNotNullOrWhiteSpace() )
-                    {
-                        var controlId = "css-" + identifier;
+                var styleText = $"{Environment.NewLine}<style>{stylesheet}</style>{Environment.NewLine}";
 
-                        var cssControl = page.Header.FindControl( controlId );
-                        if (cssControl == null )
+                if ( page != null )
+                {
+                    if ( parms.ContainsKey( "id" ) )
+                    {
+                        var identifier = parms["id"];
+                        if ( identifier.IsNotNullOrWhiteSpace() )
                         {
-                            cssControl = new System.Web.UI.LiteralControl( $"{Environment.NewLine}<style>{stylesheet}</style>{Environment.NewLine}" );
-                            cssControl.ID = controlId;
-                            page.Header.Controls.Add( cssControl );
+                            var controlId = "css-" + identifier;
+
+                            var cssControl = page.Header.FindControl( controlId );
+                            if ( cssControl == null )
+                            {
+                                cssControl = new System.Web.UI.LiteralControl( styleText );
+                                cssControl.ID = controlId;
+                                page.Header.Controls.Add( cssControl );
+                            }
                         }
+                    }
+                    else
+                    {
+                        page.Header.Controls.Add( new System.Web.UI.LiteralControl( styleText ) );
                     }
                 }
                 else
                 {
-                    page.Header.Controls.Add( new System.Web.UI.LiteralControl( $"{Environment.NewLine}<style>{stylesheet}</style>{Environment.NewLine}" ) );
+                    result.Write( styleText );
                 }
             }
         }
@@ -196,10 +215,13 @@ namespace Rock.Lava.Blocks
         private Dictionary<string, string> ParseMarkup( string markup, ILavaContext context )
         {
             // first run lava across the inputted markup
+            var internalMergeFields = context.GetMergeFieldsForLocalScope();
+
+            /*
             var internalMergeFields = new Dictionary<string, object>();
 
             // get variables defined in the lava source
-            foreach ( var scope in context.Scopes )
+            foreach ( var scope in context.GetScopes )
             {
                 foreach ( var item in scope )
                 {
@@ -208,13 +230,15 @@ namespace Rock.Lava.Blocks
             }
 
             // get merge fields loaded by the block or container
-            if ( context.Environments.Count > 0 )
+            if ( context.GetEnvironments.Count > 0 )
             {
-                foreach ( var item in context.Environments[0] )
+                foreach ( var item in context.GetEnvironments[0] )
                 {
                     internalMergeFields.AddOrReplace( item.Key, item.Value );
                 }
             }
+            */
+
             var resolvedMarkup = markup.ResolveMergeFields( internalMergeFields );
 
             var parms = new Dictionary<string, string>();

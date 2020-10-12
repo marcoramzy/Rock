@@ -154,9 +154,7 @@ namespace Rock.Lava.Blocks
                         else // otherwise assume html and just throw the contents out to the screen
                         {
                             responseData = content;
-                        }
-
-                        context.Scopes.Last()[parms["return"]] = responseData;
+                        }                        
                     }
                     else
                     {
@@ -167,7 +165,7 @@ namespace Rock.Lava.Blocks
                     throw;
                 }
 
-                context.Scopes.Last()[parms["return"]] = responseData;
+                context.SetMergeFieldValue( parms["return"], responseData, "root" );
             }
             else {
                 result.Write( "No url parameter was found." );
@@ -184,25 +182,7 @@ namespace Rock.Lava.Blocks
         private Dictionary<string, string> ParseMarkup( string markup, ILavaContext context )
         {
             // first run lava across the inputted markup
-            var internalMergeFields = new Dictionary<string, object>();
-
-            // get variables defined in the lava source
-            foreach ( var scope in context.Scopes )
-            {
-                foreach ( var item in scope )
-                {
-                    internalMergeFields.AddOrReplace( item.Key, item.Value );
-                }
-            }
-
-            // get merge fields loaded by the block or container
-            foreach( var environment in context.Environments )
-            {
-                foreach ( var item in environment )
-                {
-                    internalMergeFields.AddOrReplace( item.Key, item.Value );
-                }
-            }
+            var internalMergeFields = context.GetMergeFieldsForLocalScope();
 
             var resolvedMarkup = markup.ResolveMergeFields( internalMergeFields );
 

@@ -626,6 +626,20 @@ namespace Rock
         /// <returns></returns>
         public static string ResolveMergeFields( this string content, IDictionary<string, object> mergeObjects, string enabledLavaCommands, bool encodeStrings = false, bool throwExceptionOnErrors = false )
         {
+            return ResolveMergeFields( content, mergeObjects, enabledLavaCommands.SplitDelimitedValues( "," ), encodeStrings, throwExceptionOnErrors );
+        }
+
+        /// <summary>
+        /// Uses Lava to resolve any merge codes within the content using the values in the merge objects.
+        /// </summary>
+        /// <param name="content">The content.</param>
+        /// <param name="mergeObjects">The merge objects.</param>
+        /// <param name="enabledLavaCommands">The enabled lava commands.</param>
+        /// <param name="encodeStrings">if set to <c>true</c> [encode strings].</param>
+        /// <param name="throwExceptionOnErrors">if set to <c>true</c> [throw exception on errors].</param>
+        /// <returns></returns>
+        public static string ResolveMergeFields( this string content, IDictionary<string, object> mergeObjects, IEnumerable<string> enabledLavaCommands, bool encodeStrings = false, bool throwExceptionOnErrors = false )
+        {
             try
             {
                 if ( !content.HasMergeFields() )
@@ -645,7 +659,11 @@ namespace Rock
 
                 var renderParameters = new LavaRenderParameters();
 
-                renderParameters.Registers.AddOrReplace( "EnabledCommands", enabledLavaCommands );
+                if ( enabledLavaCommands != null )
+                {
+                    renderParameters.EnabledCommands = enabledLavaCommands.ToList();
+                }
+
                 renderParameters.LocalVariables = mergeObjects;
 
                 string result;

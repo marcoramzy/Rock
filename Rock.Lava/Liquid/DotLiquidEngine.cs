@@ -52,7 +52,15 @@ namespace Rock.Lava.DotLiquid
 
         public override ILavaContext NewContext()
         {
-            return new DotLiquidLavaContext( new global::DotLiquid.Context() );
+            var dotLiquidContext = new global::DotLiquid.Context();
+
+            // Set the transformation function for converting a Lava Context to a DotLiquid Context.
+            // This is needed to allow the Lava context parameter in a filter function to be identified and 
+            // injected in a way that is framework-agnostic.
+            dotLiquidContext.FilterContextParameterType = Template.FilterContextParameterType;
+            dotLiquidContext.FilterContextParameterTransformer = Template.FilterContextParameterTransformer;
+
+            return new DotLiquidLavaContext( dotLiquidContext );
         }
 
         /// <summary>
@@ -104,8 +112,25 @@ namespace Rock.Lava.DotLiquid
                 }
             }
 
-            Template.RegisterSafeType( typeof( Rock.Lava.ILiquidizable ), ( x ) => { return ( (Rock.Lava.ILiquidizable)x ).ToLiquid(); } );
-            Template.RegisterSafeType( typeof( Rock.Lava.ILavaDataObject ), ( x ) => { return ( (ILavaDataObject)x ).ToLiquid(); } );
+            RegisterSafeType( typeof( Rock.Lava.ILiquidizable ) );
+            RegisterSafeType( typeof( Rock.Lava.ILavaDataObject ) );
+        }
+
+        public class LiquidizableObjectProxy : ILiquidizable
+        {
+            public object this[object key] => throw new NotImplementedException();
+
+            public List<string> AvailableKeys => throw new NotImplementedException();
+
+            public bool ContainsKey( object key )
+            {
+                throw new NotImplementedException();
+            }
+
+            public object ToLiquid()
+            {
+                throw new NotImplementedException();
+            }
         }
 
         public override Type GetShortcodeType( string name )
@@ -119,9 +144,16 @@ namespace Rock.Lava.DotLiquid
             {
                 Template.RegisterSafeType( type, ( x ) => { return ( (Rock.Lava.ILiquidizable)x ).ToLiquid(); } );
             }
-            else if ( type is Rock.Lava.ILiquidizable )
+            else if ( type is Rock.Lava.ILavaDataObject )
             {
-                Template.RegisterSafeType( typeof( Rock.Lava.ILavaDataObject ), ( x ) => { return ( (ILavaDataObject)x ).ToLiquid(); } );
+                Template.RegisterSafeType( typeof( Rock.Lava.ILavaDataObject ),
+                x =>
+                {
+                    return new DropProxy( x, ( (ILavaDataObject)x ).AvailableKeys.ToArray() );
+                } );
+
+
+                //Template.RegisterSafeType( typeof( Rock.Lava.ILavaDataObject ), ( x ) => { return ( (ILavaDataObject)x ).ToLiquid(); } );
             }
             else
             {
@@ -296,37 +328,19 @@ namespace Rock.Lava.DotLiquid
         {
             var renderSettings = new RenderParameters();
 
-            // For a thread-safe DotLiquid template, all variables are stored in the LocalVariables collection.
+            var dotLiquidContext = ( (DotLiquidLavaContext)context ).DotLiquidContext;
 
-            //renderSettings.Registers = new Hash();
+            // Set the transformation function for converting a Lava Context to a DotLiquid Context.
+            // This is needed to allow the context to be injected into a filter in a way that is framework-agnostic.
+            dotLiquidContext.FilterContextParameterType = Template.FilterContextParameterType;
+            dotLiquidContext.FilterContextParameterTransformer = Template.FilterContextParameterTransformer;
 
-            //// Add EnabledCommands setting to the DotLiquid Context.
-            //if ( context.EnabledCommands != null
-            //     && context.EnabledCommands.Any() )
-            //{
-            //    // Store the EnabledCommands setting in the DotLiquid Registers.
-            //    renderSettings.Registers.Add( "EnabledCommands", string.Join( ";", context.EnabledCommands ) );
-            //}
+            renderSettings.Context = dotLiquidContext;
 
-            renderSettings.LocalVariables = Hash.FromDictionary( context.Registers );
-
-            if ( context.EnabledCommands != null
-                 && context.EnabledCommands.Any() )
-            {
-                // Store the EnabledCommands setting in the DotLiquid Registers.
-                renderSettings.LocalVariables.Add( "EnabledCommands", string.Join( ";", context.EnabledCommands ) );
-            }
+            // Store the EnabledCommands setting in the DotLiquid Registers.
+            renderSettings.Context.Registers["EnabledCommands"] = string.Join( ",", context.GetEnabledCommands() );
 
             return renderSettings;
-
-            // Avoid DotLiquid wrapping unknown types in a DropProxy object,
-            // to prevent framework-specific Types being passed to our custom filters.
-            //foreach ( var key in mergeValues.Keys.ToList() )
-            //{
-            //    fieldValue = GetDotLiquidCompatibleValue( mergeValues[key] );
-
-            //    mergeValues[key] = fieldValue;
-            //}
         }
 
         public override bool TryRender( string inputTemplate, out string output, ILavaContext context )
@@ -339,7 +353,7 @@ namespace Rock.Lava.DotLiquid
 
                 //if ( mergeValues != null )
                 //{
-                object fieldValue;
+                //object fieldValue;
 
                 // Avoid DotLiquid wrapping unknown types in a DropProxy object,
                 // to prevent framework-specific Types being passed to our custom filters.

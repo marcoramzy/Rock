@@ -26,29 +26,70 @@ namespace Rock.Lava
     public interface ILavaContext
     {
         /// <summary>
-        /// The set of Lava Commands that are specifically enabled in this context.
+        /// The set of Lava Commands that are specifically enabled for this context.
         /// </summary>
-        IList<string> EnabledCommands { get; }
+        List<string> GetEnabledCommands();
+
+        void SetEnabledCommands( IEnumerable<string> commands );
+
+        void SetEnabledCommands( string commandList, string delimiter = "," );
 
         /// <summary>
-        /// Registers are user-defined variables in the current context that are internally available to custom filters and tags.
+        /// Gets the value of a field that is accessible for merging into a template.
         /// </summary>
-        /// <remarks>
-        /// Usages: Stores the EnabledCommands setting.
-        /// </remarks>
-        LavaDictionary Registers { get; }
+        /// <param name="key"></param>
+        /// <param name="defaultValue"></param>
+        /// <returns></returns>
+        object GetMergeFieldValue( string key, object defaultValue );
 
         /// <summary>
-        /// ???
+        /// Gets the collection of user-defined variables in the current context that are internally available to custom filters and tags.
         /// </summary>
-        IList<LavaDictionary> Environments { get; }
+        LavaDictionary GetMergeFieldValues();
 
         /// <summary>
-        /// ???
+        /// Sets the value of a field that is accessible for merging into a template.
         /// </summary>
-        IList<LavaDictionary> Scopes { get; }
+        /// <param name="key"></param>
+        /// <param name="defaultValue"></param>
+        /// <returns></returns>
+        void SetMergeFieldValue( string key, object value );
 
-        //IDictionary<string, object> GetInternalMergeFields();
+        /// <summary>
+        /// Sets the value of a field that is accessible for merging into a template.
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="defaultValue"></param>
+        /// <param name="scopeSelector>"root|parent|current", or the index number of a scope in the current stack.</param>
+        /// <returns></returns>
+        void SetMergeFieldValue( string key, object value, string scopeSelector );
+
+        /// <summary>
+        /// Sets a collection of user-defined variables in the current context that are internally available to custom filters and tags.
+        /// </summary>
+        /// <param name="values"></param>
+        void SetMergeFieldValues( LavaDictionary values );
+
+        /// <summary>
+        /// Get or set the value of a field that is accessible for merging into a template.
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        object this[string key] { get; set; }
+
+        ILavaEngine LavaEngine { get; }
+
+        /// <summary>
+        /// Retrieves a nested stack of Environments, with the current environment first.
+        /// An environment holds the variables that have been defined by the container in which a Lava template is resolved.
+        /// </summary>
+        IList<LavaDictionary> GetEnvironments();
+
+        /// <summary>
+        /// Retrieves a nested stack of Variables, with the current context first.
+        /// A scope holds the variables that have been created and assigned in the process of resolving a Lava template.
+        /// </summary>
+        IList<LavaDictionary> GetScopes();
 
         /// <summary>
         /// Gets the set of merge fields in the current Lava source markup.
@@ -72,14 +113,6 @@ namespace Rock.Lava
         string ResolveMergeFields( string content, IDictionary<string, object> mergeObjects, string enabledLavaCommands, bool encodeStrings = false, bool throwExceptionOnErrors = false );
         string ResolveMergeFields( string content, IDictionary<string, object> mergeObjects );
 
-        object this[string key] { get; set; }
-
-        object GetValue( string key, object defaultValue );
-        void SetValue( string key, object value );
-
-        ILavaEngine LavaEngine { get; }
-
-
         /// <summary>
         /// pushes a new local scope on the stack, pops it at the end of the block
         /// 
@@ -93,7 +126,7 @@ namespace Rock.Lava
         /// <param name="newScope"></param>
         /// <param name="callback"></param>
         /// <returns></returns>
-        void Stack( LavaDictionary newScope, Action callback );
+        //void Stack( LavaDictionary newScope, Action callback );
 
         void Stack( Action callback );
 
@@ -101,12 +134,12 @@ namespace Rock.Lava
         /// Push new local scope on the stack. use <tt>Context#stack</tt> instead
         /// </summary>
         /// <param name="newScope"></param>
-        void Push( LavaDictionary newScope );
+        //void Push( LavaDictionary newScope );
 
         /// <summary>
         /// Pop from the stack. use <tt>Context#stack</tt> instead
         /// </summary>
-        LavaDictionary Pop();
+        //LavaDictionary Pop();
 
     }
 }

@@ -143,24 +143,7 @@ namespace Rock.Lava.Shortcodes
         private Dictionary<string, string> ParseMarkup( string markup, ILavaContext context )
         {
             // first run lava across the inputted markup
-            var internalMergeFields = new Dictionary<string, object>();
-
-            // get variables defined in the lava source
-            foreach ( var scope in context.Scopes )
-            {
-                foreach ( var item in scope )
-                {
-                    internalMergeFields.AddOrReplace( item.Key, item.Value );
-                }
-            }
-
-            // get merge fields loaded by the block or container
-            var containerMergeFields = context.GetMergeFieldsInContainerScope();
-
-            foreach ( var item in containerMergeFields )
-            {
-                internalMergeFields.AddOrReplace( item.Key, item.Value );
-            }
+            var internalMergeFields = context.GetMergeFieldsForLocalScope();
 
             var resolvedMarkup = markup.ResolveMergeFields( internalMergeFields );
 

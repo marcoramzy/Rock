@@ -165,9 +165,15 @@ namespace Rock.Lava.Blocks
             }
 
             var client = IndexContainer.GetActiveComponent();
+
+            if ( client == null )
+            {
+                throw new Exception( "Search results not available. Universal search is not enabled for this Rock instance." );
+            }
+
             var results = client.Search( query, searchType, entityIds, fieldCriteria, limit, offset );
 
-            context.Scopes.Last()[parms["iterator"]] = results;
+            context.SetMergeFieldValue( parms["iterator"], results, "root" );
 
             base.OnRender( context, result );
         }
@@ -187,25 +193,8 @@ namespace Rock.Lava.Blocks
         private Dictionary<string, string> ParseMarkup( string markup, ILavaContext context )
         {
             // first run lava across the inputted markup
-            var internalMergeFields = new Dictionary<string, object>();
+            var internalMergeFields = context.GetMergeFieldsForLocalScope();
 
-            // get variables defined in the lava source
-            foreach ( var scope in context.Scopes )
-            {
-                foreach ( var item in scope )
-                {
-                    internalMergeFields.AddOrReplace( item.Key, item.Value );
-                }
-            }
-
-            // get merge fields loaded by the block or container
-            if ( context.Environments.Count > 0 )
-            {
-                foreach ( var item in context.Environments[0] )
-                {
-                    internalMergeFields.AddOrReplace( item.Key, item.Value );
-                }
-            }
             var resolvedMarkup = markup.ResolveMergeFields( internalMergeFields );
 
             var parms = new Dictionary<string, string>();

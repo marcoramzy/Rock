@@ -222,9 +222,15 @@ namespace Rock.Tests.Integration.Lava
         /// </summary>
         /// <param name="expectedOutput"></param>
         /// <param name="inputTemplate"></param>
-        public void AssertTemplateOutput( string expectedOutput, string inputTemplate, ILavaContext context )
+        public void AssertTemplateOutput( string expectedOutput, string inputTemplate, ILavaContext context, bool ignoreWhitespace = false )
         {
             var outputString = GetTemplateOutput( inputTemplate, context );
+
+            if ( ignoreWhitespace )
+            {
+                outputString = Regex.Replace( outputString, @"\s*", string.Empty );
+                expectedOutput = Regex.Replace( expectedOutput, @"\s*", string.Empty );
+            }
 
             Assert.That.Equal( expectedOutput, outputString );
         }
@@ -234,9 +240,15 @@ namespace Rock.Tests.Integration.Lava
         /// </summary>
         /// <param name="expectedOutput"></param>
         /// <param name="inputTemplate"></param>
-        public void AssertTemplateOutput( string expectedOutput, string inputTemplate, LavaDictionary mergeValues = null )
+        public void AssertTemplateOutput( string expectedOutput, string inputTemplate, LavaDictionary mergeValues = null, bool ignoreWhitespace = false )
         {
             var outputString = GetTemplateOutput( inputTemplate, mergeValues );
+
+            if ( ignoreWhitespace )
+            {
+                outputString = Regex.Replace( outputString, @"\s*", string.Empty );
+                expectedOutput = Regex.Replace( expectedOutput, @"\s*", string.Empty );
+            }
 
             Assert.That.Equal( expectedOutput, outputString );
         }
@@ -251,6 +263,26 @@ namespace Rock.Tests.Integration.Lava
             var outputString = GetTemplateOutput( inputTemplate, mergeValues );
 
             var regex = new Regex(expectedOutputRegex);
+
+            StringAssert.Matches( outputString, regex );
+        }
+
+        /// <summary>
+        /// Process the specified input template and verify against the expected output regular expression.
+        /// </summary>
+        /// <param name="expectedOutputRegex"></param>
+        /// <param name="inputTemplate"></param>
+        public void AssertTemplateOutputRegex( string expectedOutputRegex, string inputTemplate, ILavaContext context, bool ignoreWhitespace = true )
+        {
+            var outputString = GetTemplateOutput( inputTemplate, context );
+
+            // If ignoring whitespace, replace any whitespace in the expected output regex with a greedy whitespace match.
+            if ( ignoreWhitespace )
+            {
+                expectedOutputRegex = Regex.Replace( expectedOutputRegex, @"\s+", @"\\s\*" );
+            }
+            
+            var regex = new Regex( expectedOutputRegex );
 
             StringAssert.Matches( outputString, regex );
         }

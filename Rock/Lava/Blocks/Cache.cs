@@ -266,26 +266,30 @@ namespace Rock.Lava.Blocks
         private string MergeLava( string lavaTemplate, ILavaContext context )
         {
             // Get enabled commands
-            var enabledCommands = context.Registers["EnabledCommands"].ToString();
+            var enabledCommands = context.GetEnabledCommands();
 
+            var lavaMergeFields = context.GetMergeFieldsForLocalScope();
+
+            /*
             // Get mergefields from lava context
             var lavaMergeFields = new Dictionary<string, object>();
-            if ( context.Environments?.Count > 0 )
+            if ( context.GetEnvironments?.Count > 0 )
             {
-                foreach ( var item in context.Environments[0] )
+                foreach ( var item in context.GetEnvironments[0] )
                 {
                     lavaMergeFields.Add( item.Key, item.Value );
                 }
             }
 
             // Add variables in the scope (defined in the lava itself via assign)
-            if ( context.Scopes?.Count > 0 )
+            if ( context.GetScopes?.Count > 0 )
             {
-                foreach ( var item in context.Scopes[0] )
+                foreach ( var item in context.GetScopes[0] )
                 {
                     lavaMergeFields.Add( item.Key, item.Value );
                 }
             }
+            */
 
             return lavaTemplate.ResolveMergeFields( lavaMergeFields, enabledCommands );
         }
@@ -299,25 +303,7 @@ namespace Rock.Lava.Blocks
         private Dictionary<string, string> ParseMarkup( string markup, ILavaContext context )
         {
             // first run lava across the inputted markup
-            var internalMergeFields = new Dictionary<string, object>();
-
-            // get variables defined in the lava source
-            foreach ( var scope in context.Scopes )
-            {
-                foreach ( var item in scope )
-                {
-                    internalMergeFields.AddOrReplace( item.Key, item.Value );
-                }
-            }
-
-            // get merge fields loaded by the block or container
-            if ( context.Environments.Count > 0 )
-            {
-                foreach ( var item in context.Environments[0] )
-                {
-                    internalMergeFields.AddOrReplace( item.Key, item.Value );
-                }
-            }
+            var internalMergeFields = context.GetMergeFieldsForLocalScope();
 
             var parms = new Dictionary<string, string>();
             parms.Add( "key", string.Empty );

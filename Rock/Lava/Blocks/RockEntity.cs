@@ -344,7 +344,7 @@ namespace Rock.Lava.Blocks
                         if ( parms.GetValueOrNull( "count" ).AsBoolean() )
                         {
                             int countResult = queryResult.Count();
-                            context.Scopes.Last()["count"] = countResult;
+                            context.SetMergeFieldValue( "count", countResult, "root" );
                         }
                         else
                         {
@@ -420,10 +420,10 @@ namespace Rock.Lava.Blocks
                             // if there is only one item to return set an alternative non-array based variable
                             if ( resultList.Count == 1 )
                             {
-                                context.Scopes.Last()[_entityName] = resultList.FirstOrDefault();
+                                context.SetMergeFieldValue( _entityName, resultList.FirstOrDefault(), "root" );
                             }
 
-                            context.Scopes.Last()[parms["iterator"]] = resultList;
+                            context.SetMergeFieldValue( parms["iterator"], resultList, "root" );
                         }
                     }
                 }
@@ -557,16 +557,18 @@ namespace Rock.Lava.Blocks
             Person currentPerson = null;
 
             // First check for a person override value included in lava context
-            if ( context.Scopes != null )
-            {
-                foreach ( var scopeHash in context.Scopes )
-                {
-                    if ( scopeHash.ContainsKey( "CurrentPerson" ) )
-                    {
-                        currentPerson = scopeHash["CurrentPerson"] as Person;
-                    }
-                }
-            }
+            currentPerson = context.GetMergeFieldValue( "CurrentPerson", null ) as Person;
+
+            //if ( context.GetScopes != null )
+            //{
+            //    foreach ( var scopeHash in context.GetScopes )
+            //    {
+            //        if ( scopeHash.ContainsKey( "CurrentPerson" ) )
+            //        {
+            //            currentPerson = scopeHash["CurrentPerson"] as Person;
+            //        }
+            //    }
+            //}
 
             if ( currentPerson == null )
             {
@@ -589,10 +591,13 @@ namespace Rock.Lava.Blocks
         private Dictionary<string, string> ParseMarkup( string markup, ILavaContext context )
         {
             // first run lava across the inputted markup
+            var internalMergeFields = context.GetMergeFieldsForLocalScope();
+
+            /*
             var internalMergeFields = new Dictionary<string, object>();
 
             // get variables defined in the lava source
-            foreach ( var scope in context.Scopes )
+            foreach ( var scope in context.GetScopes )
             {
                 foreach ( var item in scope )
                 {
@@ -601,13 +606,15 @@ namespace Rock.Lava.Blocks
             }
 
             // get merge fields loaded by the block or container
-            if ( context.Environments.Count > 0 )
+            if ( context.GetEnvironments.Count > 0 )
             {
-                foreach ( var item in context.Environments[0] )
+                foreach ( var item in context.GetEnvironments[0] )
                 {
                     internalMergeFields.AddOrReplace( item.Key, item.Value );
                 }
             }
+            */
+
             var resolvedMarkup = markup.ResolveMergeFields( internalMergeFields );
 
             var parms = new Dictionary<string, string>();

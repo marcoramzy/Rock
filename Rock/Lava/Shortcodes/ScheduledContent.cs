@@ -179,7 +179,7 @@ namespace Rock.Lava.Shortcodes
             var rockContext = new RockContext();
 
             // Get enabled security commands
-            _enabledSecurityCommands = context.EnabledCommands.JoinStrings(",");
+            _enabledSecurityCommands = context.GetEnabledCommands().JoinStrings(",");
 
             using ( TextWriter writer = new StringWriter() )
             {
@@ -300,16 +300,7 @@ namespace Rock.Lava.Shortcodes
             Person currentPerson = null;
 
             // First check for a person override value included in lava context
-            if ( context.Scopes != null )
-            {
-                foreach ( var scopeHash in context.Scopes )
-                {
-                    if ( scopeHash.ContainsKey( "CurrentPerson" ) )
-                    {
-                        currentPerson = scopeHash["CurrentPerson"] as Person;
-                    }
-                }
-            }
+            currentPerson = context.GetMergeFieldValue( "CurrentPerson", null ) as Person;
 
             if ( currentPerson == null )
             {

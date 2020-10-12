@@ -413,18 +413,26 @@ namespace Rock.Lava.DotLiquid
                 if ( itemParts.Length > 1 )
                 {
                     var scopeKey = itemParts[1].Trim();
+                    
+                    var scopeObject = context.GetMergeFieldValue( scopeKey, null );
+
+                    if ( scopeObject != null )
+                    {
+                        parms.AddOrReplace( itemParts[0].Trim().ToLower(), scopeObject );
+                        break;
+                    }
 
                     // context.Scopes is a weird beast can't find a cleaner way to get the object than to iterate over it
-                    foreach ( var scopeItem in context.Scopes )
-                    {
-                        var scopeObject = scopeItem.Where( x => x.Key == scopeKey ).FirstOrDefault();
+                    //foreach ( var scopeItem in context.GetScopes() )
+                    //{
+                    //    var scopeObject = scopeItem.Where( x => x.Key == scopeKey ).FirstOrDefault();
 
-                        if ( scopeObject.Value != null )
-                        {
-                            parms.AddOrReplace( itemParts[0].Trim().ToLower(), scopeObject.Value );
-                            break;
-                        }
-                    }
+                    //    if ( scopeObject.Value != null )
+                    //    {
+                    //        parms.AddOrReplace( itemParts[0].Trim().ToLower(), scopeObject.Value );
+                    //        break;
+                    //    }
+                    //}
                 }
             }
 

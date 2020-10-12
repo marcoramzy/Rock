@@ -70,11 +70,17 @@ namespace Rock.Lava
     {
         public LavaRenderParameters()
         {
+            EnabledCommands = new List<string>();
             Registers = new Dictionary<string, object>();
             InstanceAssigns = new Dictionary<string, object>();
             LocalVariables = new Dictionary<string, object>();
             ValueTypeTransformers = new Dictionary<Type, Func<object, object>>();
         }
+
+        /// <summary>
+        /// The set of Lava commands permitted for this rendering of the template.
+        /// </summary>
+        public List<string> EnabledCommands { get; set; }
 
         /// <summary>
         /// Private variable assignments that are shared with other instances of this template but are not available for rendering.

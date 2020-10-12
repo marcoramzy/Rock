@@ -83,7 +83,7 @@ namespace Rock.Lava.Blocks
                     case "select":
                         var results = DbService.GetDataSet( sql.ToString(), CommandType.Text, parms.ToDictionary( i => i.Key, i => ( object ) i.Value ), sqlTimeout );
 
-                        context.Scopes.Last()[parms["return"]] = results.Tables[0].ToDynamic();
+                        context.SetMergeFieldValue( parms["return"], results.Tables[0].ToDynamic(), "root"  );
                         break;
                     case "command":
                         var sqlParameters = new List<System.Data.SqlClient.SqlParameter>();
@@ -99,9 +99,9 @@ namespace Rock.Lava.Blocks
                             {
                                 rockContext.Database.CommandTimeout = sqlTimeout;
                             }
-                            int numOfRowEffected = rockContext.Database.ExecuteSqlCommand( sql.ToString(), sqlParameters.ToArray() );
+                            int numOfRowsAffected = rockContext.Database.ExecuteSqlCommand( sql.ToString(), sqlParameters.ToArray() );
 
-                            context.Scopes.Last()[parms["return"]] = numOfRowEffected;
+                            context.SetMergeFieldValue( parms["return"], numOfRowsAffected, "root" );
                         }
                         break;
                     default:
@@ -119,25 +119,7 @@ namespace Rock.Lava.Blocks
         private Dictionary<string, string> ParseMarkup( string markup, ILavaContext context )
         {
             // first run lava across the inputted markup
-            var internalMergeFields = new Dictionary<string, object>();
-
-            // get variables defined in the lava source
-            foreach ( var scope in context.Scopes )
-            {
-                foreach ( var item in scope )
-                {
-                    internalMergeFields.AddOrReplace( item.Key, item.Value );
-                }
-            }
-
-            // get merge fields loaded by the block or container
-            if ( context.Environments.Count > 0 )
-            {
-                foreach ( var item in context.Environments[0] )
-                {
-                    internalMergeFields.AddOrReplace( item.Key, item.Value );
-                }
-            }
+            var internalMergeFields = context.GetMergeFieldsForLocalScope();
 
             var parms = new Dictionary<string, string>();
             parms.Add( "return", "results" );

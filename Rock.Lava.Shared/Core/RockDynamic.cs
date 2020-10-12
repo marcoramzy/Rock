@@ -30,7 +30,7 @@ namespace Rock.Lava
     /// </summary>
     /// <seealso cref="System.Dynamic.DynamicObject" />
     /// <seealso cref="Rock.Lava.ILiquidizable" />
-    public class RockDynamic : DynamicObject, Lava.ILiquidizable
+    public class RockDynamic : DynamicObject, ILavaDataObject, Lava.ILiquidizable
     {
         private Dictionary<string, object> _members = new Dictionary<string, object>();
 
@@ -299,6 +299,39 @@ namespace Rock.Lava
             return propertyNames;
         }
 
+        /// <summary>
+        /// Provides the implementation for operations that get member values. Classes derived from the <see cref="T:System.Dynamic.DynamicObject" /> class can override this method to specify dynamic behavior for operations such as getting a value for a property.
+        /// </summary>
+        /// <param name="binder">Provides information about the object that called the dynamic operation. The binder.Name property provides the name of the member on which the dynamic operation is performed. For example, for the Console.WriteLine(sampleObject.SampleProperty) statement, where sampleObject is an instance of the class derived from the <see cref="T:System.Dynamic.DynamicObject" /> class, binder.Name returns "SampleProperty". The binder.IgnoreCase property specifies whether the member name is case-sensitive.</param>
+        /// <param name="result">The result of the get operation. For example, if the method is called for a property, you can assign the property value to <paramref name="result" />.</param>
+        /// <returns>
+        /// true if the operation is successful; otherwise, false. If this method returns false, the run-time binder of the language determines the behavior. (In most cases, a run-time exception is thrown.)
+        /// </returns>
+        public virtual bool TryGetMember( string memberName, out object result )
+        {
+            result = null;
+
+            // first check the dictionary for member
+            if ( _members.Keys.Contains( memberName ) )
+            {
+                result = _members[memberName];
+                return true;
+            }
+
+            // next check for public properties via Reflection
+            try
+            {
+                return GetProperty( _instance, memberName, out result );
+            }
+            catch
+            {
+            }
+
+            // failed to retrieve a property
+            result = null;
+            return false;
+        }
+
         #region ILiquid Implementation
         /// <summary>
         /// Gets the available keys (for debugging info).
@@ -355,12 +388,12 @@ namespace Rock.Lava
         }
 
         /// <summary>
-        /// Returns liquid for the object
+        /// Returns a Liquid framework compatible representation of the object.
         /// </summary>
         /// <returns></returns>
         public object ToLiquid()
         {
-            return this;
+            return AsDictionary();
         }
 
         /// <summary>
@@ -373,136 +406,27 @@ namespace Rock.Lava
             return this.GetDynamicMemberNames().Contains( key.ToString() );
         }
 
-        /// <summary>
-        /// Provides the implementation for operations that get member values. Classes derived from the <see cref="T:System.Dynamic.DynamicObject" /> class can override this method to specify dynamic behavior for operations such as getting a value for a property.
-        /// </summary>
-        /// <param name="binder">Provides information about the object that called the dynamic operation. The binder.Name property provides the name of the member on which the dynamic operation is performed. For example, for the Console.WriteLine(sampleObject.SampleProperty) statement, where sampleObject is an instance of the class derived from the <see cref="T:System.Dynamic.DynamicObject" /> class, binder.Name returns "SampleProperty". The binder.IgnoreCase property specifies whether the member name is case-sensitive.</param>
-        /// <param name="result">The result of the get operation. For example, if the method is called for a property, you can assign the property value to <paramref name="result" />.</param>
-        /// <returns>
-        /// true if the operation is successful; otherwise, false. If this method returns false, the run-time binder of the language determines the behavior. (In most cases, a run-time exception is thrown.)
-        /// </returns>
-        public virtual bool TryGetMember( string memberName, out object result )
-        {
-            result = null;
-
-            // first check the dictionary for member
-            if ( _members.Keys.Contains( memberName ) )
-            {
-                result = _members[memberName];
-                return true;
-            }
-
-            // next check for public properties via Reflection
-            try
-            {
-                return GetProperty( _instance, memberName, out result );
-            }
-            catch
-            {
-            }
-
-            // failed to retrieve a property
-            result = null;
-            return false;
-        }
-
         #endregion
 
-        #region IDictionary<string, object> implementation.
-
-        public ICollection<string> Keys
+        /// <summary>
+        /// Gets a dictionary populated with the properties of the dynamic object.
+        /// </summary>
+        /// <returns></returns>
+        public Dictionary<string, object> AsDictionary()
         {
-            get
-            {
-                return this.AvailableKeys;
-            }
-        }
-
-        public ICollection<object> Values
-        {
-            get
-            {
-                var dictionary = GetValueDictionary();
-
-                return dictionary.Values;
-            }
-        }
-
-        public int Count
-        {
-            get
-            {
-                return this.GetDynamicMemberNames().Count();
-            }
-        }
-
-        public bool IsReadOnly
-        {
-            get
-            {
-                return false;
-            }
-        }
-
-        public bool ContainsKey( string key )
-        {
-            return this.GetDynamicMemberNames().Contains( key );
-        }
-
-        public void Add( string key, object value )
-        {
-            this[key] = value;
-        }
-
-        public bool Remove( string key )
-        {
-            return ( (IDictionary<string, object>)_members ).Remove( key );
-        }
-
-        public bool TryGetValue( string key, out object value )
-        {
-            return this.TryGetMember( key, out value );
-        }
-
-        public void Add( KeyValuePair<string, object> item )
-        {
-            this[item.Key] = item.Value;
-        }
-
-        public void Clear()
-        {
-            ( (IDictionary<string, object>)_members ).Clear();
-        }
-
-        public bool Contains( KeyValuePair<string, object> item )
-        {
-            return ( (IDictionary<string, object>)_members ).Contains( item );
-        }
-
-        public void CopyTo( KeyValuePair<string, object>[] array, int arrayIndex )
-        {
-            ( (IDictionary<string, object>)_members ).CopyTo( array, arrayIndex );
-        }
-
-        public bool Remove( KeyValuePair<string, object> item )
-        {
-            return ( (IDictionary<string, object>)_members ).Remove( item );
-        }
-
-        public IEnumerator<KeyValuePair<string, object>> GetEnumerator()
-        {
-            return this.GetValueDictionary().GetEnumerator();
-        }
-
-        private Dictionary<string, object> GetValueDictionary()
-        {
+            /* [2020-10-01] DJL
+             * Although it would be preferable to implement the IDictionary<string, object> interface directly,
+             * doing so breaks the use of the RockDynamic class to store an individual row in the result set of a LINQ query.
+             * LINQ does not support the use of an IEnumerable to receive an individual row of data, and
+             * this technique is used in a number of places in the Rock codebase.
+             */
             var memberNames = this.GetDynamicMemberNames();
 
             var dictionary = new Dictionary<string, object>( _members );
 
             foreach ( var memberName in memberNames )
             {
-                if ( dictionary.ContainsKey( memberName ))
+                if ( dictionary.ContainsKey( memberName ) )
                 {
                     dictionary[memberName] = this[memberName];
                 }
@@ -513,9 +437,11 @@ namespace Rock.Lava
             }
 
             return dictionary;
-
         }
 
-        #endregion
+        public object GetValue( object key )
+        {
+            return this[key];
+        }
     }
 }

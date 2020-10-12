@@ -15,6 +15,7 @@
 // </copyright>
 //
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -25,7 +26,50 @@ using Rock.Common;
 
 namespace Rock.Lava.DotLiquid
 {
-    public class DotLiquidLavaContext : ILavaContext
+    public abstract class LavaContextBase : ILavaContext
+    {
+        public object this[string key]
+        {
+            get
+            {
+                return GetMergeFieldValue( key, null );
+            }
+            set
+            {
+                SetMergeFieldValue( key, value );
+            }
+        }
+
+        public abstract ILavaEngine LavaEngine { get; }
+
+        public abstract List<string> GetEnabledCommands();
+        public abstract IList<LavaDictionary> GetEnvironments();
+        public abstract LavaDictionary GetMergeFieldsForLocalScope();
+        public abstract IDictionary<string, object> GetMergeFieldsInContainerScope();
+        public abstract IDictionary<string, object> GetMergeFieldsInScope();
+        public abstract object GetMergeFieldValue( string key, object defaultValue );
+        public abstract LavaDictionary GetMergeFieldValues();
+        public abstract IList<LavaDictionary> GetScopes();
+        //public abstract LavaDictionary Pop();
+        //public abstract void Push( LavaDictionary newScope );
+        public abstract string ResolveMergeFields( string content, IDictionary<string, object> mergeObjects, string enabledLavaCommands, bool encodeStrings = false, bool throwExceptionOnErrors = false );
+        public abstract string ResolveMergeFields( string content, IDictionary<string, object> mergeObjects );
+        public abstract void SetEnabledCommands( IEnumerable<string> commands );
+        public void SetEnabledCommands( string commandList, string delimiter = "," )
+        {
+            var commands = commandList.SplitDelimitedValues( delimiter );
+
+            SetEnabledCommands( commands );
+        }
+
+        public abstract void SetMergeFieldValue( string key, object value );
+        public abstract void SetMergeFieldValue( string key, object value, string scopeSelector );
+        public abstract void SetMergeFieldValues( LavaDictionary values );
+        //public abstract void Stack( LavaDictionary newScope, Action callback );
+        public abstract void Stack( Action callback );
+    }
+
+    public class DotLiquidLavaContext : LavaContextBase
     {
         private Context _context;
 
@@ -42,50 +86,44 @@ namespace Rock.Lava.DotLiquid
             }
         }
 
-        public object this[string key]
+        //public object this[string key]
+        //{
+        //    get
+        //    {
+        //        return _context[key];
+        //    }
+        //    set
+        //    {
+        //        _context[key] = value;
+        //    }
+        //}
+
+
+        public override IList<LavaDictionary> GetEnvironments()
         {
-            get
+            var environments = new List<LavaDictionary>();
+
+            foreach ( var hash in _context.Environments )
             {
-                return _context[key];
+                environments.Add( new LavaDictionary( hash ) );
             }
-            set
-            {
-                _context[key] = value;
-            }
+
+            return environments;
         }
 
-        public IList<LavaDictionary> Environments
+        public override IList<LavaDictionary> GetScopes()
         {
-            get
+            var environments = new List<LavaDictionary>();
+
+            foreach ( var hash in _context.Scopes )
             {
-                var environments = new List<LavaDictionary>();
-
-                foreach ( var hash in _context.Environments )
-                {
-                    environments.Add( new LavaDictionary( hash ) );
-                }
-
-                return environments;
-            }
-        }
-
-        public IList<LavaDictionary> Scopes
-        {
-            get
-            {
-                var environments = new List<LavaDictionary>();
-
-                foreach ( var hash in _context.Scopes )
-                {
-                    environments.Add( new LavaDictionary( hash ) );
-                }
-
-                return environments;
+                environments.Add( new LavaDictionary( hash ) );
             }
 
+            return environments;
         }
 
-        public ILavaEngine LavaEngine
+        public override ILavaEngine LavaEngine
         {
             get
             {
@@ -93,73 +131,29 @@ namespace Rock.Lava.DotLiquid
             }
         }
 
-        private List<string> _enabledCommands = new List<string>();
+        //private List<string> _enabledCommands = new List<string>();
 
-        public IList<string> EnabledCommands
+        public override void SetEnabledCommands( IEnumerable<string> commands )
         {
-            get
+            if ( commands == null )
             {
-                return _enabledCommands;
-                //_enabledCommands
-                //if ( _context.Registers?.ContainsKey( "EnabledCommands" ) == true )
-                //{
-                //    return _context.Registers["EnabledCommands"].ToString().Split( ',' ).ToList();
-                //}
-
-                //return new List<string>();
+                _context.Registers["EnabledCommands"] = string.Empty;
             }
-            set
+            else
             {
-                if ( value == null )
-                {
-                    _enabledCommands = new List<string>();
-                }
-                else
-                {
-                    _enabledCommands = value.ToList();
-                }
+                _context.Registers["EnabledCommands"] = commands.JoinStrings( "," );
             }
         }
 
-        public LavaDictionary Registers
+        public override List<string> GetEnabledCommands()
         {
-            get
+            // The set of enabled Lava Commands is stored in the DotLiquid Registers collection.
+            if ( _context.Registers?.ContainsKey( "EnabledCommands" ) == true )
             {
-                return LavaDictionary.FromDictionary( _context.Registers );
-            }
-        }
-
-
-        public IDictionary<string, object> GetMergeFieldsInContainerScope()
-        {
-            // get merge fields loaded by the block or container
-            var internalMergeFields = new Dictionary<string, object>();
-
-            if ( _context.Environments.Count > 0 )
-            {
-                foreach ( var item in _context.Environments[0] )
-                {
-                    internalMergeFields.AddOrReplace( item.Key, item.Value );
-                }
+                return _context.Registers["EnabledCommands"].ToString().Split( ',' ).ToList();
             }
 
-            return internalMergeFields;
-        }
-
-        public IDictionary<string, object> GetMergeFieldsInScope()
-        {
-            var internalMergeFields = new Dictionary<string, object>();
-
-            // get variables defined in the lava source
-            foreach ( var scope in _context.Scopes )
-            {
-                foreach ( var item in scope )
-                {
-                    internalMergeFields.AddOrReplace( item.Key, item.Value );
-                }
-            }
-
-            return internalMergeFields;
+            return new List<string>();
         }
 
         /// <summary>
@@ -167,7 +161,7 @@ namespace Rock.Lava.DotLiquid
         /// Values are defined by the outermost container first, and overridden by values defined in a contained scope.
         /// </summary>
         /// <returns></returns>
-        public LavaDictionary GetMergeFieldsForLocalScope()
+        public override LavaDictionary GetMergeFieldsForLocalScope()
         {
             var fields = new LavaDictionary();
 
@@ -180,7 +174,7 @@ namespace Rock.Lava.DotLiquid
                 }
             }
 
-            // Second, apply overrides defined by the block or container
+            // Second, apply overrides defined by the block or container in which the template is being resolved.
             foreach ( var environment in _context.Environments )
             {
                 foreach ( var item in environment )
@@ -195,7 +189,13 @@ namespace Rock.Lava.DotLiquid
             return fields;
         }
 
-        public object GetValue( string key, object defaultValue )
+        /// <summary>
+        /// Get the value of a field that is accessible for merging into a template.
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="defaultValue"></param>
+        /// <returns></returns>
+        public override object GetMergeFieldValue( string key, object defaultValue )
         {
             if ( !_context.HasKey(key) )
             {
@@ -205,7 +205,15 @@ namespace Rock.Lava.DotLiquid
             return _context[key];
         }
 
-        public string ResolveMergeFields( string content, IDictionary<string, object> mergeObjects, string enabledLavaCommands, bool encodeStrings = false, bool throwExceptionOnErrors = false )
+        /// <summary>
+        /// Get a dictionary of field values that are accessible for merging in to a template.
+        /// </summary>
+        public override LavaDictionary GetMergeFieldValues()
+        {
+            return LavaDictionary.FromDictionary( _context.Registers );
+        }
+
+        public override string ResolveMergeFields( string content, IDictionary<string, object> mergeObjects, string enabledLavaCommands, bool encodeStrings = false, bool throwExceptionOnErrors = false )
         {
             try
             {
@@ -235,15 +243,59 @@ namespace Rock.Lava.DotLiquid
             }
         }
 
-        public string ResolveMergeFields( string content, IDictionary<string, object> mergeObjects )
+        public override string ResolveMergeFields( string content, IDictionary<string, object> mergeObjects )
         {
             var enabledCommands = string.Empty; // GlobalAttributesCache.Get().GetValue( "DefaultEnabledLavaCommands" );
             return ResolveMergeFields( content, mergeObjects, enabledCommands );
         }
 
-        public void SetValue( string key, object value )
+        public override void SetMergeFieldValue( string key, object value )
         {
-            throw new NotImplementedException();
+            var fieldValue = GetDotLiquidCompatibleValue( value );
+
+            // Use the default implementation to set a variable in the current scope.
+            _context[key] = fieldValue;
+        }
+
+        public override void SetMergeFieldValue( string key, object value, string scopeReference )
+        {
+            int? scopeIndex;
+
+            if ( string.IsNullOrWhiteSpace( scopeReference ) )
+            {
+                scopeIndex = 0;
+            }
+            else
+            { 
+                scopeReference = scopeReference.Trim().ToLower();
+
+                if ( scopeReference == "root" )
+                {
+                    scopeIndex = _context.Scopes.Count - 1;
+                }
+                else if ( scopeReference == "parent" )
+                {
+                    scopeIndex = 1;
+                }
+                else if ( scopeReference == "current" )
+                {
+                    scopeIndex = 0;
+                }
+                else
+                {
+                    scopeIndex = scopeReference.AsIntegerOrNull();
+                }
+            }
+
+            if ( scopeIndex == null )
+            {
+                throw new Exception( $"SetMergeFieldValue failed. Scope reference \"{ scopeReference }\" is invalid." );
+            }
+
+            var fieldValue = GetDotLiquidCompatibleValue( value );
+
+            // Set the variable in the specified scope.
+            _context.Scopes[scopeIndex.Value][key] = fieldValue;
         }
 
         /// <summary>
@@ -350,32 +402,45 @@ namespace Rock.Lava.DotLiquid
         /// Push new local scope on the stack. use <tt>Context#stack</tt> instead
         /// </summary>
         /// <param name="newScope"></param>
-        public void Push( LavaDictionary newScope )
-        {
-            if ( Scopes.Count > 80 )
-            {
-                throw new StackLevelException( "ContextStackException" );
-            }
+        //public override void Push( LavaDictionary newScope )
+        //{
+        //    if ( _context.Scopes.Count > 80 )
+        //    {
+        //        throw new StackLevelException( "ContextStackException" );
+        //    }
 
-            Scopes.Insert( 0, newScope );
-        }
+        //    _context.Scopes.Insert( 0, newScope. Hash.FromDictionary( newScope ) );
+        //}
 
         /// <summary>
         /// Pop from the stack. use <tt>Context#stack</tt> instead
         /// </summary>
-        public LavaDictionary Pop()
-        {
-            if ( Scopes.Count == 1 )
-            {
-                throw new ContextException();
-            }
+        //public override LavaDictionary Pop()
+        //{
+        //    if ( _context.Scopes.Count == 1 )
+        //    {
+        //        throw new ContextException();
+        //    }
 
-            var result = Scopes[0];
+        //    var result = LavaDictionary.FromDictionary( _context.Scopes[0] );
 
-            Scopes.RemoveAt( 0 );
+        //    _context.Scopes.RemoveAt( 0 );
 
-            return result;
-        }
+        //    return result;
+        //}
+
+        //public override void Stack( LavaDictionary newScope, Action callback )
+        //{
+        //    Push( newScope );
+        //    try
+        //    {
+        //        callback();
+        //    }
+        //    finally
+        //    {
+        //        Pop();
+        //    }
+        //}
 
         /// <summary>
         /// pushes a new local scope on the stack, pops it at the end of the block
@@ -390,23 +455,128 @@ namespace Rock.Lava.DotLiquid
         /// <param name="newScope"></param>
         /// <param name="callback"></param>
         /// <returns></returns>
-        public void Stack( LavaDictionary newScope, Action callback )
+        public override void Stack( Action callback )
         {
-            Push( newScope );
+            //Stack( new LavaDictionary(), callback );
+
+            // Push a new scope onto the stack.
+            if ( _context.Scopes.Count > 80 )
+            {
+                throw new StackLevelException( "ContextStackException" );
+            }
+
+            var newScope = new Hash();
+
+            _context.Scopes.Insert( 0, newScope );
+
             try
             {
                 callback();
             }
             finally
             {
-                Pop();
+                if ( _context.Scopes.Count == 1 )
+                {
+                    throw new ContextException();
+                }
+
+                //var result = LavaDictionary.FromDictionary( _context.Scopes[0] );
+
+                _context.Scopes.RemoveAt( 0 );
+
+                //return result;
+
+
+                //                Pop();
+            }
+
+        }
+
+        public void ClearValues()
+        {
+            _context.ClearInstanceAssigns();
+        }
+
+        public override void SetMergeFieldValues( LavaDictionary values )
+        {
+            if ( values == null )
+            {
+                return;
+            }
+
+            foreach ( var kvp in values )
+            {
+                SetMergeFieldValue( kvp.Key, kvp.Value );
             }
         }
 
-        public void Stack( Action callback )
+        private object GetDotLiquidCompatibleValue( object value )
         {
-            Stack( new LavaDictionary(), callback );
+            if ( value == null
+                 || value is string
+                 || value is IEnumerable
+                 || value is decimal
+                 || value is DateTime
+                 || value is DateTimeOffset
+                 || value is TimeSpan
+                 || value is Guid
+                 || value is Enum
+                 || value is KeyValuePair<string, object>
+                 || value.GetType().IsPrimitive
+                 )
+            {
+                return value;
+            }
 
+            var safeTypeTransformer = Template.GetSafeTypeTransformer( value.GetType() );
+
+            if ( safeTypeTransformer != null )
+            {
+                return safeTypeTransformer( value );
+            }
+
+            return value;
         }
+
+
+        #region Unused???
+
+        //TODO: Remove this?
+        public override IDictionary<string, object> GetMergeFieldsInContainerScope()
+        {
+            // get merge fields loaded by the block or container
+            var internalMergeFields = new Dictionary<string, object>();
+
+            if ( _context.Environments.Count > 0 )
+            {
+                foreach ( var item in _context.Environments[0] )
+                {
+                    internalMergeFields.AddOrReplace( item.Key, item.Value );
+                }
+            }
+
+            return internalMergeFields;
+        }
+
+        // TODO: Remove this?
+        public override IDictionary<string, object> GetMergeFieldsInScope()
+        {
+            var internalMergeFields = new Dictionary<string, object>();
+
+            // get variables defined in the lava source
+            foreach ( var scope in _context.Scopes )
+            {
+                foreach ( var item in scope )
+                {
+                    internalMergeFields.AddOrReplace( item.Key, item.Value );
+                }
+            }
+
+            return internalMergeFields;
+        }
+
+        #endregion
+
+
     }
 }

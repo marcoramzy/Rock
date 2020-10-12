@@ -22,7 +22,7 @@ using Rock.Tests.Shared;
 namespace Rock.Tests.UnitTests.Lava
 {
     [TestClass]
-    public class ObjectFilterTests
+    public class ObjectPropertyTests
     {
         private static LavaTestHelper _helper;
 
@@ -44,54 +44,56 @@ namespace Rock.Tests.UnitTests.Lava
         /// Referencing a valid property of an input object should return the property value.
         /// </summary>
         [TestMethod]
-        public void Property_FirstLevelPropertyAccess_ReturnsPropertyValue()
+        public void ObjectProperty_DotNotationPropertyAccess_ReturnsPropertyValue()
         {
+            System.Diagnostics.Debug.Print( _helper.GetTestPersonTedDecker().ToString() );
+
             var mergeValues = new LavaDictionary { { "CurrentPerson", _helper.GetTestPersonTedDecker() } };
 
-            _helper.AssertTemplateOutput( "Decker", "{{ CurrentPerson | Property:'LastName' }}", mergeValues );
+            _helper.AssertTemplateOutput( "Decker", "{{ CurrentPerson.LastName }}", mergeValues );
         }
 
         /// <summary>
         /// Accessing a nested property using dot-notation "Campus.Name" should return the correct value.
         /// </summary>
         [TestMethod]
-        public void Property_SecondLevelPropertyAccess_ReturnsValue()
+        public void ObjectProperty_DotNotationNestedPropertyAccess_ReturnsPropertyValue()
         {
             var mergeValues = new LavaDictionary { { "CurrentPerson", _helper.GetTestPersonTedDecker() } };
 
-            _helper.AssertTemplateOutput( "North Campus", "{{ CurrentPerson | Property:'Campus.Name' }}", mergeValues );
+            _helper.AssertTemplateOutput( "North Campus", "{{ CurrentPerson.Campus.Name' }}", mergeValues );
         }
 
         /// <summary>
         /// Referencing a non-existent property of an input object should return an empty string.
         /// </summary>
         [TestMethod]
-        public void Property_InvalidPropertyName_ReturnsEmptyString()
+        public void ObjectProperty_DotNotationInvalidPropertyName_ReturnsEmptyString()
         {
             var mergeValues = new LavaDictionary { { "CurrentPerson", _helper.GetTestPersonTedDecker() } };
 
-            _helper.AssertTemplateOutput( string.Empty, "{{ CurrentPerson | Property:'NonexistentProperty' }}", mergeValues );
+            _helper.AssertTemplateOutput( string.Empty, "{{ CurrentPerson.NonexistentProperty' }}", mergeValues );
         }
 
         /// <summary>
         /// Accessing the property of a nested dynamically-typed object should return the correct value.
         /// </summary>
-        //[TestMethod]
-        //public void Property_AnonymousObjectPropertyAccess_ReturnsValue()
-        //{
-        //    var groupMember = new
-        //    {
-        //        GroupName = "Group 1",
-        //        GroupRole = new { Name = "Member", IsLeader = false },
-        //        Person = new { FirstName = "Alex", LastName = "Andrews", Address = new { Street = "1 Main St", City = "MyTown" } }
-        //    };
+        [TestMethod]
+        public void ObjectProperty_DotNotationPropertyAccessForAnonymousObject_ReturnsValue()
+        {
+            var groupMember = new
+            {
+                GroupName = "Group 1",
+                GroupRole = new { Name = "Member", IsLeader = false },
+                Person = new { FirstName = "Alex", LastName = "Andrews", Address = new { Street = "1 Main St", City = "MyTown" } }
+            };
 
-        //    var mergeValues = new LavaDictionary { { "GroupMember", groupMember } };
+            var mergeValues = new LavaDictionary { { "GroupMember", groupMember } };
 
-        //    _helper.AssertTemplateOutput( "Group 1: Andrews, Alex (1 Main St)",
-        //        "{{ GroupMember.GroupName }}: {{ GroupMember.Person.LastName }}, {{ GroupMember.Person.FirstName }} ({{ GroupMember.Person.Address.Street }})",
-        //        mergeValues );
+            _helper.AssertTemplateOutput( "Group 1: Andrews, Alex (1 Main St)",
+                "{{ GroupMember.GroupName }}: {{ GroupMember.Person.LastName }}, {{ GroupMember.Person.FirstName }} ({{ GroupMember.Person.Address.Street }})",
+                mergeValues );
 
-        //}
+        }
     }
 }

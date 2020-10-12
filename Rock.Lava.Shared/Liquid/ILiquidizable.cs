@@ -14,6 +14,7 @@
 // limitations under the License.
 // </copyright>
 //
+using System;
 using System.Collections.Generic;
 
 namespace Rock.Lava
@@ -22,6 +23,7 @@ namespace Rock.Lava
     /// Represents an object model that can be used with the Lava implementation of the Liquid templating language.
     /// This is a legacy interface, duplicated from the DotLiquid project.
     /// </summary>
+    [Obsolete("Use ILavaDataObject instead.")]
     public interface ILiquidizable
     {
         object ToLiquid();

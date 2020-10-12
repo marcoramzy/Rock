@@ -26,7 +26,7 @@ namespace Rock.Model
     /// </summary>
     [Table( "GroupTypeLocationType" )]
     [DataContract]
-    public class GroupTypeLocationType: ILavaDataObject
+    public class GroupTypeLocationType: ILavaDataObjectSource
     {
         /// <summary>
         /// Gets or sets the Id of the <see cref="Rock.Model.GroupType"/>. This property is required, and is part of the key.
@@ -69,6 +69,11 @@ namespace Rock.Model
         /// </value>
         [DataMember]
         public virtual Model.DefinedValue LocationTypeValue { get; set; }
+
+        public ILavaDataObject GetLavaDataObject()
+        {
+            return new LavaDictionary( LocationTypeValue );
+        }
 
         /// <summary>
         /// To the liquid.

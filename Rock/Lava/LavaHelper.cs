@@ -249,16 +249,7 @@ namespace Rock.Lava
             Person currentPerson = null;
 
             // First, check for a person override value included in the lava context.
-            if ( context.Scopes != null )
-            {
-                foreach ( var scope in context.Scopes )
-                {
-                    if ( scope.ContainsKey( currentPersonKey ) )
-                    {
-                        currentPerson = scope[currentPersonKey] as Person;
-                    }
-                }
-            }
+            currentPerson = context.GetMergeFieldValue( currentPersonKey, null ) as Person;
 
             if ( currentPerson == null )
             {

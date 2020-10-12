@@ -4,21 +4,17 @@ using System.Collections.Generic;
 using System.Reflection;
 
 namespace Rock.Lava
-{
-    public interface ILavaDictionary
-    {
-        
-    }
-
+{ 
     /// <summary>
     /// A case-insensitive dictionary implementation for storing variables used to resolve Lava templates.
     /// </summary>
-    public class LavaDictionary : IDictionary<string, object>, IDictionary, ILavaDataObject
+    public class LavaDictionary : IDictionary<string, object>, IDictionary
     {
         #region Fields
 
         private readonly Func<LavaDictionary, string, object> _lambda;
         private readonly Dictionary<string, object> _nestedDictionary;
+        private readonly object _defaultValue;
 
         #endregion
 
@@ -26,37 +22,29 @@ namespace Rock.Lava
 
         public static LavaDictionary FromAnonymousObject( object anonymousObject )
         {
-            return new LavaDictionary( anonymousObject );
+            LavaDictionary result = new LavaDictionary();
+            if ( anonymousObject != null )
+                foreach ( PropertyInfo property in anonymousObject.GetType().GetProperties() )
+                    result[property.Name] = property.GetValue( anonymousObject, null );
+            return result;
         }
 
         public static LavaDictionary FromDictionary( IDictionary<string, object> dictionary )
         {
-            return new LavaDictionary( dictionary );
+            LavaDictionary result = new LavaDictionary();
+            foreach ( var keyValue in dictionary )
+                result.Add( keyValue );
+            return result;
         }
 
         #endregion
 
         #region Constructors
 
-        public LavaDictionary( object anonymousObject )
+        public LavaDictionary( object defaultValue )
+            : this()
         {
-            if ( anonymousObject == null )
-            {
-                return;
-            }
-
-            foreach ( PropertyInfo property in anonymousObject.GetType().GetProperties() )
-            {
-                this[property.Name] = property.GetValue( anonymousObject, null );
-            }
-        }
-
-        public LavaDictionary( IDictionary<string, object> dictionary )
-        {
-            foreach ( var keyValue in dictionary )
-            {
-                this.Add( keyValue );
-            }
+            _defaultValue = defaultValue;
         }
 
         public LavaDictionary( Func<LavaDictionary, string, object> lambda )
@@ -86,6 +74,9 @@ namespace Rock.Lava
 
             if ( _lambda != null )
                 return _lambda( this, key );
+
+            if ( _defaultValue != null )
+                return _defaultValue;
 
             return null;
         }
@@ -222,26 +213,6 @@ namespace Rock.Lava
             return _nestedDictionary.TryGetValue( key, out value );
         }
 
-        public object GetValue( object key )
-        {
-            if ( key == null )
-            {
-                return null;
-            }
-
-            return GetValue( key.ToString() );
-        }
-
-        public bool ContainsKey( object key )
-        {
-            if ( key == null )
-            {
-                return false;
-            }
-
-            return ContainsKey( key.ToString() );
-        }
-
         public object this[string key]
         {
             get { return GetValue( key ); }
@@ -262,8 +233,6 @@ namespace Rock.Lava
         {
             get { return _nestedDictionary.Values; }
         }
-
-        public List<string> AvailableKeys => throw new NotImplementedException();
 
         #endregion
     }

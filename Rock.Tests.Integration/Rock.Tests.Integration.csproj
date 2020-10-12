@@ -138,12 +138,13 @@
     <Compile Include="Jobs\RockJobListenerTestJob.cs" />
     <Compile Include="Jobs\SendPrayerCommentsJobTests.cs" />
     <Compile Include="Jobs\RockJobListenerTests.cs" />
+    <Compile Include="Lava\ScopeTests.cs" />
     <Compile Include="Lava\CachingTests.cs" />
     <Compile Include="Lava\Filters\DateFilterTests.cs" />
     <Compile Include="Lava\Filters\NumericFilterTests.cs" />
     <Compile Include="Lava\LavaTestHelper.cs" />
-    <Compile Include="Lava\Shortcodes\ShortcodeTests.cs" />
-    <Compile Include="Lava\Blocks\BlockTests.cs" />
+    <Compile Include="Lava\ShortcodeTests.cs" />
+    <Compile Include="Lava\CommandTests.cs" />
     <Compile Include="Lava\SqlTests.cs" />
     <Compile Include="Lava\RockEntityTests.cs" />
     <Compile Include="Model\IdentityVerificationCodeTests.cs" />
@@ -270,6 +271,8 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Constants\" />
+    <Folder Include="Lava\Blocks\" />
+    <Folder Include="Lava\Shortcodes\" />
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

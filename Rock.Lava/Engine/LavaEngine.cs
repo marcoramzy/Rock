@@ -96,13 +96,7 @@ namespace Rock.Lava
         {
             var context = NewContext();
 
-            if ( mergeValues != null )
-            {
-                foreach ( var key in mergeValues.Keys )
-                {
-                    context.Registers.Add( key, mergeValues[key] );
-                }
-            }
+            context.SetMergeFieldValues( mergeValues );
 
             return TryRender( inputTemplate, out output, context );
         }

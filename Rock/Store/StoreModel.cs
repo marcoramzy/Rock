@@ -23,13 +23,20 @@ namespace Rock.Store
     /// <summary>
     /// Base model class for the store 
     /// </summary>
-    public class StoreModel : ILavaDataObject
+    public class StoreModel : ILavaDataObjectSource
     {
 
         /// <summary>
         /// Initializes a new instance of the <see cref="StoreModel"/> class.
         /// </summary>
         public StoreModel() { }
+
+        public ILavaDataObject GetLavaDataObject()
+        {
+            var dictionary = this.ToLiquid( false ) as Dictionary<string, object>;
+
+            return new LavaDictionary( dictionary );
+        }
 
         /// <summary>
         /// Creates a DotLiquid compatible dictionary that represents the current entity object. 
@@ -54,8 +61,7 @@ namespace Rock.Store
             Type entityType = this.GetType();
 
             foreach ( var propInfo in entityType.GetProperties() )
-            {
-                
+            {                
                 object propValue = propInfo.GetValue( this, null );
 
                 if ( propValue is Guid )
@@ -63,9 +69,9 @@ namespace Rock.Store
                     propValue = ((Guid)propValue).ToString();
                 }
 
-                if ( debug && propValue is ILavaDataObject )
+                if ( debug && propValue is ILavaDataObjectSource )
                 {
-                    dictionary.Add( propInfo.Name, ((ILavaDataObject)propValue).ToLiquid() );
+                    dictionary.Add( propInfo.Name, ((ILavaDataObjectSource)propValue).GetLavaDataObject() );
                 }
                 else
                 {
