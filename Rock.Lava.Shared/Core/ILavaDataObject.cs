@@ -19,6 +19,8 @@ namespace Rock.Lava
     /// </summary>
     public interface ILavaDataObject
     {
+        //object this[object key] { get; }
+
         object GetValue( object key );
 
         bool ContainsKey( object key );

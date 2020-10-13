@@ -17,6 +17,7 @@
 using System;
 using System.Collections.Generic;
 using Rock.Data;
+using Rock.Lava;
 using Rock.Model;
 
 namespace Rock.Communication.SmsActions
@@ -24,8 +25,8 @@ namespace Rock.Communication.SmsActions
     /// <summary>
     /// 
     /// </summary>
-    /// <seealso cref="Rock.Lava.ILiquidizable" />
-    public class SmsMessage : Lava.ILiquidizable
+    /// <seealso cref="Rock.ILavaDataObject" />
+    public class SmsMessage : ILavaDataObject
     {
         /// <summary>
         /// Gets or sets the number the message was sent to.
@@ -106,6 +107,19 @@ namespace Rock.Communication.SmsActions
 
                 return availableKeys;
             }
+        }
+
+        /// <summary>
+        /// Gets the <see cref="System.Object"/> with the specified key.
+        /// </summary>
+        /// <value>
+        /// The <see cref="System.Object"/>.
+        /// </value>
+        /// <param name="key">The key.</param>
+        /// <returns></returns>
+        public object GetValue( object key )
+        {
+            return this[key];
         }
 
         /// <summary>

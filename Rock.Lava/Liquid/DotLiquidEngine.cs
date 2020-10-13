@@ -112,7 +112,7 @@ namespace Rock.Lava.DotLiquid
                 }
             }
 
-            RegisterSafeType( typeof( Rock.Lava.ILiquidizable ) );
+            //RegisterSafeType( typeof( Rock.Lava.ILiquidizable ) );
             RegisterSafeType( typeof( Rock.Lava.ILavaDataObject ) );
         }
 
@@ -140,9 +140,9 @@ namespace Rock.Lava.DotLiquid
 
         public override void RegisterSafeType( Type type, string[] allowedMembers = null )
         {
-            if ( type is Rock.Lava.ILiquidizable )
+            if ( type is Rock.Lava.ILavaDataObjectSource )
             {
-                Template.RegisterSafeType( type, ( x ) => { return ( (Rock.Lava.ILiquidizable)x ).ToLiquid(); } );
+                Template.RegisterSafeType( type, ( x ) => { return ( (Rock.Lava.ILavaDataObjectSource)x ).GetLavaDataObject(); } );
             }
             else if ( type is Rock.Lava.ILavaDataObject )
             {
@@ -157,8 +157,14 @@ namespace Rock.Lava.DotLiquid
             }
             else
             {
-                // Wrap the object in a RockDynamic proxy.
-                Template.RegisterSafeType( type, ( x ) => { return new RockDynamic( x ).ToLiquid(); } );
+                // Wrap the object in a RockDynamic proxy, and a DotLiquid compatible proxy.
+                //Template.RegisterSafeType( type, ( x ) => { return new RockDynamic( x ).ToLiquid(); } );
+                Template.RegisterSafeType( type, ( x ) =>
+                {
+                    var dynamicObject = new RockDynamic( x );
+                    var wrapper = new DotLiquidLavaDataObjectProxy( dynamicObject );
+                    return wrapper;
+                } );
             }
         }
 

@@ -57,11 +57,11 @@ namespace Rock.Lava.Blocks
         /// <param name="markup">The markup.</param>
         /// <param name="tokens">The tokens.</param>
         /// <exception cref="System.Exception">Could not find the variable to place results in.</exception>
-        public override void OnInitialize( string tagName, string markup, List<string> tokens )
+        public override void OnInitialize( string tagName, string markup, IEnumerable<string> tokens )
         {
             _markup = markup;
 
-            base.Initialize( tagName, markup, tokens );
+            base.OnInitialize( tagName, markup, tokens );
         }
 
         /// <summary>

@@ -97,6 +97,7 @@
     <Compile Include="Filters\Generic\TemplateFilters.Text.partial.cs" />
     <Compile Include="Liquid\Blocks\DotLiquidDynamicShortcodeBlock.cs" />
     <Compile Include="Liquid\Blocks\DynamicShortcodeInline.cs" />
+    <Compile Include="Liquid\DotLiquidLavaDataObjectProxy.cs" />
     <Compile Include="Liquid\DotLiquidDynamicShortcodeTagFactory.cs" />
     <Compile Include="Liquid\DotLiquidEngine.cs" />
     <Compile Include="Liquid\DotLiquidLavaContext.cs" />

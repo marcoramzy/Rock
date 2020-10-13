@@ -30,7 +30,7 @@ namespace Rock.Lava
     /// </summary>
     /// <seealso cref="System.Dynamic.DynamicObject" />
     /// <seealso cref="Rock.Lava.ILiquidizable" />
-    public class RockDynamic : DynamicObject, ILavaDataObject, Lava.ILiquidizable
+    public class RockDynamic : DynamicObject, ILavaDataObject
     {
         private Dictionary<string, object> _members = new Dictionary<string, object>();
 

@@ -125,9 +125,9 @@ namespace Rock
             }
 
             // If the object is liquidable, get the object return by its ToLiquid() method.
-            if ( myObject is ILiquidizable )
+            if ( myObject is ILavaDataObjectSource )
             {
-                myObject = ( (ILiquidizable)myObject ).ToLiquid();
+                myObject = ( (ILavaDataObjectSource)myObject ).GetLavaDataObject();
             }
 
             // If the object is null, return an empty string
@@ -206,9 +206,9 @@ namespace Rock
             }
 
             // If the object is a Rock Liquidizable object, call the object's AvailableKeys method to determine the properties available.
-            if ( myObject is Lava.ILiquidizable )
+            if ( myObject is ILavaDataObject )
             {
-                var liquidObject = (Lava.ILiquidizable)myObject;
+                var liquidObject = (ILavaDataObject)myObject;
 
                 var result = new Dictionary<string, object>();
 
@@ -247,7 +247,7 @@ namespace Rock
                                     {
                                         if ( entryCollection.IsLoaded )
                                         {
-                                            propValue = liquidObject[key];
+                                            propValue = liquidObject.GetValue(key);
                                         }
                                         else
                                         {
@@ -266,7 +266,7 @@ namespace Rock
                                             catch
                                             {
                                                 // The Collection might be a database model that isn't an IEntity, so just do it the regular way
-                                                propValue = liquidObject[key];
+                                                propValue = liquidObject.GetValue(key);
                                             }
                                         }
                                     }
@@ -274,7 +274,7 @@ namespace Rock
                             }
                             else
                             {
-                                propValue = liquidObject[key];
+                                propValue = liquidObject.GetValue(key);
                             }
 
                             if ( propValue != null )

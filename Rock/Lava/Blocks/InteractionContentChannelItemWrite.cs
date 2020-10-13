@@ -52,11 +52,11 @@ namespace Rock.Lava.Blocks
         /// <param name="tagName">Name of the tag.</param>
         /// <param name="markup">The markup.</param>
         /// <param name="tokens">The tokens.</param>
-        public override void OnInitialize( string tagName, string markup, List<string> tokens )
+        public override void OnInitialize( string tagName, string markup, IEnumerable<string> tokens )
         {
             _markup = markup;
 
-            base.Initialize( tagName, markup, tokens );
+            base.OnInitialize( tagName, markup, tokens );
         }
 
         /// <summary>

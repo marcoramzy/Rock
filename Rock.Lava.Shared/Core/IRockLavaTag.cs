@@ -29,9 +29,9 @@ namespace Rock.Lava
         /// </summary>
         string TagName { get; }
 
-        void Initialize( string tagName, string markup, IEnumerable<string> tokens );
+        void OnInitialize( string tagName, string markup, IEnumerable<string> tokens );
 
-        void Render( ILavaContext context, TextWriter result );
+        void OnRender( ILavaContext context, TextWriter result );
 
 
         /// <summary>

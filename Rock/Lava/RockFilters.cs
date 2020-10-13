@@ -2408,11 +2408,11 @@ namespace Rock.Lava
                         propertyValue = null;
                     }
                 }
-                else if ( propertyValue is RockDynamic dynamicObject )
+                else if ( propertyValue is ILavaDataObject dynamicObject )
                 {
                     if ( dynamicObject.ContainsKey( propName ) )
                     {
-                        propertyValue = dynamicObject[propName];
+                        propertyValue = dynamicObject.GetValue( propName );
                         if ( propertyValue != null )
                         {
                             valueType = propertyValue.GetType();
@@ -5121,13 +5121,13 @@ namespace Rock.Lava
 
                 foreach ( var value in ( ( IEnumerable ) input ) )
                 {
-                    if ( value is ILiquidizable )
+                    if ( value is ILavaDataObject )
                     {
-                        var liquidObject = value as ILiquidizable;
+                        var liquidObject = value as ILavaDataObject;
                         //var condition = DotLiquid.Condition.Operators["=="];
 
                         if ( liquidObject.ContainsKey( filterKey )
-                             && lavaEngine.AreEqualValue( liquidObject[filterKey], filterValue ) )
+                             && lavaEngine.AreEqualValue( liquidObject.GetValue( filterKey ), filterValue ) )
                         {
                             result.Add( liquidObject );
                         }
@@ -5167,12 +5167,12 @@ namespace Rock.Lava
 
                 foreach ( var value in ( ( IEnumerable ) input ) )
                 {
-                    if ( value is ILiquidizable )
+                    if ( value is ILavaDataObject )
                     {
-                        var liquidObject = value as ILiquidizable;
+                        var liquidObject = value as ILavaDataObject;
                         if ( liquidObject.ContainsKey( selectKey ) )
                         {
-                            result.Add( liquidObject[selectKey] );
+                            result.Add( liquidObject.GetValue(selectKey) );
                         }
                     }
                     else if ( value is IDictionary<string, object> )

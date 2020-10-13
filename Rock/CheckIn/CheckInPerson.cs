@@ -29,7 +29,7 @@ namespace Rock.CheckIn
     /// A person option for the current check-in
     /// </summary>
     [DataContract]
-    public class CheckInPerson : Lava.ILiquidizable, IHasAttributesWrapper
+    public class CheckInPerson : ILavaDataObject, IHasAttributesWrapper
     {
         /// <summary>
         /// Gets or sets the person.
@@ -373,6 +373,19 @@ namespace Rock.CheckIn
                     default: return Person[key];
                 }
             }
+        }
+
+        /// <summary>
+        /// Gets the <see cref="System.Object"/> with the specified key.
+        /// </summary>
+        /// <value>
+        /// The <see cref="System.Object"/>.
+        /// </value>
+        /// <param name="key">The key.</param>
+        /// <returns></returns>
+        public object GetValue( object key )
+        {
+            return this[key];
         }
 
         /// <summary>

@@ -29,8 +29,7 @@ namespace Rock.Lava.Blocks
     public abstract class RockLavaBlockBase : IRockLavaBlock // ILava DotLiquid.Block, IRockStartup
     {
         private string _blockName = null;
-
-        
+        private IRockLavaBlock _blockProxy;
 
         /// <summary>
         /// The name of the block.
@@ -53,13 +52,13 @@ namespace Rock.Lava.Blocks
             }
         }
 
-        public LavaElementTypeSpecifier ElementType
-        {
-            get
-            {
-                return LavaElementTypeSpecifier.Block;
-            }
-        }
+        //public LavaElementTypeSpecifier ElementType
+        //{
+        //    get
+        //    {
+        //        return LavaElementTypeSpecifier.Block;
+        //    }
+        //}
 
         /// <summary>
         /// Gets the not authorized message.
@@ -87,15 +86,11 @@ namespace Rock.Lava.Blocks
 
         #region DotLiquid Block Implementation
 
-
-
         public virtual void OnInitialize( string tagName, string markup, List<string> tokens )
         {
             //
         }
-
-        private IRockLavaBlock _blockProxy;
-
+        
         internal void RenderInternal( ILavaContext context, TextWriter result, IRockLavaBlock proxy )
         {
             _blockProxy = proxy;
@@ -130,14 +125,6 @@ namespace Rock.Lava.Blocks
         }
 
         #endregion
-
-        /// <summary>
-        /// All IRockStartup classes will be run in order by this value. If class does not depend on an order, return zero.
-        /// </summary>
-        /// <value>
-        /// The order.
-        /// </value>
-        //public int StartupOrder { get { return 0; } }
 
         /// <summary>
         /// Method that will be run at Rock startup

@@ -44,7 +44,7 @@ namespace Rock.Lava.DotLiquid
 
             _tag = factoryMethod( tagName );
 
-            _tag.Initialize( tagName, markup, tokens );
+            _tag.OnInitialize( tagName, markup, tokens );
 
             base.Initialize( tagName, markup, tokens );
         }
@@ -53,7 +53,7 @@ namespace Rock.Lava.DotLiquid
         {
             var lavaContext = new DotLiquidLavaContext( context );
 
-            _tag.Render( lavaContext, result );
+            _tag.OnRender( lavaContext, result );
 
             base.Render( context, result );
         }

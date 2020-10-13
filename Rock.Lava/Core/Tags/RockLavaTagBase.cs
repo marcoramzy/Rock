@@ -26,56 +26,105 @@ namespace Rock.Lava.Blocks
     /// 
     /// </summary>
     /// <seealso cref="DotLiquid.Block" />
-    public abstract class RockLavaTagBase : IRockLavaTag //: global::DotLiquid.Tag //, IRockStartup
+    public abstract class RockLavaTagBase : IRockLavaTag
     {
+        private string _tagName = null;
+        private IRockLavaTag _tagProxy;
+
         /// <summary>
-        /// All IRockStartup classes will be run in order by this value. If class does not depend on an order, return zero.
+        /// The name of the tag.
         /// </summary>
-        /// <value>
-        /// The order.
-        /// </value>
-        //public int StartupOrder { get { return 0; } }
+        public string TagName
+        {
+            get
+            {
+                if ( _tagName == null )
+                {
+                    return this.GetType().Name;
+                }
 
-        ///// <summary>
-        ///// Method that will be run at Rock startup
-        ///// </summary>
-        //public virtual void OnStartup()
+                return _tagName;
+            }
+
+            set
+            {
+                _tagName = value;
+            }
+        }
+
+        //public void Initialize( string tagName, string markup, List<string> tokens )
         //{
+        //    _tagName = tagName;
+
+        //    OnInitialize( tagName, markup, tokens );
         //}
-        public string TagName { get; private set; }
 
-        //public string Name => throw new System.NotImplementedException();
-
-        public void Initialize( string tagName, string markup, List<string> tokens )
-        {
-            this.TagName = tagName;
-
-            OnInitialize( tagName, markup, tokens );
-        }
-
-        public virtual void OnInitialize( string tagName, string markup, List<string> tokens )
-        {
-            //
-        }
+        //public virtual void OnInitialize( string tagName, string markup, List<string> tokens )
+        //{
+        //    //
+        //}
 
         public void Render( ILavaContext context, TextWriter result )
         {
             OnRender( context, result );
         }
 
-        public virtual void OnRender( ILavaContext context, TextWriter result )
-        {
-            //
-        }
+        //public virtual void OnRender( ILavaContext context, TextWriter result )
+        //{
+        //    //
+        //}
 
-        public void Initialize( string tagName, string markup, IEnumerable<string> tokens )
-        {
-            throw new System.NotImplementedException();
-        }
+        //public void Initialize( string tagName, string markup, IEnumerable<string> tokens )
+        //{
+        //    throw new System.NotImplementedException();
+        //}
 
         public virtual void OnStartup()
         {
             //throw new System.NotImplementedException();
         }
+
+        #region DotLiquid Tag Implementation
+
+        public virtual void OnInitialize( string tagName, string markup, IEnumerable<string> tokens )
+        {
+            //
+        }
+
+        internal void RenderInternal( ILavaContext context, TextWriter result, IRockLavaTag proxy )
+        {
+            _tagProxy = proxy;
+
+            this.OnRender( context, result );
+        }
+
+        /// <summary>
+        /// Renders the specified context.
+        /// </summary>
+        /// <param name="context">The context.</param>
+        /// <param name="result">The result.</param>
+        public virtual void OnRender( ILavaContext context, TextWriter result )
+        {
+            // By default, call the underlying engine to render this element.
+            _tagProxy.OnRender( context, result );
+        }
+
+        public void Parse( List<string> tokens, out List<object> nodes )
+        {
+            OnParse( tokens, out nodes );
+        }
+
+        /// <summary>
+        /// Parse a set of Lava tokens into a set of document nodes that can be processed by the underlying rendering framework.
+        /// </summary>
+        /// <param name="tokens"></param>
+        /// <param name="nodes"></param>
+        protected virtual void OnParse( List<string> tokens, out List<object> nodes )
+        {
+            nodes = null;
+        }
+
+        #endregion
+
     }
 }
