@@ -46,7 +46,7 @@ namespace Rock.Tests.UnitTests.Lava
         /// This filter has an identical implementation to "ToString", so we only need to test that it is accessible.
         /// </remarks>
         [TestMethod]
-        public void AsString_ComplexTypeInput_ProducesString()
+        public void AsString_AnonymousObjectWithToStringMethodOverride_ReturnsToStringForObject()
         {
             var person = _helper.GetTestPersonAlishaMarble();
 

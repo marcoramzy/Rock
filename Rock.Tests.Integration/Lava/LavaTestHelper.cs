@@ -36,6 +36,7 @@ namespace Rock.Tests.Integration.Lava
             var engine = global::Rock.Lava.LavaEngine.Instance;
 
             RegisterBlocks( engine );
+            RegisterTags( engine );
 
             RegisterStaticShortcodes( engine );
             RegisterDynamicShortcodes( engine );
@@ -54,6 +55,49 @@ namespace Rock.Tests.Integration.Lava
             return helper;
         }
 
+        private static void RegisterTags( ILavaEngine engine )
+        {
+            // Get all blocks and call OnStartup methods
+            try
+            {
+                var elementTypes = Rock.Reflection.FindTypes( typeof( IRockLavaTag ) ).Select( a => a.Value ).ToList();
+
+                foreach ( var elementType in elementTypes )
+                {
+                    var instance = Activator.CreateInstance( elementType ) as IRockLavaTag;
+
+                    var name = instance.TagName;
+
+                    if ( string.IsNullOrWhiteSpace( name ) )
+                    {
+                        name = elementType.Name;
+                    }
+
+                    engine.RegisterTag( name, ( shortcodeName ) =>
+                    {
+                        var shortcode = Activator.CreateInstance( elementType ) as IRockLavaTag;
+
+                        return shortcode;
+                    } );
+
+                    try
+                    {
+                        instance.OnStartup();
+                    }
+                    catch ( Exception ex )
+                    {
+                        var lavaException = new Exception( string.Format( "Lava component initialization failure. Startup failed for Lava Tag \"{0}\".", elementType.FullName ), ex );
+
+                        ExceptionLogService.LogException( lavaException, null );
+                    }
+                }
+            }
+            catch ( Exception ex )
+            {
+                ExceptionLogService.LogException( ex, null );
+            }
+        }
+
         private static void RegisterBlocks( ILavaEngine engine )
         {
             // Get all blocks and call OnStartup methods
@@ -63,16 +107,16 @@ namespace Rock.Tests.Integration.Lava
 
                 foreach ( var elementType in elementTypes )
                 {
-                    var shortcodeInstance = Activator.CreateInstance( elementType ) as IRockLavaBlock;
+                    var instance = Activator.CreateInstance( elementType ) as IRockLavaBlock;
 
-                    var blockName = shortcodeInstance.BlockName;
+                    var name = instance.BlockName;
 
-                    if ( string.IsNullOrWhiteSpace( blockName ) )
+                    if ( string.IsNullOrWhiteSpace( name ) )
                     {
-                        blockName = elementType.Name;
+                        name = elementType.Name;
                     }
 
-                    engine.RegisterBlock( blockName, ( shortcodeName ) =>
+                    engine.RegisterBlock( name, ( shortcodeName ) =>
                     {
                         var shortcode = Activator.CreateInstance( elementType ) as IRockLavaBlock;
 
@@ -81,7 +125,7 @@ namespace Rock.Tests.Integration.Lava
 
                     try
                     {
-                        shortcodeInstance.OnStartup();
+                        instance.OnStartup();
                     }
                     catch ( Exception ex )
                     {
@@ -89,7 +133,6 @@ namespace Rock.Tests.Integration.Lava
 
                         ExceptionLogService.LogException( lavaException, null );
                     }
-
                 }
             }
             catch ( Exception ex )
@@ -222,11 +265,11 @@ namespace Rock.Tests.Integration.Lava
         /// </summary>
         /// <param name="expectedOutput"></param>
         /// <param name="inputTemplate"></param>
-        public void AssertTemplateOutput( string expectedOutput, string inputTemplate, ILavaContext context, bool ignoreWhitespace = false )
+        public void AssertTemplateOutput( string expectedOutput, string inputTemplate, ILavaContext context, bool ignoreWhiteSpace = false )
         {
             var outputString = GetTemplateOutput( inputTemplate, context );
 
-            if ( ignoreWhitespace )
+            if ( ignoreWhiteSpace )
             {
                 outputString = Regex.Replace( outputString, @"\s*", string.Empty );
                 expectedOutput = Regex.Replace( expectedOutput, @"\s*", string.Empty );
@@ -340,7 +383,7 @@ namespace Rock.Tests.Integration.Lava
         public TestPerson GetTestPersonTedDecker()
         {
             var campus = new TestCampus { Name = "North Campus", Id = 1 };
-            var person = new TestPerson { FirstName = "Edward", NickName = "Ted", LastName = "Decker", Campus = campus, Id = 1 };
+            var person = new TestPerson { FirstName = "Edward", NickName = "Ted", LastName = "Decker", Campus = campus, Id = 1, Guid = "8FEDC6EE-8630-41ED-9FC5-C7157FD1EAA4" };
 
             return person;
         }
@@ -383,6 +426,7 @@ namespace Rock.Tests.Integration.Lava
         public class TestPerson : RockDynamic
         {
             public int Id { get; set; }
+            public string Guid { get; set; }
             public string NickName { get; set; }
             public string FirstName { get; set; }
             public string LastName { get; set; }

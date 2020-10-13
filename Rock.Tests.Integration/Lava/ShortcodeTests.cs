@@ -40,6 +40,86 @@ namespace Rock.Tests.Integration.Lava
 
         #endregion
 
+        #region Accordion
+
+        [TestMethod]
+        public void AccordionShortcode_Basic_EmitsCorrectHtml( string input, string expectedResult )
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion
+
+        #region Chart
+
+        [TestMethod]
+        public void ChartShortcode_Basic_EmitsCorrectHtml( string input, string expectedResult )
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion
+
+        #region Easy Pie Chart
+
+        [TestMethod]
+        public void EasyPieChartShortcode_Basic_EmitsCorrectHtml( string input, string expectedResult )
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion
+
+        #region GoogleMap
+
+        [TestMethod]
+        public void GoogleMapShortcode_Basic_EmitsCorrectHtml( string input, string expectedResult )
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion
+
+        #region GoogleStaticMap
+
+        [TestMethod]
+        public void GoogleStaticMapShortcode_Basic_EmitsCorrectHtml( string input, string expectedResult )
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion
+
+        #region Panel
+
+        [TestMethod]
+        public void PanelShortcode_Basic_EmitsCorrectHtml( string input, string expectedResult )
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion
+
+        #region Parallax
+
+        [TestMethod]
+        public void ParallaxShortcode_Basic_EmitsCorrectHtml( string input, string expectedResult )
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion
+
+        #region ScheduledContent
+
+        [TestMethod]
+        public void ScheduledContentShortcode_Basic_EmitsCorrectHtml( string input, string expectedResult )
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion
+
         #region Scripturize
 
         /// <summary>
@@ -50,7 +130,7 @@ namespace Rock.Tests.Integration.Lava
         [DataRow( "Jn 3:16", "<a href=\"https://www.bible.com/bible/116/JHN.3.16.NLT\"  title=\"YouVersion\">Jn 3:16</a>" )]
         [DataRow( "John 3", "<a href=\"https://www.bible.com/bible/116/JHN.3..NLT\"  title=\"YouVersion\">John 3</a>" )]
 
-        public void Scripturize_YouVersion_SimpleCase( string input, string expectedResult )
+        public void ScripturizeShortcode_YouVersion_SimpleCase( string input, string expectedResult )
         {
             _helper.AssertTemplateOutput( expectedResult,
                                           "{[ scripturize defaulttranslation:'NLT' landingsite:'YouVersion' cssclass:'scripture' ]}" + input + "{[ endscripturize ]}" );
@@ -69,5 +149,57 @@ namespace Rock.Tests.Integration.Lava
         }
 
         #endregion
+
+        #region Sparkline Chart
+
+        [TestMethod]
+        public void SparklineChartShortcode_Basic_EmitsCorrectHtml( string input, string expectedResult )
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion
+
+        #region Vimeo
+
+        [TestMethod]
+        public void VimeoShortcode_Basic_EmitsCorrectHtml( string input, string expectedResult )
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion
+
+        #region Wistia Embed
+
+        [TestMethod]
+        public void WistiaEmbedShortcode_Basic_EmitsCorrectHtml( string input, string expectedResult )
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion
+
+        #region Word Cloud
+
+        [TestMethod]
+        public void WordCloudShortcode_Basic_EmitsCorrectHtml( string input, string expectedResult )
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion
+
+        #region YouTube
+
+        [TestMethod]
+        public void YouTubeShortcode_Basic_EmitsCorrectHtml( string input, string expectedResult )
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion
+
+
     }
 }

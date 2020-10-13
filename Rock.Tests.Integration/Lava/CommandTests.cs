@@ -96,13 +96,14 @@ namespace Rock.Tests.Integration.Lava
 ";
 
             var expectedOutput = @"
+AlexDecker<br/>AmadoDecker<br/>AutumnDecker<br/>BrunoDecker<br/>CindyDecker<br/>DavidDecker<br/>DeweyDecker<br/>EarlDecker<br/>EllisDecker<br/>EmmettDecker<br/>FrederickaDecker<br/>HattieDecker<br/>JackieDecker<br/>JeannieDecker<br/>JohnDecker<br/>JudeDecker<br/>KarieDecker<br/>KeishaDecker<br/>KiaDecker<br/>Kid0Decker<br/>Kid0Decker<br/>Kid0Decker<br/>Kid1Decker<br/>Kid2Decker<br/>KristaDecker<br/>LaceyDecker<br/>LaurenceDecker<br/>LavernDecker<br/>LavernDecker<br/>LelandDecker<br/>LibradaDecker<br/>MelissaDecker<br/>MeridithDecker<br/>NoahDecker<br/>PiperDecker<br/>SherronDecker<br/>SparkleDecker<br/>StephenDecker<br/>SuzanDecker<br/>TaniaDecker<br/>TedDecker<br/>ToddDecker<br/>ZolaDecker<br/>
 ";
 
             var context = _helper.LavaEngine.NewContext();
 
             context.SetEnabledCommands( "Cache,RockEntity" );
 
-            _helper.AssertTemplateOutput( expectedOutput, input, context, ignoreWhitespace: true );
+            _helper.AssertTemplateOutput( expectedOutput, input, context, ignoreWhiteSpace: true );
         }
 
         [TestMethod]
@@ -132,7 +133,7 @@ Color 4: blue
 
             context.SetEnabledCommands( "Cache" );
 
-            _helper.AssertTemplateOutput( expectedOutput, input, context, ignoreWhitespace: true );
+            _helper.AssertTemplateOutput( expectedOutput, input, context, ignoreWhiteSpace: true );
         }
 
         #endregion
@@ -278,7 +279,7 @@ return firstCommit.message + ""<br />"" + firstCommit.author.name;
     {
         public string Execute() {
             using(RockContext rockContext = new RockContext()){
-                var person = new PersonService(rockContext).Get({{ Person | Property: 'Id' }});
+                var person = new PersonService(rockContext).Get({{ Person | Property: 'Guid' }});
                 
                 return person.FullName;
             }
@@ -331,7 +332,7 @@ return firstCommit.message + ""<br />"" + firstCommit.author.name;
 
             context.SetEnabledCommands( "InteractionWrite" );
 
-            _helper.AssertTemplateOutput( expectedOutput, input, context, ignoreWhitespace: true );
+            _helper.AssertTemplateOutput( expectedOutput, input, context, ignoreWhiteSpace: true );
         }
 
         #endregion
@@ -364,7 +365,7 @@ return firstCommit.message + ""<br />"" + firstCommit.author.name;
 
             context.SetEnabledCommands( "Cache,RockEntity" );
 
-            _helper.AssertTemplateOutput( expectedOutput, input, context, ignoreWhitespace: true );
+            _helper.AssertTemplateOutput( expectedOutput, input, context, ignoreWhiteSpace: true );
         }
 
         #endregion
@@ -430,7 +431,7 @@ Liquid error: Search results not available. Universal search is not enabled for 
 
             context.SetEnabledCommands( "Search" );
 
-            _helper.AssertTemplateOutput( expectedOutput, input, context, ignoreWhitespace: true );
+            _helper.AssertTemplateOutput( expectedOutput, input, context, ignoreWhiteSpace: true );
         }
 
         #endregion Search
@@ -467,16 +468,16 @@ Liquid error: Search results not available. Universal search is not enabled for 
     ORDER BY [NickName]
 {% endsql %}
 
-{% for item in results %}{{ item.NickName }} {{ item.LastName }}; {% endfor %}
+{% for item in results %}{{ item.NickName }}_{{ item.LastName }};{% endfor %}
 ";
 
-            var expectedOutput = @"\s*Alex Decker; Ted Decker\s*";
+            var expectedOutput = @"Alex_Decker;Ted_Decker;";
 
             var context = _helper.LavaEngine.NewContext();
 
             context.SetEnabledCommands( "Sql" );
 
-            _helper.AssertTemplateOutputRegex( expectedOutput, input, context );
+            _helper.AssertTemplateOutput( expectedOutput, input, context, ignoreWhiteSpace: true );
         }
 
         #endregion
@@ -499,6 +500,24 @@ Liquid error: Search results not available. Universal search is not enabled for 
 <style>
     #content-wrapper {background-color:red!important;color:#fff;}
 </style> 
+";
+
+            _helper.AssertTemplateOutput( expectedOutput, input, ignoreWhitespace: true );
+        }
+
+        #endregion
+
+        #region TagList
+
+        [TestMethod]
+        public void TagListTag_InTemplate_ReturnsListOfTags()
+        {
+            var input = @"
+{% taglist %}
+";
+
+            var expectedOutput = @"
+???
 ";
 
             _helper.AssertTemplateOutput( expectedOutput, input, ignoreWhitespace: true );
@@ -584,13 +603,13 @@ Liquid error: Search results not available. Universal search is not enabled for 
 {% endworkflowactivate %}
 ";
 
-            var expectedOutput = @"Activated new workflow with the name ''.";
+            var expectedOutput = @"Activated new workflow with the name 'IT Support'.";
 
             var context = _helper.LavaEngine.NewContext();
 
             context.SetEnabledCommands( "WorkflowActivate" );
 
-            _helper.AssertTemplateOutputRegex( expectedOutput, input, context );
+            _helper.AssertTemplateOutput( expectedOutput, input, context, true );
         }
 
         #endregion

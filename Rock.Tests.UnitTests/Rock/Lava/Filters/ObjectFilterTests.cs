@@ -44,7 +44,7 @@ namespace Rock.Tests.UnitTests.Lava
         /// Referencing a valid property of an input object should return the property value.
         /// </summary>
         [TestMethod]
-        public void Property_FirstLevelPropertyAccess_ReturnsPropertyValue()
+        public void Property_AnonymousObjectFirstLevelPropertyAccess_ReturnsPropertyValue()
         {
             var mergeValues = new LavaDictionary { { "CurrentPerson", _helper.GetTestPersonTedDecker() } };
 
@@ -55,7 +55,7 @@ namespace Rock.Tests.UnitTests.Lava
         /// Accessing a nested property using dot-notation "Campus.Name" should return the correct value.
         /// </summary>
         [TestMethod]
-        public void Property_SecondLevelPropertyAccess_ReturnsValue()
+        public void Property_AnonymousObjectSecondLevelPropertyAccess_ReturnsValue()
         {
             var mergeValues = new LavaDictionary { { "CurrentPerson", _helper.GetTestPersonTedDecker() } };
 
