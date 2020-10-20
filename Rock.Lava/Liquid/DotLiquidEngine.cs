@@ -168,38 +168,40 @@ namespace Rock.Lava.DotLiquid
             }
         }
 
-        public override void RegisterShortcode( IRockShortcode shortcode )
-        {
-            //Tag WrapperFactoryMethod( string shortcodeName )
-            //{
-            //    return shortcode as Tag;
-            //};
+        //public override void RegisterShortcode( IRockShortcode shortcode )
+        //{
+        //    throw new NotImplementedException();
 
-            // TODO: We need to register the shortcode using Reflection to access the private variable Template.shortcodes.
-            //Template.RegisterShortcodeFactory( shortcode.Name, WrapperFactoryMethod );
+        //    //Tag WrapperFactoryMethod( string shortcodeName )
+        //    //{
+        //    //    return shortcode as Tag;
+        //    //};
 
-            // Create an instance of the shortcode object and register the Type with DotLiquid.
-            //var shortcodeObject = shortcodeFactoryMethod.Invoke( name );
+        //    // TODO: We need to register the shortcode using Reflection to access the private variable Template.shortcodes.
+        //    //Template.RegisterShortcodeFactory( shortcode.Name, WrapperFactoryMethod );
 
-            ////Tag shortcode = ( Tag ) Activator.CreateInstance( shortcodeType );
+        //    // Create an instance of the shortcode object and register the Type with DotLiquid.
+        //    //var shortcodeObject = shortcodeFactoryMethod.Invoke( name );
 
-            //var shortcodesCollectionInfo = typeof( Template ).GetProperty( "Shortcodes", BindingFlags.Static | BindingFlags.NonPublic );
+        //    ////Tag shortcode = ( Tag ) Activator.CreateInstance( shortcodeType );
 
-            //var shortcodesCollection = shortcodesCollectionInfo.GetValue( null ) as Dictionary<string, Type>;
+        //    //var shortcodesCollectionInfo = typeof( Template ).GetProperty( "Shortcodes", BindingFlags.Static | BindingFlags.NonPublic );
 
-            //shortcodesCollection.Add( name, shortcodeObject.GetType() );
+        //    //var shortcodesCollection = shortcodesCollectionInfo.GetValue( null ) as Dictionary<string, Type>;
 
-
-            // Create a new Dynamic Shortcode
-
+        //    //shortcodesCollection.Add( name, shortcodeObject.GetType() );
 
 
-            Template.RegisterShortcode<DotLiquidDynamicShortcodeBlockProxy>( shortcode.SourceElementName );
-            //Template.RegisterShortcode(<>
-            //Template.RegisterShortcode<DynamicShortcodeBlock>( shortcode.TagName );
+        //    // Create a new Dynamic Shortcode
 
-            //throw new NotImplementedException();
-        }
+
+
+        //    Template.RegisterShortcode<DotLiquidDynamicShortcodeBlockProxy>( shortcode.SourceElementName );
+        //    //Template.RegisterShortcode(<>
+        //    //Template.RegisterShortcode<DynamicShortcodeBlock>( shortcode.TagName );
+
+        //    //throw new NotImplementedException();
+        //}
 
         //public override void RegisterStaticShortcode( string name, Func<string, IRockShortcode> shortcodeFactoryMethod )
         //{
@@ -237,17 +239,23 @@ namespace Rock.Lava.DotLiquid
         //    }
         //}
 
-        public override void RegisterDynamicShortcode( string name, Func<string, DynamicShortcodeDefinition> shortcodeFactoryMethod )
-        {
-            // We can only register Tags by specifying a System.Type that is instantiated at runtime by the DotLiquid framework using a parameterless constructor.
-            // To register Lava shortcodes, we register a Type that represents a DotLiquid Tag that can reconfigure itself dynamically.
-            //DotLiquidDynamicShortcodeTagProxy.TagFactoryMethods.Add( name, shortcodeFactoryMethod );
+        //public override void RegisterDynamicShortcode( string name, Func<string, DynamicShortcodeDefinition> shortcodeFactoryMethod )
+        //{
+        //    // In the DotLiquid framework, we can only register Tags by specifying a System.Type that is instantiated at runtime using a parameterless constructor.
+        //    // To overcome this limitation for creating Lava shortcodes, we register a Type that represents a DotLiquid Tag that can reconfigure itself dynamically.
+        //    // using the shortcode definition provided when the Tag is initialized.
 
-            var registrationName = GetShortcodeInternalName( name );
+        //    // Register the shortcode according to type.
+
+
+
+        //    DotLiquidDynamicShortcodeTagProxy.TagFactoryMethods.Add( name, shortcodeFactoryMethod );
+
+        //    var registrationName = GetShortcodeInternalName( name );
             
-            //Template.RegisterShortcode<DotLiquidDynamicShortcodeBlockProxy>( shortcode.SourceElementName );
-            Template.RegisterTag<DotLiquidDynamicShortcodeBlockProxy>( registrationName );
-        }
+        //    //Template.RegisterShortcode<DotLiquidDynamicShortcodeBlockProxy>( shortcode.SourceElementName );
+        //    Template.RegisterTag<DotLiquidDynamicShortcodeBlockProxy>( registrationName );
+        //}
 
         private string GetShortcodeInternalName(string shortcodeName )
         {
@@ -256,14 +264,14 @@ namespace Rock.Lava.DotLiquid
             return internalName.Trim().ToLower();
         }
 
-        public override void RegisterShortcode<T>( string name )
-        {
-            var shortcodesCollectionInfo = typeof( Template ).GetProperty( "Shortcodes", BindingFlags.Static | BindingFlags.NonPublic );
+        //public override void RegisterShortcode<T>( string name )
+        //{
+        //    var shortcodesCollectionInfo = typeof( Template ).GetProperty( "Shortcodes", BindingFlags.Static | BindingFlags.NonPublic );
 
-            var shortcodesCollection = shortcodesCollectionInfo.GetValue( null ) as Dictionary<string, Type>;
+        //    var shortcodesCollection = shortcodesCollectionInfo.GetValue( null ) as Dictionary<string, Type>;
 
-            shortcodesCollection.Add( name, typeof( T ) );
-        }
+        //    shortcodesCollection.Add( name, typeof( T ) );
+        //}
 
         public override void RegisterTag( string name, Func<string, IRockLavaTag> factoryMethod )
         {

@@ -23,13 +23,13 @@ using DotLiquid;
 namespace Rock.Lava
 {
 
-    public abstract class RockLavaShortcodeBlockBase : RockLavaShortcodeBase, IRockLavaBlock
-    {
-    }
+    //public abstract class RockLavaShortcodeBlockBase : RockLavaShortcodeBase, IRockLavaBlock
+    //{
+    //}
 
-    public abstract class RockLavaShortcodeTagBase : RockLavaShortcodeBase, IRockLavaTag
-    {
-    }
+    //public abstract class RockLavaShortcodeTagBase : RockLavaShortcodeBase, IRockLavaTag
+    //{
+    //}
 
     /// <summary>
     /// 
@@ -40,7 +40,7 @@ namespace Rock.Lava
         private string _internalName = null;
 
         //private IRockLavaElement _tagProxy = null;
-        private IRockLavaElement _lavaElement = null;
+        //private IRockLavaElement _lavaElement = null;
         private ILiquidFrameworkRenderer _frameworkProxy = null;
 
         /// <summary>

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Rock.Lava.DotLiquid;
 using Rock.Lava.Blocks;
 using System.IO;
+using Rock.Lava.Shortcodes;
 
 namespace Rock.Lava
 {
@@ -134,14 +135,108 @@ namespace Rock.Lava
         //public abstract void RegisterStaticShortcode( string name, Func<string, IRockShortcode> shortcodeFactoryMethod );
 
 
-        public abstract void RegisterDynamicShortcode( string name, Func<string, DynamicShortcodeDefinition> shortcodeFactoryMethod );
+        //public abstract void RegisterDynamicShortcode( string name, Func<string, DynamicShortcodeDefinition> shortcodeFactoryMethod );
 
-        [Obsolete]
-        public abstract void RegisterShortcode( IRockShortcode shortcode );
+        public void RegisterDynamicShortcode( string name, Func<string, DynamicShortcodeDefinition> shortcodeFactoryMethod )
+        {
+            var instance = shortcodeFactoryMethod( name );
 
-        [Obsolete]
-        public abstract void RegisterShortcode<T>( string name )
-            where T : IRockShortcode;
+            if ( instance == null )
+            {
+                throw new Exception( $"Shortcode factory could not provide a valid instance for \"{name}\" ." );
+            }
+
+            if ( instance.ElementType == LavaShortcodeTypeSpecifier.Inline )
+            {
+                // Create a new factory method that returns an initialized Shortcode Tag element.
+                
+                Func<string, IRockLavaTag> tagFactoryMethod = ( tagName ) =>
+                {
+                    var shortcodeInstance = GetShortcodeFromFactory<DynamicShortcodeTag>( tagName, shortcodeFactoryMethod );
+
+                    return shortcodeInstance;
+
+                    // Call the factory method we have been passed to retrieve the definition of the shortcode.
+                    // The definition may change at runtime, so we need to execute the factory method every time we create a new shortcode instance.
+                    //var shortcodeDefinition = shortcodeFactoryMethod( tagName );
+
+                    //var shortcodeInstance = new DynamicShortcodeTag( shortcodeDefinition );
+
+                    //return shortcodeInstance;
+                };
+
+                // Get a registration name for the shortcode that will not collide with an existing tag name.
+                var registrationKey = GetShortcodeRegistrationKey( name );
+
+                this.RegisterTag( registrationKey, tagFactoryMethod );
+            }
+            else
+            {
+                // Create a new factory method that returns an initialized Shortcode Block element.
+
+                Func<string, IRockLavaBlock> blockFactoryMethod = ( blockName ) =>
+                {
+                    // Call the factory method we have been passed to retrieve the definition of the shortcode.
+                    // The definition may change at runtime, so we need to execute the factory method every time we create a new shortcode instance.
+                    var shortCodeName = blockName;
+
+                    if ( shortCodeName.EndsWith( LavaEngine.ShortcodeNameSuffix ) )
+                    {
+                        shortCodeName = shortCodeName.Remove( shortCodeName.Length - LavaEngine.ShortcodeNameSuffix.Length );
+                    }
+
+                    var shortcodeDefinition = shortcodeFactoryMethod( shortCodeName );
+
+                    var shortcodeInstance = new DynamicShortcodeBlock( shortcodeDefinition );
+
+                    return shortcodeInstance;
+                };
+
+                // Get a registration name for the shortcode that will not collide with an existing tag name.
+                var registrationKey = GetShortcodeRegistrationKey( name );
+
+                this.RegisterBlock( registrationKey, blockFactoryMethod );
+
+
+
+                //this.RegisterBlock( registrationKey, ( blockName ) =>
+                //{
+                //    // Get a shortcode instance using the provided shortcut factory.
+                //    var shortcode = shortcodeFactoryMethod( registrationKey );
+
+                //    // Return the shortcode instance as a RockLavaBlock
+                //    return shortcode as IRockLavaBlock;
+                //} );
+
+            }
+        }
+
+        private T GetShortcodeFromFactory<T>( string shortcodeInternalName, Func<string, DynamicShortcodeDefinition> shortcodeFactoryMethod )
+            where T : DynamicShortcode, new()
+        {
+            // Call the factory method we have been passed to retrieve the definition of the shortcode.
+            // The definition may change at runtime, so we need to execute the factory method every time we create a new shortcode instance.
+            var shortCodeName = shortcodeInternalName;
+
+            if ( shortCodeName.EndsWith( LavaEngine.ShortcodeNameSuffix ) )
+            {
+                shortCodeName = shortCodeName.Remove( shortCodeName.Length - LavaEngine.ShortcodeNameSuffix.Length );
+            }
+
+            var shortcodeDefinition = shortcodeFactoryMethod( shortCodeName );
+
+            var shortcodeInstance = new T();
+
+            shortcodeInstance.Initialize( shortcodeDefinition );
+
+            return shortcodeInstance;
+        }
+
+
+        //public abstract void RegisterShortcode( IRockShortcode shortcode );
+
+        //public abstract void RegisterShortcode<T>( string name )
+        //  where T : IRockShortcode;
 
         //public abstract void SetContextValue( string key, object value );
 

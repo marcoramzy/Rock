@@ -32,9 +32,9 @@ namespace Rock.Lava.DotLiquid
     /// We need to intercept this process and generate a proxy Tag from a source class that does not inherit from the DotLiquid.Tag base class.
     /// This proxy class is instantiated by the DotLiquid framework, and we generate an internal instance of a Lava tag that performs the processing.
     /// </remarks>
-    internal class DotLiquidTagProxy : Tag, ILiquidFrameworkRenderer //, IRockLavaTag
+    internal class DotLiquidTagProxy : Tag, ILiquidFrameworkRenderer
     {
-        private static Dictionary<string, Func<string, IRockLavaTag>> _tagFactoryMethods = new Dictionary<string, Func<string, IRockLavaTag>>( StringComparer.OrdinalIgnoreCase );
+        private static Dictionary<string, Func<string, IRockLavaTag>> _factoryMethods = new Dictionary<string, Func<string, IRockLavaTag>>( StringComparer.OrdinalIgnoreCase );
 
         public static void RegisterFactory( string name, Func<string, IRockLavaTag> factoryMethod )
         {
@@ -45,16 +45,16 @@ namespace Rock.Lava.DotLiquid
 
             name = name.Trim().ToLower();
 
-            _tagFactoryMethods.Add( name, factoryMethod );
+            _factoryMethods.Add( name, factoryMethod );
         }
 
-        private IRockLavaTag _tag = null;
+        private IRockLavaTag _lavaElement = null;
 
         public string SourceElementName
         {
             get
             {
-                return _tag.SourceElementName;
+                return _lavaElement.SourceElementName;
             }
         }
 
@@ -62,22 +62,32 @@ namespace Rock.Lava.DotLiquid
 
         public override void Initialize( string tagName, string markup, List<string> tokens )
         {
-            var factoryMethod = _tagFactoryMethods[tagName];
+            if ( !_factoryMethods.ContainsKey( tagName ) )
+            {
+                throw new Exception( "Block factory could not be found." );
+            }
 
-            _tag = factoryMethod( tagName );
+            var factoryMethod = _factoryMethods[tagName];
 
-            // Initialize the DotLiquid tag.
+            _lavaElement = factoryMethod( tagName );
+
+            if ( _lavaElement == null )
+            {
+                throw new Exception( "Block factory could not provide a compatible block instance." );
+            }
+
+            // Initialize the Lava block first, because it may be called during the DotLiquid.Block initialization process.
+            _lavaElement.OnInitialize( tagName, markup, tokens );
+
+            // Initialize the DotLiquid block.
             base.Initialize( tagName, markup, tokens );
-
-            // Call the Lava tag initializer.
-            _tag.OnInitialize( tagName, markup, tokens );
         }
 
         public override void Render( Context context, TextWriter result )
         {
             var lavaContext = new DotLiquidLavaContext( context );
 
-            var tag = _tag as ILiquidFrameworkRenderer;
+            var tag = _lavaElement as ILiquidFrameworkRenderer;
 
             if ( tag == null )
             {
@@ -95,7 +105,6 @@ namespace Rock.Lava.DotLiquid
 
         void ILiquidFrameworkRenderer.Render( ILiquidFrameworkRenderer baseRenderer, ILavaContext context, TextWriter result )
         {
-            //             
             var dotLiquidContext = ( (DotLiquidLavaContext)context ).DotLiquidContext;
 
             base.Render( dotLiquidContext, result );
@@ -111,8 +120,6 @@ namespace Rock.Lava.DotLiquid
             base.Parse( tokens );
 
             nodes = base.NodeList;
-
-            //_tag.OnParse( tokens, out nodes );
         }
 
         #endregion

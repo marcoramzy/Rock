@@ -34,7 +34,7 @@ namespace Rock.Lava.DotLiquid
     /// A dynamic shortcode block is a Lava shortcode whose definition is loaded from a data store at runtime.
     /// By contrast, a static shortcode has a fixed definition that is defined in a Rock code component.
     /// </summary>
-    public class DotLiquidDynamicShortcodeBlockProxy : Block, IRockShortcode
+    public class DotLiquidDynamicShortcodeBlockProxy : Block, ILiquidFrameworkRenderer //, IRockShortcode
     {
         private static readonly Regex Syntax = new Regex( @"(\w+)" );
 
@@ -487,9 +487,39 @@ namespace Rock.Lava.DotLiquid
             }
         }
 
+        //public void Render( ILiquidFrameworkRenderer baseRenderer, ILavaContext context, TextWriter result )
+        //{
+        //    throw new NotImplementedException();
+        //}
+
+        //public void Parse( ILiquidFrameworkRenderer baseRenderer, List<string> tokens, out List<object> nodes )
+        //{
+        //    throw new NotImplementedException();
+        //}
+
         //void IRockShortcode.OnInitialize( string tagName, string markup, List<string> tokens )
         //{
         //    this.OnInitialize( tagName, markup, tokens.ToList() );
         //}
+
+        #region ILiquidFrameworkRenderer implementation
+
+        void ILiquidFrameworkRenderer.Render( ILiquidFrameworkRenderer baseRenderer, ILavaContext context, TextWriter result )
+        {
+            // Call the default DotLiquid renderer.
+            var dotLiquidContext = ( (DotLiquidLavaContext)context ).DotLiquidContext;
+
+            base.Render( dotLiquidContext, result );
+        }
+
+        void ILiquidFrameworkRenderer.Parse( ILiquidFrameworkRenderer baseRenderer, List<string> tokens, out List<object> nodes )
+        {
+            base.Parse( tokens );
+
+            nodes = base.NodeList;
+        }
+
+        #endregion
+
     }
 }

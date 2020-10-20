@@ -176,6 +176,12 @@ namespace Rock.Lava.Blocks
         /// <returns></returns>
         private string ResolveRockUrl(string url )
         {
+            // If we are not operating in the context of a page, return the unresolved URL.
+            if ( HttpContext.Current == null )
+            {
+                return url;
+            }
+
             RockPage page = HttpContext.Current.Handler as RockPage;
 
             if ( url.StartsWith( "~~" ) )

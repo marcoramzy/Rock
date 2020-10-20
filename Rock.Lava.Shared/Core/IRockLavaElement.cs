@@ -25,7 +25,7 @@ namespace Rock.Lava
     public interface IRockLavaElement
     {
         /// <summary>
-        /// The name of the element as it appears in a source Lava document.
+        /// The name by which this element is identified in a Lava document.
         /// </summary>
         string SourceElementName { get; }
 

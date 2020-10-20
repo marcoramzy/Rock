@@ -38,16 +38,8 @@ namespace Rock.Lava
     /// Represents a Lava shortcode definition, a tag that represents a parameterized Lava template.
     /// Shortcodes can be used to generate complex Lava components from a simple tag.
     /// </summary>
-    public interface IRockShortcode
+    public interface IRockShortcode : IRockLavaElement
     {
-        /// <summary>
-        /// The name by which this shortcode is identified in a Lava document.
-        /// </summary>
-        string SourceElementName
-        {
-            get;
-        }
-
         /// <summary>
         /// The key that internally identifies the block or tag element associated with this shortcode.
         /// </summary>

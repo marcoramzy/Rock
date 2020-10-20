@@ -16,17 +16,12 @@
 //
 using System;
 using System.Collections.Generic;
-using System.Data;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-
 
 namespace Rock.Lava
 {
     /// <summary>
     /// Defines the properties of a Dynamic Shortcode.
+    /// A dynamic shortcode creates an element in a Lava document from a parameterized template that is defined at runtime.
     /// </summary>
     public class DynamicShortcodeDefinition
     {

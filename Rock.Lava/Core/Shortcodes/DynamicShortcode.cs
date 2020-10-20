@@ -20,98 +20,107 @@ using System.Data;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using DotLiquid;
 
-using Rock.Lava.Utility;
+using DotLiquid;
 using Rock.Common;
-//using DotLiquid;
+using Rock.Lava.Utility;
 
 //using Rock.Model;
 //using Rock.Utility;
 //using Rock.Web.Cache;
 
-namespace Rock.Lava.DotLiquid
+namespace Rock.Lava.Shortcodes
 {
-    //public class ShortcodeDefinition
-    //{
-    //    public string Markup { get; set; }
-    //    public string EnabledLavaCommands { get; set; }
-    //    public string Parameters { get; set; }
-    //}
+    public class DynamicShortcodeBlock: DynamicShortcode, IRockLavaBlock
+    {
+        public DynamicShortcodeBlock()
+        {
+            //
+        }
 
-    //public interface IShortcodeDefinitionProvider
-    //{
-    //    ShortcodeDefinition GetShortcodeDefinition( string shortcodeName );
-    //}
+        public DynamicShortcodeBlock( DynamicShortcodeDefinition definition )
+            : base( definition )
+        {
+            //
+        }
+    }
+
+    public class DynamicShortcodeTag : DynamicShortcode, IRockLavaTag
+    {
+        public DynamicShortcodeTag()
+        {
+            //
+        }
+
+        public DynamicShortcodeTag( DynamicShortcodeDefinition definition )
+            : base ( definition )
+        {
+            //
+        }
+    }
 
     /// <summary>
-    /// Implementation of a Dynamic Shortcode Tag for the DotLiquid templating framework.
+    /// A shortcode that uses a parameterized Lava template supplied at runtime to generate an element in a Lava source document.
     /// </summary>
-    public partial class DotLiquidDynamicShortcodeTagProxy : Tag, ILiquidFrameworkRenderer // IRockShortcode // RockLavaShortcodeBase
+    public class DynamicShortcode : RockLavaShortcodeBase
     {
-        private static readonly Regex Syntax = new Regex( @"(\w+)" );
+        //private static readonly Regex Syntax = new Regex( @"(\w+)" );
 
-        string _markup = string.Empty;
+        string _elementAttributesMarkup = string.Empty;
         string _tagName = string.Empty;
-        //LavaShortcodeCache _shortcode;
+        DynamicShortcodeDefinition _shortcode = null;
+        //private LavaShortcodeTypeSpecifier? _elementType = null;
+        private string _shortcodeParameters = null;
+        private string _enabledLavaCommands = string.Empty;
 
         //Dictionary<string, object> _internalMergeFields;
 
-        public string _shortcodeMarkup = null;
-        public string _shortcodeEnabledLavaCommands = null;
-        public string _shortcodeParameters = null;
-        //private Dictionary<string, ShortcodeDefinition> _shortCodeDefinitions = new Dictionary<string, ShortcodeDefinition>();
-
         const int _maxRecursionDepth = 10;
 
-        public LavaShortcodeTypeSpecifier ElementType
-        {
-            get
-            {
-                return LavaShortcodeTypeSpecifier.Inline;
-            }
-        }
-        public string SourceElementName
-        {
-            get
-            {
-                return _tagName;
-            }
-        }
-
         /// <summary>
-        /// The key that internally identifies the block or tag element associated with this shortcode.
+        /// Default constructor required for internal use.
+        /// An instance created using this constructor must call the Initialize() method before use.
         /// </summary>
-        public string InternalElementName
+        public DynamicShortcode()
+        {
+            //
+        }
+
+        public DynamicShortcode( DynamicShortcodeDefinition definition )
+        {
+            this.Initialize( definition );
+
+            AssertShortcodeIsInitialized();
+        }
+
+        public void Initialize( DynamicShortcodeDefinition definition )
+        {
+            _shortcode = definition;
+            _shortcodeParameters = string.Empty;
+        }
+
+        public override LavaShortcodeTypeSpecifier ElementType
         {
             get
             {
-                return this.SourceElementName + LavaEngine.ShortcodeNameSuffix;
+                return _shortcode.ElementType;
             }
         }
 
-        //public Dictionary<string, string> ShortCodeDefinitions
-        //{
-
-        //}
-        /* TODO: Move initialization code out of this library
-         * 
         /// <summary>
         /// Method that will be run at Rock startup
         /// </summary>
         public override void OnStartup()
         {
             // get all the inline dynamic shortcodes and register them
-            var inlineShortCodes = LavaShortcodeCache.All().Where( s => s.TagType == TagType.Inline );
+            //var inlineShortCodes = LavaShortcodeCache.All().Where( s => s.TagType == TagType.Inline );
 
-            foreach(var shortcode in inlineShortCodes )
-            {
-                // register this shortcode
-                Template.RegisterShortcode<DynamicShortcodeInline>( shortcode.TagName );
-            }
+            //foreach(var shortcode in inlineShortCodes )
+            //{
+            //    // register this shortcode
+            //    Template.RegisterShortcode<DynamicShortcodeInline>( shortcode.TagName );
+            //}
         }
-
-    */
 
         /// <summary>
         /// Initializes the specified tag name.
@@ -120,15 +129,13 @@ namespace Rock.Lava.DotLiquid
         /// <param name="markup">The markup.</param>
         /// <param name="tokens">The tokens.</param>
         /// <exception cref="System.Exception">Could not find the variable to place results in.</exception>
-        public override void Initialize( string tagName, string markup, List<string> tokens )
+        public override void OnInitialize( string tagName, string markup, List<string> tokens )
         {
-            _markup = markup;
+            _elementAttributesMarkup = markup;
             _tagName = tagName;
-
-            // TODO: Get Shortcode definition
             //_shortcode = LavaShortcodeCache.All().Where( c => c.TagName == tagName ).FirstOrDefault();
 
-            base.Initialize( tagName, markup, tokens );
+            base.OnInitialize( tagName, markup, tokens );
         }
 
         /// <summary>
@@ -136,23 +143,13 @@ namespace Rock.Lava.DotLiquid
         /// </summary>
         /// <param name="context">The context.</param>
         /// <param name="result">The result.</param>
-        public void OnRender( ILavaContext context, TextWriter result )
+        public override void OnRender( ILavaContext context, TextWriter result )
         {
-            //
-        }
+            AssertShortcodeIsInitialized();
 
-        /// <summary>
-        /// Renders the specified context.
-        /// </summary>
-        /// <param name="context">The context.</param>
-        /// <param name="result">The result.</param>
-        public override void Render( Context context, TextWriter result )
-        {
-            if ( !string.IsNullOrEmpty( _shortcodeMarkup ) )
-            {
-                var lavaContext = new DotLiquidLavaContext( context );
-
-                var parms = ParseMarkup( _markup, lavaContext );
+            //if (_shortcode != null )
+            //{
+                var parms = ParseMarkup( _elementAttributesMarkup, context );
 
                 // add a unique id so shortcodes have easy access to one
                 parms.AddOrReplace( "uniqueid", "id-" + Guid.NewGuid().ToString() );
@@ -171,16 +168,24 @@ namespace Rock.Lava.DotLiquid
                 }
                 parms.AddOrReplace( "RecursionDepth", currentRecurrsionDepth );
 
-                var results = lavaContext.ResolveMergeFields( _shortcodeMarkup, parms, _shortcodeEnabledLavaCommands );
-
+                var results = context.ResolveMergeFields( _shortcode.TemplateMarkup, parms, _enabledLavaCommands );
+            //var results = _shortcode.TemplateMarkup.ResolveMergeFields( parms, "" ); // _shortcode..EnabledLavaCommands );
                 result.Write( results );
-            }
-            else
+            //}
+            //else
+            //{
+            //    result.Write( $"An error occurred while processing the {0} shortcode.", _tagName );
+            //}
+
+            base.OnRender( context, result );
+        }
+
+        private void AssertShortcodeIsInitialized()
+        {
+            if ( _shortcode == null )
             {
-                result.Write( $"An error occurred while processing the {0} shortcode.", _tagName );
+                throw new Exception( $"Shortcode configuration error. \"{_tagName}\" is not initialized." );
             }
-            
-            base.Render( context, result );
         }
 
         /// <summary>
@@ -202,19 +207,19 @@ namespace Rock.Lava.DotLiquid
 
             //if ( context.Environments.Count > 0 )
             //{
-                foreach ( var item in context.GetMergeFieldsInContainerScope() )
-                {
-                    _internalMergeFields.AddOrReplace( item.Key, item.Value );
-                    parms.AddOrReplace( item.Key, item.Value );
-                }
+            foreach ( var item in context.GetMergeFieldsInContainerScope() )
+            {
+                _internalMergeFields.AddOrReplace( item.Key, item.Value );
+                parms.AddOrReplace( item.Key, item.Value );
+            }
             //}
 
             // get variables defined in the lava source
-                foreach ( var item in context.GetMergeFieldsInScope() )
-                {
-                    _internalMergeFields.AddOrReplace( item.Key, item.Value );
-                    parms.AddOrReplace( item.Key, item.Value );
-                }
+            foreach ( var item in context.GetMergeFieldsInScope() )
+            {
+                _internalMergeFields.AddOrReplace( item.Key, item.Value );
+                parms.AddOrReplace( item.Key, item.Value );
+            }
 
             var resolvedMarkup = context.ResolveMergeFields( markup, _internalMergeFields );
 
@@ -276,27 +281,5 @@ namespace Rock.Lava.DotLiquid
 
             return parms;
         }
-
-        #region ILiquidFrameworkRenderer implementation
-
-        void ILiquidFrameworkRenderer.Render( ILiquidFrameworkRenderer baseRenderer, ILavaContext context, TextWriter result )
-        {
-            // Call the default DotLiquid renderer.
-            var dotLiquidContext = ( (DotLiquidLavaContext)context ).DotLiquidContext;
-
-            base.Render( dotLiquidContext, result );
-        }
-
-        void ILiquidFrameworkRenderer.Parse( ILiquidFrameworkRenderer baseRenderer, List<string> tokens, out List<object> nodes )
-        {
-            base.Parse( tokens );
-
-            nodes = base.NodeList;
-        }
-
-        #endregion
-
     }
-
-
 }

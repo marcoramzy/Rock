@@ -46,7 +46,7 @@ namespace Rock.Tests.Integration.Lava
         #region Accordion
 
         [TestMethod]
-        public void AccordionShortcode_Basic_EmitsCorrectHtml()
+        public void AccordionShortcodeBlock_Basic_EmitsCorrectHtml()
         {
             var input = @"
 {[ accordion ]}

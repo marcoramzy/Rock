@@ -608,7 +608,8 @@ namespace Rock.WebStartup
 
         private static void InitializeLavaShortcodes( ILavaEngine engine )
         {
-            // Register dynamic shortcodes with a factory method to ensure that the latest definition is retrieved from the global cache.
+            // Register dynamic shortcodes with a factory method to ensure that the latest definition is retrieved
+            // from the global cache when a new instance of the shortcode is created.
             Func<string, DynamicShortcodeDefinition> shortCodeFactory = ( shortcodeName ) =>
             {
                 DynamicShortcodeDefinition newShortcode = null;
@@ -636,12 +637,11 @@ namespace Rock.WebStartup
                 return newShortcode;
             };
 
-            var blockShortCodes = LavaShortcodeCache.All();
-            //.Where( s => s.TagType == TagType.Block );
+            // Register all of the shortcodes defined in the current database.
+            var shortCodes = LavaShortcodeCache.All();
 
-            foreach ( var shortcode in blockShortCodes )
+            foreach ( var shortcode in shortCodes )
             {
-                // register this shortcode
                 engine.RegisterDynamicShortcode( shortcode.TagName, shortCodeFactory );
             }
         }

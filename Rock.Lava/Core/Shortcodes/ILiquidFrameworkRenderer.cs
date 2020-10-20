@@ -22,16 +22,6 @@ namespace Rock.Lava
     /// <summary>
     /// A component that can parse and render a Lava document element using the Liquid templating framework.
     /// </summary>
-    //internal interface ILiquidFrameworkRenderer
-    //{
-    //    void Render( ILavaContext context, TextWriter result );
-
-    //    void Parse( List<string> tokens, out List<object> nodes );
-    //}
-
-    /// <summary>
-    /// A component that can parse and render a Lava document element using the Liquid templating framework.
-    /// </summary>
     internal interface ILiquidFrameworkRenderer
     {
         // TODO: Remove the frameworkObject parameter - it should appear in IRockLavaBlock/Tag.

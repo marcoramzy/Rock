@@ -30,7 +30,7 @@ namespace Rock.Lava.DotLiquid
     /// <remarks>
     /// This class implements a Lava Block element using the DotLiquid.Block Type that can be processed by the DotLiquid framework.
     /// </remarks>
-    internal class DotLiquidBlockProxy : Block, ILiquidFrameworkRenderer //, IRockLavaBlock
+    internal class DotLiquidBlockProxy : Block, ILiquidFrameworkRenderer
     {
         private static Dictionary<string, Func<string, IRockLavaBlock>> _factoryMethods = new Dictionary<string, Func<string, IRockLavaBlock>>( StringComparer.OrdinalIgnoreCase );
 
@@ -111,12 +111,7 @@ namespace Rock.Lava.DotLiquid
 
         #endregion
 
-        #region IRockLavaBlock implementation
-
-        //public void OnInitialize( string tagName, string markup, List<string> tokens )
-        //{
-        //    this.OnInitialize( tagName, markup, tokens );
-        //}
+        #region ILiquidFrameworkRenderer implementation
 
         void ILiquidFrameworkRenderer.Render( ILiquidFrameworkRenderer baseRenderer, ILavaContext context, TextWriter result )
         {
@@ -131,13 +126,6 @@ namespace Rock.Lava.DotLiquid
             base.Parse( tokens );
 
             nodes = base.NodeList;
-
-            //_tag.OnParse( tokens, out nodes );
-        }
-
-        public void OnStartup()
-        {
-            throw new NotImplementedException( "The OnStartup method is not a valid operation for the DotLiquidBlockProxy." );
         }
 
         #endregion
