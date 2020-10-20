@@ -29,18 +29,18 @@ namespace Rock.Lava.DotLiquid
     /// </remarks>
     internal class DotLiquidStaticShortcodeBlockProxy : Block
     {
-        private static DotLiquidShortcodeElementCore _core = new DotLiquidShortcodeElementCore();
+        private static DotLiquidShortcodeBlockProxy _core = new DotLiquidShortcodeBlockProxy();
 
         public static void RegisterFactory( string name, Func<string, IRockShortcode> factoryMethod )
         {
             _core.RegisterFactory( name, factoryMethod );
         }
 
-        public override void Initialize( string tagName, string markup, List<string> tokens )
+        public override void OnInitialize( string tagName, string markup, List<string> tokens )
         {
             _core.Initialize( tagName, markup, tokens );
 
-            base.Initialize( tagName, markup, tokens );
+            base.OnInitialize( tagName, markup, tokens );
         }
 
         public override void Render( Context context, TextWriter result )

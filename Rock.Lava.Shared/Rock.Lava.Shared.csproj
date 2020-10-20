@@ -82,6 +82,7 @@
     <Compile Include="Core\CommonMergeFieldsOptions.cs" />
     <Compile Include="Core\DynamicShortcodeDefinition.cs" />
     <Compile Include="Core\ILavaDataObject.cs" />
+    <Compile Include="Core\IRockLavaElement.cs" />
     <Compile Include="Core\IRockLavaTag.cs" />
     <Compile Include="Core\IRockLavaBlock.cs" />
     <Compile Include="Core\LavaDictionary.cs" />
@@ -93,6 +94,7 @@
     <Compile Include="ILavaEngine.cs" />
     <Compile Include="ILavaTemplate.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Shortcodes\ILavaElement.cs" />
     <Compile Include="Shortcodes\IRockShortcode.cs" />
   </ItemGroup>
   <ItemGroup>

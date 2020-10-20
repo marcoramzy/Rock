@@ -138,13 +138,14 @@
     <Compile Include="Jobs\RockJobListenerTestJob.cs" />
     <Compile Include="Jobs\SendPrayerCommentsJobTests.cs" />
     <Compile Include="Jobs\RockJobListenerTests.cs" />
-    <Compile Include="Lava\ScopeTests.cs" />
-    <Compile Include="Lava\CachingTests.cs" />
+    <Compile Include="Lava\Engine\ScopeTests.cs" />
+    <Compile Include="Lava\Engine\CachingTests.cs" />
     <Compile Include="Lava\Filters\DateFilterTests.cs" />
     <Compile Include="Lava\Filters\NumericFilterTests.cs" />
     <Compile Include="Lava\LavaTestHelper.cs" />
-    <Compile Include="Lava\ShortcodeTests.cs" />
+    <Compile Include="Lava\ShortcodeCodeTests.cs" />
     <Compile Include="Lava\CommandTests.cs" />
+    <Compile Include="Lava\ShortcodeTemplateTests.cs" />
     <Compile Include="Lava\SqlTests.cs" />
     <Compile Include="Lava\RockEntityTests.cs" />
     <Compile Include="Model\IdentityVerificationCodeTests.cs" />

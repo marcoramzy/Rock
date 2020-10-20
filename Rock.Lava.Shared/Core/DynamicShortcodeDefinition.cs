@@ -36,6 +36,6 @@ namespace Rock.Lava
 
         public List<string> Tokens { get; set; }
 
-        public LavaElementTypeSpecifier ElementType { get; set; }
+        public LavaShortcodeTypeSpecifier ElementType { get; set; }
     }
 }

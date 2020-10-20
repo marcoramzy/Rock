@@ -42,13 +42,13 @@ namespace Rock.Tests.Integration.Lava
             RegisterDynamicShortcodes( engine );
 
 
-            Debug.Print( "** Registered Tags:" );
+            //Debug.Print( "** Registered Tags:" );
 
-            foreach (var tag in engine.GetRegisteredTags())
-            {
-                Debug.Print( "{0} [{1}]", tag.Key, tag.Value.SystemTypeName );
-            }
-            Debug.Print( "**" );
+            //foreach (var tag in engine.GetRegisteredElements())
+            //{
+            //    Debug.Print( "{0} [{1}]", tag.Key, tag.Value.SystemTypeName );
+            //}
+            //Debug.Print( "**" );
 
             var helper = new LavaTestHelper();
 
@@ -66,7 +66,7 @@ namespace Rock.Tests.Integration.Lava
                 {
                     var instance = Activator.CreateInstance( elementType ) as IRockLavaTag;
 
-                    var name = instance.TagName;
+                    var name = instance.SourceElementName;
 
                     if ( string.IsNullOrWhiteSpace( name ) )
                     {
@@ -109,7 +109,7 @@ namespace Rock.Tests.Integration.Lava
                 {
                     var instance = Activator.CreateInstance( elementType ) as IRockLavaBlock;
 
-                    var name = instance.BlockName;
+                    var name = instance.SourceElementName;
 
                     if ( string.IsNullOrWhiteSpace( name ) )
                     {
@@ -150,24 +150,12 @@ namespace Rock.Tests.Integration.Lava
 
                 foreach ( var shortcodeType in shortcodeTypes )
                 {
-                    var shortcodeInstance = Activator.CreateInstance( shortcodeType ) as IRockShortcode;
-
-                    engine.RegisterStaticShortcode( shortcodeInstance.Name, ( shortcodeName ) =>
-                    {
+                    engine.RegisterStaticShortcode( ( shortcodeName ) =>
+                    { 
                         var shortcode = Activator.CreateInstance( shortcodeType ) as IRockShortcode;
 
                         return shortcode;
                     } );
-
-                    //try
-                    //{
-                    //    shortcodeInstance.OnStartup();
-                    //}
-                    //catch ( Exception ex )
-                    //{
-                    //    ExceptionLogService.LogException( ex, null );
-                    //}
-
                 }
             }
             catch ( Exception ex )
@@ -195,11 +183,11 @@ namespace Rock.Tests.Integration.Lava
 
                     if ( shortcodeDefinition.TagType == TagType.Block )
                     {
-                        newShortcode.ElementType = LavaElementTypeSpecifier.Block;
+                        newShortcode.ElementType = LavaShortcodeTypeSpecifier.Block;
                     }
                     else
                     {
-                        newShortcode.ElementType = LavaElementTypeSpecifier.Inline;
+                        newShortcode.ElementType = LavaShortcodeTypeSpecifier.Inline;
                     }
                 }
 

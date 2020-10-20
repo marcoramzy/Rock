@@ -18,6 +18,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using DotLiquid;
+using Rock.Lava.Shortcodes;
 
 namespace Rock.Lava.DotLiquid
 {
@@ -25,7 +26,7 @@ namespace Rock.Lava.DotLiquid
     /// Provides common functions for a DotLiquid implementation of a Lava Shortcode,
     /// that can be used with a Tag or Block implementation.
     /// </summary>
-    internal class DotLiquidShortcodeElementCore
+    internal class DotLiquidShortcodeBlockProxy : Block, IRockShortcode
     {
         public void RegisterFactory( string name, Func<string, IRockShortcode> factoryMethod )
         {
@@ -40,10 +41,48 @@ namespace Rock.Lava.DotLiquid
             }
         }
 
+        public LavaElementTypeSpecifier ElementType
+        {
+            get
+            {
+                return LavaElementTypeSpecifier.Block;
+            }
+        }
+        
+
         private static Dictionary<string, Func<string, IRockShortcode>> _tagFactoryMethods = new Dictionary<string, Func<string, IRockShortcode>>();
         private IRockShortcode _shortcode = null;
 
         //public Func<string, IRockShortcode> ShortcodeFactoryMethod { get; set; }
+
+        #region DotLiquid Block Overrides
+
+        public override void OnInitialize( string tagName, string markup, List<string> tokens )
+        {
+            var factoryMethod = _tagFactoryMethods[tagName];
+
+            _shortcode = factoryMethod( tagName );
+
+            // Initialize the DotLiquid block.
+            base.OnInitialize( tagName, markup, tokens );
+
+            // Call the Lava block initializer.
+            _shortcode.OnInitialize( tagName, markup, tokens );
+        }
+
+        public override void Render( Context context, TextWriter result )
+        {
+            var lavaContext = new DotLiquidLavaContext( context );
+
+            var shortcode = _shortcode as RockLavaShortcodeBase;
+
+            // Call the Lava block renderer.
+            shortcode.RenderInternal( lavaContext, result, this );
+        }
+
+        #endregion
+
+        #region IRockLavaBlock implementation
 
         public void Initialize( string tagName, string markup, List<string> tokens )
         {
@@ -51,19 +90,19 @@ namespace Rock.Lava.DotLiquid
 
             _shortcode = factoryMethod( tagName );
 
-            _shortcode.Initialize( tagName, markup, tokens );
+            _shortcode.OnInitialize( tagName, markup, tokens );
 
             //base.Initialize( tagName, markup, tokens );
         }
 
-        public void Render( Context context, TextWriter result )
+        public void OnRender( ILavaContext context, TextWriter result )
         {
-            var lavaContext = new DotLiquidLavaContext( context );
+            var dotLiquidContext = ( (DotLiquidLavaContext)context ).DotLiquidContext;
 
-            _shortcode.Render( lavaContext, result );
-
-            //base.Render( context, result );
+            base.Render( dotLiquidContext, result );
         }
+
+        #endregion
 
     }
 }

@@ -25,7 +25,7 @@ namespace Rock.Lava.Shortcodes
     /// <summary>
     ///
     /// </summary>
-    public class BootstrapAlert : RockLavaShortcodeBase
+    public class BootstrapAlert : RockLavaShortcodeBase, IRockLavaBlock
     {
         private static readonly Regex Syntax = new Regex( @"(\w+)" );
 
@@ -34,11 +34,19 @@ namespace Rock.Lava.Shortcodes
         /// <summary>
         /// Specifies the type of Liquid element for this shortcode.
         /// </summary>
-        public override LavaElementTypeSpecifier ElementType
+        public override LavaShortcodeTypeSpecifier ElementType
         {
             get
             {
-                return LavaElementTypeSpecifier.Block;
+                return LavaShortcodeTypeSpecifier.Block;
+            }
+        }
+
+        public string SourceElementName
+        {
+            get
+            {
+                return this.GetType().Name;
             }
         }
 
@@ -53,7 +61,7 @@ namespace Rock.Lava.Shortcodes
         {
             _markup = markup;
 
-            base.Initialize( tagName, markup, tokens );
+            base.OnInitialize( tagName, markup, tokens );
         }
 
         /// <summary>
@@ -66,7 +74,7 @@ namespace Rock.Lava.Shortcodes
 
             using ( TextWriter writer = new StringWriter() )
             {
-                base.Render( context, writer );
+                base.OnRender( context, writer );
 
                 var parms = ParseMarkup( _markup, context );
 

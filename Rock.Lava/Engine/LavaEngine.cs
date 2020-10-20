@@ -11,6 +11,8 @@ namespace Rock.Lava
     /// </summary>
     public static class LavaEngine
     {
+        public static string ShortcodeNameSuffix = "_sc";
+
         private static ILavaEngine _instance = null;
         private static LavaEngineTypeSpecifier _liquidFramework = LavaEngineTypeSpecifier.DotLiquid;
 
@@ -78,14 +80,70 @@ namespace Rock.Lava
 
         public abstract void RegisterSafeType( Type type, string[] allowedMembers = null );
 
-        public abstract void RegisterStaticShortcode( string name, Func<string, IRockShortcode> shortcodeFactoryMethod );
+        public void RegisterStaticShortcode( Func<string, IRockShortcode> shortcodeFactoryMethod )
+        {
+            var instance = shortcodeFactoryMethod( "default" );
+
+            if ( instance == null )
+            {
+                throw new Exception( "Shortcode factory could not provide a valid instance for \"default\"." );
+            }
+
+            RegisterStaticShortcode( instance.SourceElementName, shortcodeFactoryMethod );
+        }
+
+        public void RegisterStaticShortcode( string name, Func<string, IRockShortcode> shortcodeFactoryMethod )
+        {
+            var instance = shortcodeFactoryMethod( name );
+
+            if ( instance == null )
+            {
+                throw new Exception( $"Shortcode factory could not provide a valid instance for \"{name}\" ." );
+            }
+
+            // Get a registration name for the shortcode that will not collide with an existing tag name.
+            var registrationKey = GetShortcodeRegistrationKey( name );
+
+            if ( instance.ElementType == LavaShortcodeTypeSpecifier.Inline )
+            {
+                var tagFactoryMethod = shortcodeFactoryMethod as Func<string, IRockLavaTag>;
+
+                this.RegisterTag( registrationKey, tagFactoryMethod );
+            }
+            else
+            {
+                this.RegisterBlock( registrationKey,  ( blockName ) =>
+                {
+                    // Get a shortcode instance using the provided shortcut factory.
+                    var shortcode = shortcodeFactoryMethod( registrationKey );
+
+                    // Return the shortcode instance as a RockLavaBlock
+                    return shortcode as IRockLavaBlock;
+                } );
+                ;
+            }
+        }
+
+        private string GetShortcodeRegistrationKey( string shortcodeName )
+        {
+            var internalName = shortcodeName + LavaEngine.ShortcodeNameSuffix;
+
+            return internalName.Trim().ToLower();
+        }
+
+        //public abstract void RegisterStaticShortcode( string name, Func<string, IRockShortcode> shortcodeFactoryMethod );
+
+
         public abstract void RegisterDynamicShortcode( string name, Func<string, DynamicShortcodeDefinition> shortcodeFactoryMethod );
 
+        [Obsolete]
         public abstract void RegisterShortcode( IRockShortcode shortcode );
+
+        [Obsolete]
         public abstract void RegisterShortcode<T>( string name )
             where T : IRockShortcode;
 
-        public abstract void SetContextValue( string key, object value );
+        //public abstract void SetContextValue( string key, object value );
 
         public bool TryRender( string inputTemplate, out string output )
         {
@@ -157,12 +215,103 @@ namespace Rock.Lava
 
         public abstract ILavaTemplate ParseTemplate( string inputTemplate );
 
-        public abstract void RegisterTag( string name, Func<string, IRockLavaTag> factoryMethod );
+        public Dictionary<string, ILavaElementInfo> GetRegisteredElements()
+        {
+            var tags = new Dictionary<string, ILavaElementInfo>();
 
-        public abstract void RegisterBlock( string name, Func<string, IRockLavaBlock> factoryMethod );
+            foreach ( var tagWrapper in _lavaElements )
+            {
+                var info = new LavaTagInfo();
 
-        public abstract Dictionary<string, ILavaTagInfo> GetRegisteredTags();
+                info.Name = tagWrapper.Key;
 
-        public abstract void RenderTag( IRockLavaBlock tag, ILavaContext context, TextWriter result );
+                info.SystemTypeName = tagWrapper.Value.SystemTypeName;
+
+                tags.Add( info.Name, info );
+            }
+
+            return tags;
+        }    
+
+        #region Tags
+
+        private static Dictionary<string, ILavaElementInfo> _lavaElements = new Dictionary<string, ILavaElementInfo>( StringComparer.OrdinalIgnoreCase );
+
+        public virtual void RegisterTag( string name, Func<string, IRockLavaTag> factoryMethod )
+        {
+            if ( string.IsNullOrWhiteSpace( name ) )
+            {
+                throw new ArgumentException( "Name must be specified." );
+            }
+
+            name = name.Trim().ToLower();
+
+            var tagInstance = factoryMethod( name );
+
+            var tagInfo = new LavaTagInfo();
+
+            tagInfo.Name = name;
+            tagInfo.FactoryMethod = factoryMethod;
+
+            tagInfo.IsAvailable = ( tagInstance != null );
+
+            if ( tagInstance != null )
+            {
+                tagInfo.SystemTypeName = tagInstance.GetType().FullName;
+            }
+
+            _lavaElements[name] = tagInfo;
+        }
+
+        public virtual void RegisterBlock( string name, Func<string, IRockLavaBlock> factoryMethod )
+        {
+            if ( string.IsNullOrWhiteSpace( name ) )
+            {
+                throw new ArgumentException( "Name must be specified." );
+            }
+
+            name = name.Trim().ToLower();
+
+            var blockInstance = factoryMethod( name );
+
+            var blockInfo = new LavaBlockInfo();
+
+            blockInfo.Name = name;
+            blockInfo.FactoryMethod = factoryMethod;
+
+            blockInfo.IsAvailable = ( blockInstance != null );
+
+            if ( blockInstance != null )
+            {
+                blockInfo.SystemTypeName = blockInstance.GetType().FullName;
+            }
+
+            _lavaElements[name] = blockInfo;
+        }
+
+        public bool TryGetTagInstance( string tagName, out IRockLavaTag tagInstance )
+        {
+            tagInstance = null;
+
+            if ( !_lavaElements.ContainsKey( tagName ) )
+            {
+                return false;
+            }
+
+            var tag = _lavaElements[tagName] as LavaTagInfo;
+
+            if ( tag == null )
+            {
+                return false;
+            }
+
+            var factoryMethod = tag.FactoryMethod;
+
+            tagInstance = factoryMethod( tagName );
+
+            return true;
+        }
+
+        #endregion
     }
 }

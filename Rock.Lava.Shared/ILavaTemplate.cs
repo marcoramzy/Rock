@@ -83,13 +83,14 @@ namespace Rock.Lava
         public List<string> EnabledCommands { get; set; }
 
         /// <summary>
-        /// Private variable assignments that are shared with other instances of this template but are not available for rendering.
+        /// Private variable assignments that are shared with other instances of this template but are not accessible to the source template.
         /// </summary>
         public IDictionary<string, object> Registers { get; set; }
-
+       
         /// <summary>
-        /// Local variable assignments used to resolve this template.
+        /// Local variable assignments made while resolving this template.
         /// </summary>
+        [Obsolete("Not sure if this is used?")]
         public IDictionary<string, object> InstanceAssigns { get; set; }
 
         /// <summary>

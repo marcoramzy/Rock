@@ -67,7 +67,7 @@ namespace Rock.Lava.Blocks
             // first ensure that entity commands are allowed in the context
             if ( !this.IsAuthorized( context ) )
             {
-                result.Write( string.Format( RockLavaBlockBase.NotAuthorizedMessage, this.BlockName ) );
+                result.Write( string.Format( RockLavaBlockBase.NotAuthorizedMessage, this.SourceElementName ) );
                 base.OnRender( context, result );
                 return;
             }
@@ -538,7 +538,7 @@ namespace Rock.Lava.Blocks
 
                 var lavaEngine = LavaEngine.Instance;
 
-                if ( lavaEngine.GetRegisteredTags().ContainsKey( entityName ) )
+                if ( lavaEngine.GetRegisteredElements().ContainsKey( entityName ) )
                 {
                     entityName = entityType.Name.Replace( '.', '_' );
                 }

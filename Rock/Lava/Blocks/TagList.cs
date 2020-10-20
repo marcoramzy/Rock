@@ -30,9 +30,9 @@ namespace Rock.Lava.Blocks
     /// </summary>
     public class TagList : RockLavaTagBase //, IRockStartup
     {
-        private static readonly Regex Syntax = new Regex( @"(\w+)" );
+        //private static readonly Regex Syntax = new Regex( @"(\w+)" );
 
-        string _markup = string.Empty;
+        //string _markup = string.Empty;
 
         /// <summary>
         /// Method that will be run at Rock startup
@@ -57,12 +57,12 @@ namespace Rock.Lava.Blocks
         /// <param name="markup">The markup.</param>
         /// <param name="tokens">The tokens.</param>
         /// <exception cref="System.Exception">Could not find the variable to place results in.</exception>
-        public override void OnInitialize( string tagName, string markup, IEnumerable<string> tokens )
-        {
-            _markup = markup;
+        //public override void OnInitialize() // string tagName, string markup, IEnumerable<string> tokens )
+        //{
+        //    _markup = markup;
 
-            base.OnInitialize( tagName, markup, tokens );
-        }
+        //    base.OnInitialize( tagName, markup, tokens );
+        //}
 
         /// <summary>
         /// Renders the specified context.
@@ -71,28 +71,30 @@ namespace Rock.Lava.Blocks
         /// <param name="result">The result.</param>
         public override void OnRender( ILavaContext context, TextWriter result )
         {
-           var tags = LavaEngine.Instance.GetRegisteredTags();
+           var tags = LavaEngine.Instance.GetRegisteredElements();
 
            if ( !tags.Any() )
            {
                 return;
            }
-
+           
            var tagList = new StringBuilder();
 
            tagList.Append( "<strong>Lava Tag List</strong>" );
            tagList.Append( "<ul>" );
 
-           foreach( var tag in tags.OrderBy( t => t.Key ) )
+           foreach( var kvp in tags.OrderBy( t => t.Key ) )
            {
-                tagList.Append( $"<li>{tag.Key} - {tag.Value}</li>" );
+                var tag = kvp.Value;
+                
+                tagList.Append( $"<li>{tag.Name} - {tag.SystemTypeName}</li>" );
            }
 
            tagList.Append( "</ul>" );
 
            result.Write( tagList.ToString() );
 
-           base.Render( context, result );
+           base.OnRender( context, result );
         }
     }
 }

@@ -72,7 +72,7 @@ namespace Rock.Lava.Blocks
         /// Parses the specified tokens.
         /// </summary>
         /// <param name="tokens">The tokens.</param>
-        protected override void OnParse( List<string> tokens, out List<object> nodeList )
+        public override void OnParse( List<string> tokens, out List<object> nodeList )
         {
             // Get the block markup. The list of tokens contains all of the lava from the start tag to
             // the end of the template. This will pull out just the internals of the block.
@@ -144,7 +144,7 @@ namespace Rock.Lava.Blocks
             // First ensure that cached commands are allowed in the context
             if ( !this.IsAuthorized( context ) )
             {
-                result.Write( string.Format( RockLavaBlockBase.NotAuthorizedMessage, this.BlockName ) );
+                result.Write( string.Format( RockLavaBlockBase.NotAuthorizedMessage, this.SourceElementName ) );
                 base.OnRender( context, result );
                 return;
             }

@@ -14,88 +14,86 @@
 // limitations under the License.
 // </copyright>
 //
+using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-
-using DotLiquid;
 
 namespace Rock.Lava.Blocks
 {
     /// <summary>
-    /// 
+    /// Provides base functionality for a Lava Tag element.
     /// </summary>
-    /// <seealso cref="DotLiquid.Block" />
-    public abstract class RockLavaTagBase : IRockLavaTag
+    public abstract class RockLavaTagBase : IRockLavaTag, ILiquidFrameworkRenderer
     {
-        private string _tagName = null;
-        private IRockLavaTag _tagProxy;
+        private string _sourceElementName = null;
+        private string _attributesMarkup;
 
         /// <summary>
-        /// The name of the tag.
+        /// The raw markup for any additional Attributes contained in the element source tag.
         /// </summary>
-        public string TagName
+        public string ElementAttributesMarkup
         {
             get
             {
-                if ( _tagName == null )
-                {
-                    return this.GetType().Name;
-                }
-
-                return _tagName;
-            }
-
-            set
-            {
-                _tagName = value;
+                return _attributesMarkup;
             }
         }
+        public void Initialize( string tagName, string markup, List<string> tokens )
+        {
+            _sourceElementName = tagName;
+            _attributesMarkup = markup;
 
-        //public void Initialize( string tagName, string markup, List<string> tokens )
-        //{
-        //    _tagName = tagName;
-
-        //    OnInitialize( tagName, markup, tokens );
-        //}
-
-        //public virtual void OnInitialize( string tagName, string markup, List<string> tokens )
-        //{
-        //    //
-        //}
+            OnInitialize( tagName, markup, tokens );
+        }
 
         public void Render( ILavaContext context, TextWriter result )
         {
             OnRender( context, result );
         }
 
-        //public virtual void OnRender( ILavaContext context, TextWriter result )
-        //{
-        //    //
-        //}
+        public void Parse( List<string> tokens, out List<object> nodes )
+        {
+            OnParse( tokens, out nodes );
+        }
 
-        //public void Initialize( string tagName, string markup, IEnumerable<string> tokens )
-        //{
-        //    throw new System.NotImplementedException();
-        //}
+        #region IRockLavaElement implementation
+
+        /// <summary>
+        /// The name of the tag.
+        /// </summary>
+        /// <summary>
+        /// The name of the block.
+        /// </summary>
+        public string SourceElementName
+        {
+            get
+            {
+                if ( _sourceElementName == null )
+                {
+                    return this.GetType().Name.ToLower();
+                }
+
+                return _sourceElementName;
+            }
+
+            set
+            {
+                _sourceElementName = ( value == null ) ? null : value.Trim().ToLower();
+            }
+        }
+
+        #endregion
+
+        #region Customisation methods.
 
         public virtual void OnStartup()
         {
             //throw new System.NotImplementedException();
         }
 
-        #region DotLiquid Tag Implementation
-
-        public virtual void OnInitialize( string tagName, string markup, IEnumerable<string> tokens )
+        public virtual void OnInitialize( string tagName, string markup, List<string> tokens )
         {
             //
-        }
-
-        internal void RenderInternal( ILavaContext context, TextWriter result, IRockLavaTag proxy )
-        {
-            _tagProxy = proxy;
-
-            this.OnRender( context, result );
         }
 
         /// <summary>
@@ -106,12 +104,10 @@ namespace Rock.Lava.Blocks
         public virtual void OnRender( ILavaContext context, TextWriter result )
         {
             // By default, call the underlying engine to render this element.
-            _tagProxy.OnRender( context, result );
-        }
-
-        public void Parse( List<string> tokens, out List<object> nodes )
-        {
-            OnParse( tokens, out nodes );
+            if ( _baseRenderer != null )
+            {
+                _baseRenderer.Render( null, context, result );
+            }
         }
 
         /// <summary>
@@ -119,12 +115,41 @@ namespace Rock.Lava.Blocks
         /// </summary>
         /// <param name="tokens"></param>
         /// <param name="nodes"></param>
-        protected virtual void OnParse( List<string> tokens, out List<object> nodes )
+        public virtual void OnParse( List<string> tokens, out List<object> nodes )
         {
             nodes = null;
         }
 
         #endregion
 
+        [Obsolete( "???" )]
+        internal void RenderInternal( ILavaContext context, TextWriter result, IRockLavaTag proxy )
+        {
+            this.OnRender( context, result );
+        }
+
+        #region ILiquidFrameworkRenderer implementation
+
+        private ILiquidFrameworkRenderer _baseRenderer = null;
+
+        /// <summary>
+        /// Render this component using the Liquid templating engine.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="result"></param>
+        /// <param name="proxy"></param>
+        void ILiquidFrameworkRenderer.Render( ILiquidFrameworkRenderer baseRenderer, ILavaContext context, TextWriter result )
+        {
+            _baseRenderer = baseRenderer;
+
+            OnRender( context, result );
+        }
+
+        void ILiquidFrameworkRenderer.Parse( ILiquidFrameworkRenderer baseRenderer, List<string> tokens, out List<object> nodes )
+        {
+            baseRenderer.Parse( baseRenderer, tokens, out nodes );
+        }
+
+        #endregion
     }
 }

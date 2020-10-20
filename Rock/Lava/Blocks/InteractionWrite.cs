@@ -82,7 +82,7 @@ namespace Rock.Lava.Blocks
             // First, ensure that this command is allowed in the context.
             if ( !this.IsAuthorized( context ) )
             {
-                result.Write( string.Format( RockLavaBlockBase.NotAuthorizedMessage, this.BlockName ) );
+                result.Write( string.Format( RockLavaBlockBase.NotAuthorizedMessage, this.SourceElementName ) );
                 base.OnRender( context, result );
                 return;
             }

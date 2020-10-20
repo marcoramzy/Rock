@@ -30,11 +30,11 @@ using Rock.Common;
 namespace Rock.Lava.DotLiquid
 {
     /// <summary>
-    /// Implementation of a Dynamic Shortcode Block for the DotLiquid templating framework.
-    /// A dynamic shortcode block is identified by a unique tag
-    /// renders a parameterized lava template to produce the final output.
+    /// Implements a Dynamic Shortcode Block for the DotLiquid templating framework.
+    /// A dynamic shortcode block is a Lava shortcode whose definition is loaded from a data store at runtime.
+    /// By contrast, a static shortcode has a fixed definition that is defined in a Rock code component.
     /// </summary>
-    public class DotLiquidDynamicShortcodeBlock : Block, IRockShortcode // RockLavaShortcodeBlockBase
+    public class DotLiquidDynamicShortcodeBlockProxy : Block, IRockShortcode
     {
         private static readonly Regex Syntax = new Regex( @"(\w+)" );
 
@@ -52,13 +52,33 @@ namespace Rock.Lava.DotLiquid
 
         const int _maxRecursionDepth = 10;
 
-        public LavaElementTypeSpecifier ElementType
+        public LavaShortcodeTypeSpecifier ElementType
         {
             get
             {
-                return LavaElementTypeSpecifier.Block;
+                return LavaShortcodeTypeSpecifier.Block;
             }
         }
+
+        /// <summary>
+        /// The key that internally identifies the block or tag element associated with this shortcode.
+        /// </summary>
+        public string InternalElementName
+        {
+            get
+            {
+                return this.SourceElementName + LavaEngine.ShortcodeNameSuffix;
+            }
+        }
+
+        public string SourceElementName
+        {
+            get
+            {
+                return _tagName;
+            }
+        }
+        
 
         /// <summary>
         /// Method that will be run at Rock startup
@@ -155,7 +175,7 @@ namespace Rock.Lava.DotLiquid
             }
         }
 
-        public void Render( ILavaContext context, TextWriter result )
+        public void OnRender( ILavaContext context, TextWriter result )
         {
             var dotLiquidContext = context as DotLiquidLavaContext;
 
@@ -170,6 +190,11 @@ namespace Rock.Lava.DotLiquid
         public override void Render( Context context, TextWriter result )
         {
             // get enabled security commands
+            //if ( context.HasKey( "EnabledCommands" ) )
+            //{
+            //    _enabledSecurityCommands = context["EnabledCommands"].ToString();
+            //}
+
             if ( context.Registers.ContainsKey( "EnabledCommands" ) )
             {
                 _enabledSecurityCommands = context.Registers["EnabledCommands"].ToString();
@@ -462,9 +487,9 @@ namespace Rock.Lava.DotLiquid
             }
         }
 
-        void IRockShortcode.Initialize( string tagName, string markup, IEnumerable<string> tokens )
-        {
-            this.Initialize( tagName, markup, tokens.ToList() );
-        }
+        //void IRockShortcode.OnInitialize( string tagName, string markup, List<string> tokens )
+        //{
+        //    this.OnInitialize( tagName, markup, tokens.ToList() );
+        //}
     }
 }

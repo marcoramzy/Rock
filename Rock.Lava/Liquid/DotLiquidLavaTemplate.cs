@@ -77,9 +77,54 @@ namespace Rock.Lava.DotLiquid
         /// <param name="output"></param>
         /// <param name="errors"></param>
         /// <returns></returns>
-        protected override bool OnTryRender( IDictionary<string, object> values, out string output, out IList<Exception> errors )
+        protected override bool OnTryRender( LavaRenderParameters parameters, out string output, out IList<Exception> errors )
         {
-            output = _dotLiquidTemplate.Render( Hash.FromDictionary( values ) );
+            var values = new Dictionary<string, object>();
+
+            if ( parameters.LocalVariables != null )
+            {
+                values.AddOrReplace( parameters.LocalVariables );
+            }
+            if ( parameters.Registers != null )
+            {
+                values.AddOrReplace( parameters.Registers );
+            }
+            if ( parameters.InstanceAssigns != null )
+            {
+                values.AddOrReplace( parameters.InstanceAssigns );
+            }
+
+            // The DotLiquid rendering engine ignores the LocalVariables and Registers parameters when using thread-safe Templates.
+            // Rock requires all templates to be thread-safe, so we need to supply a Liquid context here rather than using the LocalVariables and Registers parameters.
+            var dotLiquidRenderParameters = new RenderParameters();
+
+            dotLiquidRenderParameters.Context = new Context(); // null, null, Hash.FromDictionary( parameters.Registers ), true );
+
+            dotLiquidRenderParameters.Context.Merge( Hash.FromDictionary( values ) );
+
+            //dotLiquidRenderParameters.LocalVariables = Hash.FromDictionary( parameters.LocalVariables );
+            //dotLiquidRenderParameters.Registers = Hash.FromDictionary( parameters.Registers );
+
+            // Store the EnabledCommands setting for the context and the template in the DotLiquid registers.
+            var enabledCommands = new List<string>();
+
+            if ( this.EnabledCommands != null )
+            {
+                enabledCommands.AddRange( this.EnabledCommands );
+            }
+
+            if ( parameters.EnabledCommands != null )
+            {
+                enabledCommands.AddRange( parameters.EnabledCommands );
+            }
+
+            dotLiquidRenderParameters.Registers = new Hash();
+
+            //dotLiquidRenderParameters.Registers["EnabledCommands"] = enabledCommands.Distinct().JoinStrings( "," );
+
+            dotLiquidRenderParameters.Context.Registers["EnabledCommands"] = enabledCommands.Distinct().JoinStrings( "," );
+
+            output = _dotLiquidTemplate.Render( dotLiquidRenderParameters );
 
             errors = _dotLiquidTemplate.Errors;
 

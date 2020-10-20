@@ -29,12 +29,13 @@ namespace Rock.Lava.DotLiquid
         /// <summary>
         /// The set of Lava commands permitted for this template.
         /// </summary>
+        [Obsolete("Do Lava Commands need to be enabled (and cached) for a Template, or only at the context level?")]
         public IList<string> EnabledCommands { get; set; }
 
-        public bool TryRender( LavaRenderParameters parameters, out string output, out IList<Exception> errors )
-        {
-            return TryRender( parameters as IDictionary<string, object>, out output, out errors );
-        }
+        //public bool TryRender( LavaRenderParameters parameters, out string output, out IList<Exception> errors )
+        //{
+        //    return TryRender( parameters, out output, out errors );
+        //}
 
         public string Render( IDictionary<string, object> values )
         {
@@ -55,7 +56,9 @@ namespace Rock.Lava.DotLiquid
             return output;           
         }
 
+        [Obsolete]
         public abstract void SetContextValue( string key, object value );
+
         public bool TryRender( IDictionary<string, object> values, out string output, out IList<Exception> errors )
         {
             if ( values == null )
@@ -66,9 +69,28 @@ namespace Rock.Lava.DotLiquid
             // Add the EnabledCommands setting to the context.
             values["EnabledCommands"] = this.EnabledCommands;
 
-            return OnTryRender( values, out output, out errors );
+            var parameters = new LavaRenderParameters();
+
+            parameters.LocalVariables = values;
+
+            return OnTryRender( parameters, out output, out errors );
         }
 
-        protected abstract bool OnTryRender( IDictionary<string, object> values, out string output, out IList<Exception> errors );
+        public bool TryRender( LavaRenderParameters parameters, out string output, out IList<Exception> errors )
+        {
+            if ( parameters == null )
+            {
+                parameters = new LavaRenderParameters();
+            }
+
+            // Add the EnabledCommands setting to the context.
+            //values["EnabledCommands"] = this.EnabledCommands;
+
+            //parameters.LocalVariables = values;
+
+            return OnTryRender( parameters, out output, out errors );
+        }
+
+        protected abstract bool OnTryRender( LavaRenderParameters parameters, out string output, out IList<Exception> errors );
     }
 }

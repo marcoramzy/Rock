@@ -17,48 +17,107 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Rock.Lava.DotLiquid;
+using Rock.Lava.Shortcodes;
 
 namespace Rock.Lava.Blocks
 {
-
     /// <summary>
-    /// 
+    /// Provides base functionality for implementation of a Rock Lava block.
     /// </summary>
-    /// <seealso cref="DotLiquid.Block" />
-    public abstract class RockLavaBlockBase : IRockLavaBlock // ILava DotLiquid.Block, IRockStartup
+    public abstract class RockLavaBlockBase : IRockLavaBlock, ILiquidFrameworkRenderer
     {
-        private string _blockName = null;
-        private IRockLavaBlock _blockProxy;
+        private string _sourceElementName = null;
 
         /// <summary>
-        /// The name of the block.
+        /// The name of the block as it appears in the source tag.
         /// </summary>
-        public string BlockName
+        public string SourceElementName
         {
             get
             {
-                if ( _blockName == null )
+                if ( _sourceElementName == null )
                 {
-                    return this.GetType().Name;
+                    return this.GetType().Name.ToLower();
                 }
 
-                return _blockName;
+                return _sourceElementName;
             }
 
             set
             {
-                _blockName = value;
+                _sourceElementName = ( value == null ) ? null : value.Trim().ToLower();
             }
         }
 
-        //public LavaElementTypeSpecifier ElementType
-        //{
-        //    get
-        //    {
-        //        return LavaElementTypeSpecifier.Block;
-        //    }
-        //}
+        /// <summary>
+        /// Determines if this block is authorized in the specified Lava context.
+        /// </summary>
+        /// <param name="context">The context.</param>
+        /// <returns></returns>
+        protected bool IsAuthorized( ILavaContext context )
+        {
+            return LavaSecurityHelper.IsAuthorized( context, this.SourceElementName );
+        }
+
+        #region DotLiquid Block Implementation
+
+        /// <summary>
+        /// Override this method to provide custom initialization for the block.
+        /// </summary>
+        /// <param name="tagName"></param>
+        /// <param name="markup"></param>
+        /// <param name="tokens"></param>
+        public virtual void OnInitialize( string tagName, string markup, List<string> tokens )
+        {
+            //
+        }
+
+        /// <summary>
+        /// Override this method to provide custom rendering for the block.
+        /// </summary>
+        /// <param name="context">The context.</param>
+        /// <param name="result">The result.</param>
+        public virtual void OnRender( ILavaContext context, TextWriter result )
+        {
+            // By default, call the underlying engine to render this element.
+            if ( _baseRenderer != null )
+            {
+                _baseRenderer.Render( null, context, result );
+            }
+        }
+
+        /// <summary>
+        /// Parse a set of Lava tokens into a set of document nodes that can be processed by the underlying rendering framework.
+        /// </summary>
+        /// <param name="tokens"></param>
+        /// <param name="nodes"></param>
+        public void Parse( List<string> tokens, out List<object> nodes )
+        {
+            OnParse( tokens, out nodes );
+        }
+
+        /// <summary>
+        /// Override this method to provide custom parsing for the block.
+        /// </summary>
+        /// <param name="tokens"></param>
+        /// <param name="nodes"></param>
+        public virtual void OnParse( List<string> tokens, out List<object> nodes )
+        {
+            nodes = null;
+        }
+
+        /// <summary>
+        /// Override this method to perform tasks when the block is first loaded at startup.
+        /// </summary>
+        public virtual void OnStartup()
+        {
+            //
+        }
+
+        protected virtual void AssertMissingDelimitation()
+        {
+            throw new Exception( string.Format( "BlockTagNotClosedException: {0}", this.SourceElementName ) );
+        }
 
         /// <summary>
         /// Gets the not authorized message.
@@ -74,71 +133,30 @@ namespace Rock.Lava.Blocks
             }
         }
 
-        /// <summary>
-        /// Determines whether the specified command is authorized.
-        /// </summary>
-        /// <param name="context">The context.</param>
-        /// <returns></returns>
-        protected bool IsAuthorized( ILavaContext context )
-        {
-            return LavaSecurityHelper.IsAuthorized( context, this.GetType().Name );
-        }
+        #endregion
 
-        #region DotLiquid Block Implementation
+        #region ILiquidFrameworkRenderer implementation
 
-        public virtual void OnInitialize( string tagName, string markup, List<string> tokens )
-        {
-            //
-        }
-        
-        internal void RenderInternal( ILavaContext context, TextWriter result, IRockLavaBlock proxy )
-        {
-            _blockProxy = proxy;
-
-            this.OnRender( context, result );
-        }
+        private ILiquidFrameworkRenderer _baseRenderer = null;
 
         /// <summary>
-        /// Renders the specified context.
+        /// Render this component using the Liquid templating engine.
         /// </summary>
-        /// <param name="context">The context.</param>
-        /// <param name="result">The result.</param>
-        public virtual void OnRender( ILavaContext context, TextWriter result )
+        /// <param name="context"></param>
+        /// <param name="result"></param>
+        /// <param name="proxy"></param>
+        void ILiquidFrameworkRenderer.Render( ILiquidFrameworkRenderer baseRenderer, ILavaContext context, TextWriter result )
         {
-            // By default, call the underlying engine to render this element.
-            _blockProxy.OnRender( context, result );
+            _baseRenderer = baseRenderer;
+
+            OnRender( context, result );
         }
 
-        public void Parse( List<string> tokens, out List<object> nodes )
+        void ILiquidFrameworkRenderer.Parse( ILiquidFrameworkRenderer baseRenderer, List<string> tokens, out List<object> nodes )
         {
-            OnParse( tokens, out nodes );
-        }
-
-        /// <summary>
-        /// Parse a set of Lava tokens into a set of document nodes that can be processed by the underlying rendering framework.
-        /// </summary>
-        /// <param name="tokens"></param>
-        /// <param name="nodes"></param>
-        protected virtual void OnParse( List<string> tokens, out List<object> nodes )
-        {
-            nodes = null;
+            baseRenderer.Parse( baseRenderer, tokens, out nodes );
         }
 
         #endregion
-
-        /// <summary>
-        /// Method that will be run at Rock startup
-        /// </summary>
-        public virtual void OnStartup()
-        {
-            //
-        }
-
-
-        protected virtual void AssertMissingDelimitation()
-        {
-            throw new Exception( string.Format( "BlockTagNotClosedException: {0}", this.BlockName ) );
-            //throw new SyntaxException( Liquid.ResourceManager.GetString( "BlockTagNotClosedException" ), BlockName );
-        }
     }
 }

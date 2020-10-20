@@ -61,7 +61,7 @@ namespace Rock.Lava.Blocks
             // first ensure that sql commands are allowed in the context
             if ( !this.IsAuthorized( context ) )
             {
-                result.Write( string.Format( RockLavaBlockBase.NotAuthorizedMessage, this.BlockName ) );
+                result.Write( string.Format( RockLavaBlockBase.NotAuthorizedMessage, this.SourceElementName ) );
                 base.OnRender( context, result );
                 return;
             }

@@ -17,26 +17,48 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using DotLiquid;
+using Rock.Lava.Blocks;
 
 namespace Rock.Lava.DotLiquid
 {
     /// <summary>
-    /// Represents an implementation of a Lava Shortcode as a DotLiquid Tag.
+    /// A wrapper for a Lava Tag that is compatible with the DotLiquid templating engine.
     /// </summary>
     /// <remarks>
-    /// This class wraps a Lava Shortcode in a DotLiquid.Tag Type that can be processed by the DotLiquid framework.
+    /// The DotLiquid framework processes a custom tag by creating a new instance of the Tag object from a registered Type and initializing the new instance
+    /// by calling the Initialize() method.
+    /// We need to intercept this process and generate a proxy Tag from a source class that does not inherit from the DotLiquid.Tag base class.
+    /// This proxy class is instantiated by the DotLiquid framework, and we generate an internal instance of a Lava tag that performs the processing.
     /// </remarks>
-    internal class DotLiquidTagProxy : Tag
+    internal class DotLiquidTagProxy : Tag, ILiquidFrameworkRenderer //, IRockLavaTag
     {
-        private static Dictionary<string, Func<string, IRockLavaTag>> _tagFactoryMethods = new Dictionary<string, Func<string, IRockLavaTag>>();
+        private static Dictionary<string, Func<string, IRockLavaTag>> _tagFactoryMethods = new Dictionary<string, Func<string, IRockLavaTag>>( StringComparer.OrdinalIgnoreCase );
 
         public static void RegisterFactory( string name, Func<string, IRockLavaTag> factoryMethod )
         {
+            if ( string.IsNullOrWhiteSpace( name ) )
+            {
+                throw new ArgumentException( "Name must be specified." );
+            }
+
+            name = name.Trim().ToLower();
+
             _tagFactoryMethods.Add( name, factoryMethod );
         }
 
         private IRockLavaTag _tag = null;
+
+        public string SourceElementName
+        {
+            get
+            {
+                return _tag.SourceElementName;
+            }
+        }
+
+        #region DotLiquid Tag Overrides
 
         public override void Initialize( string tagName, string markup, List<string> tokens )
         {
@@ -44,18 +66,56 @@ namespace Rock.Lava.DotLiquid
 
             _tag = factoryMethod( tagName );
 
-            _tag.OnInitialize( tagName, markup, tokens );
-
+            // Initialize the DotLiquid tag.
             base.Initialize( tagName, markup, tokens );
+
+            // Call the Lava tag initializer.
+            _tag.OnInitialize( tagName, markup, tokens );
         }
 
         public override void Render( Context context, TextWriter result )
         {
             var lavaContext = new DotLiquidLavaContext( context );
 
-            _tag.OnRender( lavaContext, result );
+            var tag = _tag as ILiquidFrameworkRenderer;
 
-            base.Render( context, result );
+            if ( tag == null )
+            {
+                throw new Exception( "Tag proxy cannot be rendered." );
+            }
+
+            // Call the renderer implemented by the wrapped Lava block.
+            tag.Render( this, lavaContext, result );
         }
+
+        #endregion
+
+        #region IRockLavaTag implementation
+
+
+        void ILiquidFrameworkRenderer.Render( ILiquidFrameworkRenderer baseRenderer, ILavaContext context, TextWriter result )
+        {
+            //             
+            var dotLiquidContext = ( (DotLiquidLavaContext)context ).DotLiquidContext;
+
+            base.Render( dotLiquidContext, result );
+        }
+
+        public void OnStartup()
+        {
+            throw new NotImplementedException( "The OnStartup method is not a valid operation for the DotLiquidTagProxy." );
+        }
+
+        void ILiquidFrameworkRenderer.Parse( ILiquidFrameworkRenderer baseRenderer, List<string> tokens, out List<object> nodes )
+        {
+            base.Parse( tokens );
+
+            nodes = base.NodeList;
+
+            //_tag.OnParse( tokens, out nodes );
+        }
+
+        #endregion
+
     }
 }

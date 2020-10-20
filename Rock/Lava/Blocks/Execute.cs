@@ -82,7 +82,7 @@ namespace Rock.Lava.Blocks
             // first ensure that entity commands are allowed in the context
             if ( !this.IsAuthorized( context ) )
             {
-                result.Write( string.Format( RockLavaBlockBase.NotAuthorizedMessage, this.BlockName ) );
+                result.Write( string.Format( RockLavaBlockBase.NotAuthorizedMessage, this.SourceElementName ) );
                 base.OnRender( context, result );
                 return;
             }
@@ -146,7 +146,7 @@ namespace Rock.Lava.Blocks
             }
         }
 
-        protected override void OnParse( List<string> tokens, out List<object> nodes )
+        public override void OnParse( List<string> tokens, out List<object> nodes )
         {
             // No action required.
             nodes = null;

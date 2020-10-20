@@ -42,22 +42,22 @@ namespace Rock.Lava.DotLiquid
 
         //public Func<string, IRockShortcode> ShortcodeFactoryMethod { get; set; }
 
-        public override void Initialize( string tagName, string markup, List<string> tokens )
+        public override void OnInitialize( string tagName, string markup, List<string> tokens )
         {
             var factoryMethod = _tagFactoryMethods[tagName];
 
             _shortcode = factoryMethod( tagName );
 
-            _shortcode.Initialize( tagName, markup, tokens );
+            _shortcode.OnInitialize( tagName, markup, tokens );
 
-            base.Initialize( tagName, markup, tokens );
+            base.OnInitialize( tagName, markup, tokens );
         }
 
         public override void Render( Context context, TextWriter result )
         {
             var lavaContext = new DotLiquidLavaContext( context );
 
-            _shortcode.Render( lavaContext, result );
+            _shortcode.OnRender( lavaContext, result );
 
             base.Render( context, result );
         }

@@ -47,7 +47,7 @@ namespace Rock.Lava.DotLiquid
     /// <summary>
     /// Implementation of a Dynamic Shortcode Tag for the DotLiquid templating framework.
     /// </summary>
-    public partial class DynamicShortcodeInline : Tag, IRockShortcode // RockLavaShortcodeBase
+    public partial class DotLiquidDynamicShortcodeTagProxy : Tag, IRockShortcode // RockLavaShortcodeBase
     {
         private static readonly Regex Syntax = new Regex( @"(\w+)" );
 
@@ -64,11 +64,29 @@ namespace Rock.Lava.DotLiquid
 
         const int _maxRecursionDepth = 10;
 
-        public LavaElementTypeSpecifier ElementType
+        public LavaShortcodeTypeSpecifier ElementType
         {
             get
             {
-                return LavaElementTypeSpecifier.Inline;
+                return LavaShortcodeTypeSpecifier.Inline;
+            }
+        }
+        public string SourceElementName
+        {
+            get
+            {
+                return _tagName;
+            }
+        }
+
+        /// <summary>
+        /// The key that internally identifies the block or tag element associated with this shortcode.
+        /// </summary>
+        public string InternalElementName
+        {
+            get
+            {
+                return this.SourceElementName + LavaEngine.ShortcodeNameSuffix;
             }
         }
 
@@ -118,7 +136,7 @@ namespace Rock.Lava.DotLiquid
         /// </summary>
         /// <param name="context">The context.</param>
         /// <param name="result">The result.</param>
-        public void Render( ILavaContext context, TextWriter result )
+        public void OnRender( ILavaContext context, TextWriter result )
         {
             //
         }
@@ -257,11 +275,6 @@ namespace Rock.Lava.DotLiquid
             }
 
             return parms;
-        }
-
-        void IRockShortcode.Initialize( string tagName, string markup, IEnumerable<string> tokens )
-        {
-            this.Initialize( tagName, markup, tokens.ToList() );
         }
     }
 }

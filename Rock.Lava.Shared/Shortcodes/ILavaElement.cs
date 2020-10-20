@@ -19,24 +19,26 @@ using System.IO;
 
 namespace Rock.Lava
 {
-    /// <summary>
-    /// Interface that classes can implement to be included when searching assemblies for custom Lava Commands.
-    /// </summary>
-    public interface IRockLavaBlock : IRockLavaElement
+    public interface ILavaElement
     {
-        /// <summary>
-        /// The name of the block.
-        /// </summary>
-        //string SourceElementName { get; }
+        string ElementName
+        {
+            get;
+        }
 
-        /*
+        /// <summary>
+        /// The name by which the element is processed internally.
+        /// This may be a decorated version of the element name that is known by the user to avoid collisions with other elements.
+        /// </summary>
+        string InternalName
+        {
+            get;
+        }
+
         void OnInitialize( string tagName, string markup, List<string> tokens );
 
         void OnRender( ILavaContext context, TextWriter result );
 
-        void OnParse( List<string> tokens, out List<object> nodes );
 
-        void OnStartup();
-        */
     }
 }

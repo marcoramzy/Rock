@@ -65,14 +65,14 @@ namespace Rock.Lava.Shortcodes
         </ul>",
         "scheduleid,showwhen,roleid",
         "" )]
-    public class ScheduledContent : RockLavaShortcodeBase
+    public class ScheduledContent : RockLavaShortcodeBlockBase
     {
-        private static readonly Regex Syntax = new Regex( @"(\w+)" );
+        //private static readonly Regex Syntax = new Regex( @"(\w+)" );
 
         string _markup = string.Empty;
         string _enabledSecurityCommands = string.Empty;
         StringBuilder _blockMarkup = new StringBuilder();
-        string _tagName = "scheduledcontent";
+        //string _tagName = "scheduledcontent";
 
         // Keys
         const string SHOW_WHEN = "showwhen";
@@ -80,15 +80,16 @@ namespace Rock.Lava.Shortcodes
         const string ROLE_ID = "roleid";
         const string LOOK_AHEAD_DAYS = "lookaheaddays";
         const string SCHEDULE_CATEGORY_ID = "schedulecategoryid";
+        const string AS_AT_DATE = "asatdate";
 
         /// <summary>
         /// Specifies the type of Liquid element for this shortcode.
         /// </summary>
-        public override LavaElementTypeSpecifier ElementType
+        public override LavaShortcodeTypeSpecifier ElementType
         {
             get
             {
-                return LavaElementTypeSpecifier.Block;
+                return LavaShortcodeTypeSpecifier.Block;
             }
         }
         
@@ -103,15 +104,17 @@ namespace Rock.Lava.Shortcodes
         {
             _markup = markup;
 
-            base.Initialize( tagName, markup, tokens );
+            base.OnInitialize( tagName, markup, tokens );
         }
 
         /// <summary>
         /// Parses the specified tokens.
         /// </summary>
         /// <param name="tokens">The tokens.</param>
-        protected override void OnParse( List<string> tokens, out List<object> nodes )
+        /// <param name="nodes"></param>
+        public override void OnParse( List<string> tokens, out List<object> nodes )
         {
+            // This block does not return any nodes for further processing.
             nodes = null;
 
             // Get the block markup. The list of tokens contains all of the lava from the start tag to
@@ -121,8 +124,10 @@ namespace Rock.Lava.Shortcodes
 
             var endTagFound = false;
 
-            var startTag = $@"{{\[\s*{ _tagName }\s*\]}}";
-            var endTag = $@"{{\[\s*end{ _tagName }\s*\]}}";
+            //var startTag = $@"{{\[\s*{ this.InternalElementName }\s*\]}}";
+            //var endTag = $@"{{\[\s*end{ this.InternalElementName }\s*\]}}";
+            var startTag = $@"{{\%\s*{ this.InternalElementName }\s*\%}}";
+            var endTag = $@"{{\%\s*end{ this.InternalElementName }\s*\%}}";
 
             var childTags = 0;
 
@@ -185,13 +190,16 @@ namespace Rock.Lava.Shortcodes
             {
                 bool filterProvided = false;
 
-                var now = RockDateTime.Now;
+                //var now = RockDateTime.Now;
 
-                base.Render( context, writer );
+                base.OnRender( context, writer );
 
                 var parms = ParseMarkup( _markup, context );
                 var lookAheadDays = parms[ LOOK_AHEAD_DAYS ].AsInteger();
                 var scheduleCategoryId = parms[ SCHEDULE_CATEGORY_ID ].AsIntegerOrNull();
+                var asAtDate = parms[AS_AT_DATE].AsDateTime();
+
+                var now = asAtDate ?? RockDateTime.Now;
 
                 var scheduleIds = new List<int>();
 
@@ -286,7 +294,7 @@ namespace Rock.Lava.Shortcodes
 
                 var results = _blockMarkup.ToString().ResolveMergeFields( mergeFields, _enabledSecurityCommands );
                 result.Write( results.Trim() );
-                base.Render( context, result );
+                base.OnRender( context, result );
             }
         }
 
@@ -333,6 +341,7 @@ namespace Rock.Lava.Shortcodes
             parms.Add( SHOW_WHEN, "live" );
             parms.Add( LOOK_AHEAD_DAYS, "30" );
             parms.Add( SCHEDULE_CATEGORY_ID, "" );
+            parms.Add( AS_AT_DATE, "" );
 
             var markupItems = Regex.Matches( resolvedMarkup, @"(\S*?:'[^']+')" )
                 .Cast<Match>()

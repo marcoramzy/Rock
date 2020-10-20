@@ -77,7 +77,7 @@ namespace Rock.Tests.Integration.Lava
 {% endcache %}
 ";
 
-            var expectedOutput = @"\s*The Lava command 'Cache' is not configured for this template\.\s*";
+            var expectedOutput = @"\s*The Lava command 'cache' is not configured for this template\.\s*";
 
             _helper.AssertTemplateOutputRegex( expectedOutput, input );
         }
@@ -151,7 +151,7 @@ Color 4: blue
 {% endperson %}
             ";
 
-            var expectedOutput = @"\s*The Lava command 'RockEntity' is not configured for this template\.\s*";
+            var expectedOutput = @"\s*The Lava command 'rockentity' is not configured for this template\.\s*";
 
             _helper.AssertTemplateOutputRegex( expectedOutput, input );
         }
@@ -167,13 +167,14 @@ Color 4: blue
 {% endperson %}
             ";
 
-            var expectedOutput = @"";
-
             var context = _helper.LavaEngine.NewContext();
 
             context.SetEnabledCommands( "RockEntity" );
 
-            _helper.AssertTemplateOutput( expectedOutput, input, context );
+            var output = _helper.GetTemplateOutput( input, context );
+
+            Assert.IsTrue( output.Contains( "Ted Decker" ), "Expected person not found." );
+            Assert.IsTrue( output.Contains( "Cindy Decker" ), "Expected person not found." );
         }
 
         #endregion
@@ -189,7 +190,7 @@ Color 4: blue
 {% endexecute %}
             ";
 
-            var expectedOutput = @"\s*The Lava command 'Execute' is not configured for this template\.\s*";
+            var expectedOutput = @"\s*The Lava command 'execute' is not configured for this template\.\s*";
 
             _helper.AssertTemplateOutputRegex( expectedOutput, input );
         }
@@ -278,8 +279,8 @@ return firstCommit.message + ""<br />"" + firstCommit.author.name;
     public class MyScript 
     {
         public string Execute() {
-            using(RockContext rockContext = new RockContext()){
-                var person = new PersonService(rockContext).Get({{ Person | Property: 'Guid' }});
+            using(RockContext rockContext = new RockContext()) {
+                var person = new PersonService(rockContext).Get(""{{ Person | Property: 'Guid' }}"".AsGuid());
                 
                 return person.FullName;
             }
@@ -311,7 +312,7 @@ return firstCommit.message + ""<br />"" + firstCommit.author.name;
 {% endinteractionwrite %}
 ";
 
-            var expectedOutput = @"\s*The Lava command 'InteractionWrite' is not configured for this template\.\s*";
+            var expectedOutput = @"\s*The Lava command 'interactionwrite' is not configured for this template\.\s*";
 
             _helper.AssertTemplateOutputRegex( expectedOutput, input );
         }
@@ -346,7 +347,7 @@ return firstCommit.message + ""<br />"" + firstCommit.author.name;
 {% interactioncontentchannelitemwrite contentchannelitemid:'1' operation:'View' summary:'Viewed content channel item #1' personaliasid:'10' %}
 ";
 
-            var expectedOutput = @"\s*The Lava command 'InteractionContentChannelItemWrite' is not configured for this template\.\s*";
+            var expectedOutput = @"\s*The Lava command 'interactioncontentchannelitemwrite' is not configured for this template\.\s*";
 
             _helper.AssertTemplateOutputRegex( expectedOutput, input );
         }
@@ -363,7 +364,7 @@ return firstCommit.message + ""<br />"" + firstCommit.author.name;
 
             var context = _helper.LavaEngine.NewContext();
 
-            context.SetEnabledCommands( "Cache,RockEntity" );
+            context.SetEnabledCommands( "InteractionContentChannelItemWrite" );
 
             _helper.AssertTemplateOutput( expectedOutput, input, context, ignoreWhiteSpace: true );
         }
@@ -407,7 +408,7 @@ return firstCommit.message + ""<br />"" + firstCommit.author.name;
 {% endsearch %}
 ";
 
-            var expectedOutput = @"\s*The Lava command 'Search' is not configured for this template\.\s*";
+            var expectedOutput = @"\s*The Lava command 'search' is not configured for this template\.\s*";
 
             _helper.AssertTemplateOutputRegex( expectedOutput, input );
         }
@@ -451,7 +452,7 @@ Liquid error: Search results not available. Universal search is not enabled for 
 {% endsql %}
 ";
 
-            var expectedOutput = @"\s*The Lava command 'Sql' is not configured for this template\.\s*";
+            var expectedOutput = @"\s*The Lava command 'sql' is not configured for this template\.\s*";
 
             _helper.AssertTemplateOutputRegex( expectedOutput, input );
         }
@@ -516,11 +517,13 @@ Liquid error: Search results not available. Universal search is not enabled for 
 {% taglist %}
 ";
 
-            var expectedOutput = @"
-???
-";
+            var output = _helper.GetTemplateOutput( input );
 
-            _helper.AssertTemplateOutput( expectedOutput, input, ignoreWhitespace: true );
+            output = output.Replace( " ", string.Empty );
+
+            Assert.IsTrue( output.Contains( "person-Rock.Lava.Blocks.RockEntity" ), "Expected Entity Tag not found." );
+            Assert.IsTrue( output.Contains( "cache-Rock.Lava.Blocks.Cache" ), "Expected Command Block not found." );
+            Assert.IsTrue( output.Contains( "interactionwrite-Rock.Lava.Blocks.InteractionWrite" ), "Expected Command Tag not found." );
         }
 
         #endregion
@@ -543,7 +546,7 @@ Liquid error: Search results not available. Universal search is not enabled for 
 {% endwebrequest %}
 ";
 
-            var expectedOutput = @"\s*The Lava command 'WebRequest' is not configured for this template\.\s*";
+            var expectedOutput = @"\s*The Lava command 'webrequest' is not configured for this template\.\s*";
 
             _helper.AssertTemplateOutputRegex( expectedOutput, input );
         }
@@ -588,7 +591,7 @@ Liquid error: Search results not available. Universal search is not enabled for 
 
             // TODO: If the security check fails, the content of the block is still returned with the erro message.
             // Is this correct behavior, or should the content of the block be hidden?
-            var expectedOutput = @"\s*The Lava command 'WorkflowActivate' is not configured for this template\.\s*.*";
+            var expectedOutput = @"\s*The Lava command 'workflowactivate' is not configured for this template\.\s*.*";
 
             _helper.AssertTemplateOutputRegex( expectedOutput, input );
         }

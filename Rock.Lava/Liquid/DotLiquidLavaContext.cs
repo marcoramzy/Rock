@@ -150,7 +150,7 @@ namespace Rock.Lava.DotLiquid
             // The set of enabled Lava Commands is stored in the DotLiquid Registers collection.
             if ( _context.Registers?.ContainsKey( "EnabledCommands" ) == true )
             {
-                return _context.Registers["EnabledCommands"].ToString().Split( ',' ).ToList();
+                return _context.Registers["EnabledCommands"].ToString().Split( ",".ToCharArray(), StringSplitOptions.RemoveEmptyEntries ).ToList();
             }
 
             return new List<string>();

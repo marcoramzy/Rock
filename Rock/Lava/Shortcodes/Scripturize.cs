@@ -69,9 +69,9 @@ namespace Rock.Lava.Shortcodes
         </ul>",
         "defaulttranslation,landingsite,cssclass",
         "" )]
-    public class Scripturize : RockLavaShortcodeBase
+    public class Scripturize : RockLavaShortcodeBase, IRockLavaBlock
     {
-        private static readonly Regex Syntax = new Regex( @"(\w+)" );
+        //private static readonly Regex Syntax = new Regex( @"(\w+)" );
 
         string _markup = string.Empty;
 
@@ -86,13 +86,21 @@ namespace Rock.Lava.Shortcodes
         /// <summary>
         /// Specifies the type of Liquid element for this shortcode.
         /// </summary>
-        public override LavaElementTypeSpecifier ElementType
+        public override LavaShortcodeTypeSpecifier ElementType
         {
             get
             {
-                return LavaElementTypeSpecifier.Block;
+                return LavaShortcodeTypeSpecifier.Block;
             }
         }
+
+        //public string SourceElementName
+        //{
+        //    get
+        //    {
+        //        return this.GetType().Name;
+        //    }
+        //}
 
         /// <summary>
         /// Initializes the specified tag name.
@@ -105,7 +113,7 @@ namespace Rock.Lava.Shortcodes
         {
             _markup = markup;
 
-            //base.Initialize( tagName, markup, tokens );
+            base.OnInitialize( tagName, markup, tokens );
         }
 
         /// <summary>
@@ -115,7 +123,6 @@ namespace Rock.Lava.Shortcodes
         /// <param name="result">The result.</param>
         public override void OnRender( ILavaContext context, TextWriter result )
         {
-
             using ( TextWriter writer = new StringWriter() )
             {
                 base.OnRender( context, writer );
@@ -130,8 +137,15 @@ namespace Rock.Lava.Shortcodes
                     return;
                 }
 
-                result.Write( Rock.Utility.Scripturize.Parse( writer.ToString(), parms["defaulttranslation"], landingSite.Value, parms["cssclass"], parms["openintab"].AsBoolean() ) );
+                var output = Rock.Utility.Scripturize.Parse( writer.ToString(), parms["defaulttranslation"], landingSite.Value, parms["cssclass"], parms["openintab"].AsBoolean() );
+
+                result.Write( output );
             }
+        }
+
+        public override void OnParse( List<string> tokens, out List<object> nodes )
+        {
+            base.OnParse( tokens, out nodes );
         }
 
         /// <summary>

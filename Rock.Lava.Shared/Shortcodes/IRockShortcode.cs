@@ -14,8 +14,6 @@
 // limitations under the License.
 // </copyright>
 //
-using System.Collections.Generic;
-using System.IO;
 
 namespace Rock.Lava
 {
@@ -23,7 +21,7 @@ namespace Rock.Lava
     /// <summary>
     /// Determines the type of tag (inline or block). Block type requires an end tag.
     /// </summary>
-    public enum LavaElementTypeSpecifier
+    public enum LavaShortcodeTypeSpecifier
     {
         /// <summary>
         /// A language element that consists of a single Tag.
@@ -37,24 +35,27 @@ namespace Rock.Lava
     }
 
     /// <summary>
-    /// Represents a Lava shortcode definition.
+    /// Represents a Lava shortcode definition, a tag that represents a parameterized Lava template.
+    /// Shortcodes can be used to generate complex Lava components from a simple tag.
     /// </summary>
     public interface IRockShortcode
     {
-        string Name
+        /// <summary>
+        /// The name by which this shortcode is identified in a Lava document.
+        /// </summary>
+        string SourceElementName
         {
             get;
         }
 
-        void Initialize( string tagName, string markup, IEnumerable<string> tokens );
+        /// <summary>
+        /// The key that internally identifies the block or tag element associated with this shortcode.
+        /// </summary>
+        string InternalElementName
+        {
+            get;
+        }
 
-        void Render( ILavaContext context, TextWriter result );
-
-        LavaElementTypeSpecifier ElementType { get; }
+        LavaShortcodeTypeSpecifier ElementType { get; }
     }
-
-    //public class RockShortcodeDefinition
-    //{
-
-    //}
 }

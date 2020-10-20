@@ -23,8 +23,11 @@ using Rock.Web.Cache;
 
 namespace Rock.Tests.Integration.Lava
 {
+    /// <summary>
+    /// Test for shortcodes that are defined and implemented as parameterized Lava templates rather than code components.
+    /// </summary>
     [TestClass]
-    public class ShortcodeTests
+    public class ShortcodeTemplateTests
     {
         private static LavaTestHelper _helper;
 
@@ -43,9 +46,34 @@ namespace Rock.Tests.Integration.Lava
         #region Accordion
 
         [TestMethod]
-        public void AccordionShortcode_Basic_EmitsCorrectHtml( string input, string expectedResult )
+        public void AccordionShortcode_Basic_EmitsCorrectHtml()
         {
-            throw new NotImplementedException();
+            var input = @"
+{[ accordion ]}
+
+    [[ item title:'Lorem Ipsum' ]]
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut pretium tortor et orci ornare 
+        tincidunt. In hac habitasse platea dictumst. Aliquam blandit dictum fringilla. 
+    [[ enditem ]]
+    
+    [[ item title:'In Commodo Dolor' ]]
+        In commodo dolor vel ante porttitor tempor. Ut ac convallis mauris. Sed viverra magna nulla, quis 
+        elementum diam ullamcorper et. 
+    [[ enditem ]]
+    
+    [[ item title:'Vivamus Sollicitudin' ]]
+        Vivamus sollicitudin, leo quis pulvinar venenatis, lorem sem aliquet nibh, sit amet condimentum
+        ligula ex a risus. Curabitur condimentum enim elit, nec auctor massa interdum in.
+    [[ enditem ]]
+
+{[ endaccordion ]}
+";
+
+            var expectedOutput = @"
+
+";
+
+            _helper.AssertTemplateOutput( expectedOutput, input, ignoreWhitespace: true );
         }
 
         #endregion
@@ -126,26 +154,14 @@ namespace Rock.Tests.Integration.Lava
         /// Using the Scripturize shortcode produces the expected output.
         /// </summary>
         [DataTestMethod]
-        [DataRow( "John 3:16", "<a href=\"https://www.bible.com/bible/116/JHN.3.16.NLT\"  title=\"YouVersion\">John 3:16</a>" )]
-        [DataRow( "Jn 3:16", "<a href=\"https://www.bible.com/bible/116/JHN.3.16.NLT\"  title=\"YouVersion\">Jn 3:16</a>" )]
-        [DataRow( "John 3", "<a href=\"https://www.bible.com/bible/116/JHN.3..NLT\"  title=\"YouVersion\">John 3</a>" )]
+        [DataRow( "John 3:16", "<a href=\"https://www.bible.com/bible/116/JHN.3.16.NLT\"  class=\"scripture\" title=\"YouVersion\">John 3:16</a>" )]
+        [DataRow( "Jn 3:16", "<a href=\"https://www.bible.com/bible/116/JHN.3.16.NLT\"  class=\"scripture\" title=\"YouVersion\">Jn 3:16</a>" )]
+        [DataRow( "John 3", "<a href=\"https://www.bible.com/bible/116/JHN.3..NLT\"  class=\"scripture\" title=\"YouVersion\">John 3</a>" )]
 
         public void ScripturizeShortcode_YouVersion_SimpleCase( string input, string expectedResult )
         {
             _helper.AssertTemplateOutput( expectedResult,
                                           "{[ scripturize defaulttranslation:'NLT' landingsite:'YouVersion' cssclass:'scripture' ]}" + input + "{[ endscripturize ]}" );
-
-            //var output = Scripturize.Parse( "John 3:16" );
-            //var expected = "<a href=\"https://www.bible.com/bible/116/JHN.3.16.NLT\"  title=\"YouVersion\">John 3:16</a>";
-            //Assert.That.AreEqual( expected, output );
-
-            //output = Scripturize.Parse( "Jn 3:16" );
-            //expected = "<a href=\"https://www.bible.com/bible/116/JHN.3.16.NLT\"  title=\"YouVersion\">Jn 3:16</a>";
-            //Assert.That.AreEqual( expected, output );
-
-            //output = Scripturize.Parse( "John 3" );
-            //expected = "<a href=\"https://www.bible.com/bible/116/JHN.3..NLT\"  title=\"YouVersion\">John 3</a>";
-            //Assert.That.AreEqual( expected, output );
         }
 
         #endregion

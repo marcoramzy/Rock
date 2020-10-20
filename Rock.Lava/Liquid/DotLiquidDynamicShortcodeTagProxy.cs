@@ -29,7 +29,7 @@ namespace Rock.Lava.DotLiquid
     /// <remarks>
     /// This class wraps a Lava Shortcode in a Tag Type that can be registered with the DotLiquid framework.
     /// </remarks>
-    internal class DotLiquidDynamicShortcodeTagFactory : Tag
+    internal class DotLiquidDynamicShortcodeTagProxy : Tag
     {
         public static Dictionary<string, Func<string, DynamicShortcodeDefinition>> TagFactoryMethods
         {
@@ -43,11 +43,16 @@ namespace Rock.Lava.DotLiquid
 
         public override void Initialize( string tagName, string markup, List<string> tokens )
         {
+            if ( !_tagFactoryMethods.ContainsKey(tagName) )
+            {
+                throw new Exception( $"Shortcode Configuration Error. Shortcode \"{tagName}\" is not defined." );
+            }
+
             var factoryMethod = _tagFactoryMethods[tagName];
 
             var shortcode = factoryMethod( tagName );
 
-            base.Initialize( tagName, shortcode.TemplateMarkup, shortcode.Tokens );
+            base.OnInitialize( tagName, shortcode.TemplateMarkup, shortcode.Tokens );
         }
 
         public override void Render( Context context, TextWriter result )

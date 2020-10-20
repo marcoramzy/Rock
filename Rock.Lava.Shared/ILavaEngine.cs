@@ -21,18 +21,98 @@ using System.IO;
 
 namespace Rock.Lava
 {
-    public interface ILavaTagInfo
+    /// <summary>
+    /// Represents information about a Lava template element, such as a tag or block.
+    /// </summary>
+    public interface ILavaElementInfo
     {
         string Name { get; }
         string SystemTypeName { get; }
         string ToString();
+
+        /// <summary>
+        /// Can the factory method successfully produce an instance of this tag?
+        /// </summary>
+        bool IsAvailable { get; set; }
+
+        LavaShortcodeTypeSpecifier ElementType { get; }
     }
 
-    public class LavaTagInfo : ILavaTagInfo
+    public class LavaTagInfo : ILavaElementInfo
     {
+        public LavaTagInfo()
+        {
+            //
+        }
+
+        public LavaTagInfo( string name, string systemTypeName )
+        {
+            Name = name;
+            SystemTypeName = systemTypeName;
+        }
+
         public string Name { get; set; }
 
         public string SystemTypeName { get; set; }
+
+        /// <summary>
+        /// The factory method used to create a new instance of this tag.
+        /// </summary>
+        public Func<string, IRockLavaTag> FactoryMethod { get; set; }
+
+        /// <summary>
+        /// Can the factory method successfully produce an instance of this tag?
+        /// </summary>
+        public bool IsAvailable { get; set; }
+
+        public LavaShortcodeTypeSpecifier ElementType
+        {
+            get
+            {
+                return LavaShortcodeTypeSpecifier.Inline;
+            }
+        }
+
+        public override string ToString()
+        {
+            return string.Format( "{0} [{1}]", Name, SystemTypeName );
+        }
+    }
+
+    public class LavaBlockInfo : ILavaElementInfo
+    {
+        public LavaBlockInfo()
+        {
+            //
+        }
+
+        public LavaBlockInfo( string name, string systemTypeName )
+        {
+            Name = name;
+            SystemTypeName = systemTypeName;
+        }
+
+        public string Name { get; set; }
+
+        public string SystemTypeName { get; set; }
+
+        /// <summary>
+        /// The factory method used to create a new instance of this block.
+        /// </summary>
+        public Func<string, IRockLavaBlock> FactoryMethod { get; set; }
+
+        /// <summary>
+        /// Can the factory method successfully produce an instance of this block?
+        /// </summary>
+        public bool IsAvailable { get; set; }
+
+        public LavaShortcodeTypeSpecifier ElementType
+        {
+            get
+            {
+                return LavaShortcodeTypeSpecifier.Block;
+            }
+        }
 
         public override string ToString()
         {
@@ -71,7 +151,6 @@ namespace Rock.Lava
 
         void RegisterTag( string name, Func<string, IRockLavaTag> factoryMethod );
         void RegisterBlock( string name, Func<string, IRockLavaBlock> factoryMethod );
-        //void RegisterShortcode( IRockShortcode shortcode );
 
         /// <summary>
         /// Registers a shortcode with a factory method that provides the definition of the shortcode dynamically.
@@ -82,38 +161,26 @@ namespace Rock.Lava
 
         void RegisterStaticShortcode( string name, Func<string, IRockShortcode> factoryMethod );
 
+        /// <summary>
+        /// Registers a shortcode with a factory method that provides the name andd definition of the shortcode dynamically.
+        /// </summary>
+        /// <param name="factoryMethod"></param>
+        void RegisterStaticShortcode( Func<string, IRockShortcode> factoryMethod );
+
         //bool TagIsRegistered( string name );
 
-        Dictionary<string, ILavaTagInfo> GetRegisteredTags();
-
-        //void RegisterShortcode<T>( string name )
-        //    where T : IRockShortcode;
-        //where T : Tag, new();
-        //{
-        //    Shortcodes[name] = typeof( T );
-        //}
+        Dictionary<string, ILavaElementInfo> GetRegisteredElements();
 
         void UnregisterShortcode( string name );
-        //{
-        //    if ( Shortcodes.ContainsKey( name ) )
-        //    {
-        //        Shortcodes.Remove( name );
-        //    }
-        //}
 
         Type GetShortcodeType( string name );
-        //{
-        //    Type result;
-        //    Shortcodes.TryGetValue( name, out result );
-        //    return result;
-        //}
 
         /// <summary>
         /// Set a value that will be used when rendering this template.
         /// </summary>
         /// <param name="key"></param>
         /// <param name="value"></param>
-        void SetContextValue( string key, object value );
+        //void SetContextValue( string key, object value );
 
 
         /// <summary>
@@ -141,7 +208,7 @@ namespace Rock.Lava
 
         bool AreEqualValue( object left, object right );
 
-        void RenderTag( IRockLavaBlock tag, ILavaContext context, TextWriter result );
+        //void RenderTag( IRockLavaBlock tag, ILavaContext context, TextWriter result );
     }
 
 }

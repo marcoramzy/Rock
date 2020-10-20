@@ -626,7 +626,7 @@ namespace Rock
         /// <returns></returns>
         public static string ResolveMergeFields( this string content, IDictionary<string, object> mergeObjects, string enabledLavaCommands, bool encodeStrings = false, bool throwExceptionOnErrors = false )
         {
-            return ResolveMergeFields( content, mergeObjects, enabledLavaCommands.SplitDelimitedValues( "," ), encodeStrings, throwExceptionOnErrors );
+            return ResolveMergeFields( content, mergeObjects, enabledLavaCommands.SplitDelimitedValues( ",", StringSplitOptions.RemoveEmptyEntries ), encodeStrings, throwExceptionOnErrors );
         }
 
         /// <summary>

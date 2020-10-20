@@ -94,5 +94,36 @@ namespace Rock.Tests.Integration.Lava
 
             _helper.AssertTemplateOutput( expectedOutput, input, context );
         }
+
+        [TestMethod]
+        public void Scope_WithInnerVariable_DoesNotModifyOuterVariable()
+        {
+            var input = @"
+{% assign color = 'blue' %}
+Color 1: {{ color }}
+
+{% cache key:'fav-color' duration:'1200' %}
+    Color 2: {{ color }}
+    {% assign color = 'red' %}
+    Color 3: {{color }}
+{% endcache %}
+
+Color 4: {{ color }}
+";
+
+            var expectedOutput = @"
+Color 1: blue
+Color 2: blue
+Color 3: red
+Color 4: blue
+";
+
+            var context = _helper.LavaEngine.NewContext();
+
+            context.SetEnabledCommands( "Cache" );
+
+            _helper.AssertTemplateOutput( expectedOutput, input, context, ignoreWhiteSpace: true );
+        }
+
     }
 }

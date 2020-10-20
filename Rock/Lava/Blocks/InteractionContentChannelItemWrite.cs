@@ -44,7 +44,7 @@ namespace Rock.Lava.Blocks
 
         #endregion Parameter Keys
 
-        private string _markup;
+        //private string _markup;
 
         /// <summary>
         /// Initializes the specified tag name.
@@ -52,12 +52,13 @@ namespace Rock.Lava.Blocks
         /// <param name="tagName">Name of the tag.</param>
         /// <param name="markup">The markup.</param>
         /// <param name="tokens">The tokens.</param>
-        public override void OnInitialize( string tagName, string markup, IEnumerable<string> tokens )
-        {
-            _markup = markup;
+        //public override void OnInitialize()
+        //    //string tagName, string markup, IEnumerable<string> tokens )
+        //{
+        //    //_markup = markup;
 
-            base.OnInitialize( tagName, markup, tokens );
-        }
+        //    base.OnInitialize( tagName, markup, tokens );
+        //}
 
         /// <summary>
         /// Renders the specified context.
@@ -69,8 +70,8 @@ namespace Rock.Lava.Blocks
             // First, ensure that this command is allowed in the context.
             if ( !LavaHelper.IsAuthorized( context, this.GetType().Name ) )
             {
-                result.Write( string.Format( RockLavaBlockBase.NotAuthorizedMessage, this.TagName ) );
-                base.Render( context, result );
+                result.Write( string.Format( RockLavaBlockBase.NotAuthorizedMessage, this.SourceElementName ) );
+                base.OnRender( context, result );
                 return;
             }
 
@@ -80,7 +81,7 @@ namespace Rock.Lava.Blocks
                 { ParameterKey.Operation, "View" }
             };
 
-            LavaHelper.ParseCommandMarkup( _markup, context, parms );
+            LavaHelper.ParseCommandMarkup( this.ElementAttributesMarkup, context, parms );
 
             // Set local variables from parsed parameters.
             int? contentChannelItemId = parms.GetValueOrNull( ParameterKey.ContentChannelItemId ).AsIntegerOrNull();

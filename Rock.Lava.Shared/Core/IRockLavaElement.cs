@@ -22,21 +22,22 @@ namespace Rock.Lava
     /// <summary>
     /// Interface that classes can implement to be included when searching assemblies for custom Lava Commands.
     /// </summary>
-    public interface IRockLavaBlock : IRockLavaElement
+    public interface IRockLavaElement
     {
         /// <summary>
-        /// The name of the block.
+        /// The name of the element as it appears in a source Lava document.
         /// </summary>
-        //string SourceElementName { get; }
+        string SourceElementName { get; }
 
-        /*
-        void OnInitialize( string tagName, string markup, List<string> tokens );
+        void OnInitialize( string elementName, string attributesMarkup, List<string> tokens );
 
         void OnRender( ILavaContext context, TextWriter result );
 
         void OnParse( List<string> tokens, out List<object> nodes );
 
+        /// <summary>
+        /// Executed when the element is first loaded during application startup.
+        /// </summary>
         void OnStartup();
-        */
     }
 }
