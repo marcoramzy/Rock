@@ -279,7 +279,8 @@ namespace Rock.Model
 
                 Ical.Net.Interfaces.DataTypes.IRecurrencePattern rrule = null;
 
-                if ( calEvent.RecurrenceRules.Any() )
+                if ( calEvent != null
+                     && calEvent.RecurrenceRules.Any() )
                 {
                     rrule = calEvent.RecurrenceRules[0]; 
                 }
