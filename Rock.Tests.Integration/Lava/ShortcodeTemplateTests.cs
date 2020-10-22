@@ -69,8 +69,25 @@ namespace Rock.Tests.Integration.Lava
 {[ endaccordion ]}
 ";
 
+// TODO: Expected output is not completely processed.
             var expectedOutput = @"
+             <div class=""panel-group"" id=""accordion-id-910e1c8a-ce44-4493-9949-9a606eb7cf73"" role=""tablist"" aria-multiselectable=""true"">
+</div>
 
+    [[ item title:'Lorem Ipsum' ]]
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut pretium tortor et orci ornare 
+        tincidunt. In hac habitasse platea dictumst. Aliquam blandit dictum fringilla. 
+    [[ enditem ]]
+    
+    [[ item title:'In Commodo Dolor' ]]
+        In commodo dolor vel ante porttitor tempor. Ut ac convallis mauris. Sed viverra magna nulla, quis 
+        elementum diam ullamcorper et. 
+    [[ enditem ]]
+    
+    [[ item title:'Vivamus Sollicitudin' ]]
+        Vivamus sollicitudin, leo quis pulvinar venenatis, lorem sem aliquet nibh, sit amet condimentum
+        ligula ex a risus. Curabitur condimentum enim elit, nec auctor massa interdum in.
+    [[ enditem ]]
 ";
 
             _helper.AssertTemplateOutput( expectedOutput, input, ignoreWhitespace: true );
@@ -138,40 +155,20 @@ namespace Rock.Tests.Integration.Lava
 
         #endregion
 
-        #region ScheduledContent
-
-        [TestMethod]
-        public void ScheduledContentShortcode_Basic_EmitsCorrectHtml( string input, string expectedResult )
-        {
-            throw new NotImplementedException();
-        }
-
-        #endregion
-
-        #region Scripturize
-
-        /// <summary>
-        /// Using the Scripturize shortcode produces the expected output.
-        /// </summary>
-        [DataTestMethod]
-        [DataRow( "John 3:16", "<a href=\"https://www.bible.com/bible/116/JHN.3.16.NLT\"  class=\"scripture\" title=\"YouVersion\">John 3:16</a>" )]
-        [DataRow( "Jn 3:16", "<a href=\"https://www.bible.com/bible/116/JHN.3.16.NLT\"  class=\"scripture\" title=\"YouVersion\">Jn 3:16</a>" )]
-        [DataRow( "John 3", "<a href=\"https://www.bible.com/bible/116/JHN.3..NLT\"  class=\"scripture\" title=\"YouVersion\">John 3</a>" )]
-
-        public void ScripturizeShortcode_YouVersion_SimpleCase( string input, string expectedResult )
-        {
-            _helper.AssertTemplateOutput( expectedResult,
-                                          "{[ scripturize defaulttranslation:'NLT' landingsite:'YouVersion' cssclass:'scripture' ]}" + input + "{[ endscripturize ]}" );
-        }
-
-        #endregion
-
         #region Sparkline Chart
 
         [TestMethod]
-        public void SparklineChartShortcode_Basic_EmitsCorrectHtml( string input, string expectedResult )
+        public void SparklineShortcode_DefaultOptions_EmitsHtmlWithDefaultSettings()
         {
-            throw new NotImplementedException();
+            var input = @"
+{[ sparkline type:'line' data:'5,6,7,9,9,5,3,2,2,4,6,7' ]}
+";
+
+            var expectedOutput = @"
+xyzzy
+";
+
+            _helper.AssertTemplateOutputWithWildcard( expectedOutput, input, ignoreWhitespace: true, wildCard: "<<guid>>" );
         }
 
         #endregion
@@ -179,9 +176,31 @@ namespace Rock.Tests.Integration.Lava
         #region Vimeo
 
         [TestMethod]
-        public void VimeoShortcode_Basic_EmitsCorrectHtml( string input, string expectedResult )
+        public void VimeoShortcode_Basic_EmitsStyleAndDivElements()
         {
-            throw new NotImplementedException();
+            var input = @"
+{[ vimeo id:'180467014' ]}
+";
+
+            var expectedOutput = @"
+<style>
+.embed-container { 
+    position: relative; 
+    padding-bottom: 56.25%; 
+    height: 0; 
+    overflow: hidden; 
+    max-width: 100%; } 
+.embed-container iframe, 
+.embed-container object, 
+.embed-container embed { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+</style>
+
+<div id='id-<<guid>>' style='width:;'>
+    <div class='embed-container'><iframe src='https://player.vimeo.com/video/180467014?autoplay=0&autoplay=0&loop=0&color=&title=0&byline=0&portrait=0' frameborder='0' webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe></div>
+</div>
+";
+
+            _helper.AssertTemplateOutputWithWildcard( expectedOutput, input, ignoreWhitespace: true, wildCard: "<<guid>>" );
         }
 
         #endregion
@@ -209,9 +228,36 @@ namespace Rock.Tests.Integration.Lava
         #region YouTube
 
         [TestMethod]
-        public void YouTubeShortcode_Basic_EmitsCorrectHtml( string input, string expectedResult )
+        public void YouTubeShortcode_Basic_EmitsStyleAndDivElements()
         {
-            throw new NotImplementedException();
+            var input = @"
+{[ youtube id:'8kpHK4YIwY4' ]}
+";
+
+            var expectedOutput = @"
+<style>
+
+#id-<<guid>> {
+    width: ;
+}
+
+.embed-container { 
+    position: relative; 
+    padding-bottom: 56.25%; 
+    height: 0; 
+    overflow: hidden; 
+    max-width: 100%; } 
+.embed-container iframe, 
+.embed-container object, 
+.embed-container embed { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+</style>
+
+<div id='id-<<guid>>'>
+    <div class='embed-container'><iframe src='https://www.youtube.com/embed/8kpHK4YIwY4?rel=0&showinfo=0&controls=0&autoplay=0' frameborder='0' allowfullscreen></iframe></div>
+</div>
+";
+
+            _helper.AssertTemplateOutputWithWildcard( expectedOutput, input, ignoreWhitespace: true, wildCard: "<<guid>>" );
         }
 
         #endregion

@@ -301,6 +301,33 @@ namespace Rock.Tests.Integration.Lava
         /// <summary>
         /// Process the specified input template and verify against the expected output regular expression.
         /// </summary>
+        /// <param name="expectedOutput"></param>
+        /// <param name="inputTemplate"></param>
+        public void AssertTemplateOutputWithWildcard( string expectedOutput, string inputTemplate, LavaDictionary mergeValues = null, bool ignoreWhitespace = false, string wildCard = "*" )
+        {
+            var outputString = GetTemplateOutput( inputTemplate, mergeValues );
+
+            // Replace the wildcards with a non-Regex symbol.
+            expectedOutput = expectedOutput.Replace( wildCard, "<<<wildCard>>>" );
+
+            if ( ignoreWhitespace )
+            {
+                outputString = Regex.Replace( outputString, @"\s*", string.Empty );
+                expectedOutput = Regex.Replace( expectedOutput, @"\s*", string.Empty );
+            }
+
+            expectedOutput = Regex.Escape( expectedOutput );
+
+            expectedOutput = expectedOutput.Replace( "<<<wildCard>>>", "(.*)" );
+
+            var regex = new Regex( expectedOutput );
+
+            StringAssert.Matches( outputString, regex );
+        }
+
+        /// <summary>
+        /// Process the specified input template and verify against the expected output regular expression.
+        /// </summary>
         /// <param name="expectedOutputRegex"></param>
         /// <param name="inputTemplate"></param>
         public void AssertTemplateOutputRegex( string expectedOutputRegex, string inputTemplate, ILavaContext context, bool ignoreWhitespace = true )
