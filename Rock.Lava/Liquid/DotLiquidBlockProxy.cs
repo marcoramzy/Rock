@@ -17,10 +17,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using DotLiquid;
-using Rock.Lava.Blocks;
-using Rock.Lava.Shortcodes;
 
 namespace Rock.Lava.DotLiquid
 {
@@ -53,7 +50,7 @@ namespace Rock.Lava.DotLiquid
 
         public override void Initialize( string tagName, string markup, List<string> tokens )
         {
-            if ( !_factoryMethods.ContainsKey(tagName) )
+            if ( !_factoryMethods.ContainsKey( tagName ) )
             {
                 throw new Exception( "Block factory could not be found." );
             }
@@ -98,13 +95,18 @@ namespace Rock.Lava.DotLiquid
             // Parse the tokens using the Lava block implementation.
             List<object> nodes;
 
+            // The output of the parsing process is a set of nodes that can be rendered by the DotLiquid rendering engine.
+            // Tokens should be removed sequentially from the list as they are parsed into nodes.
             _lavaBlock.OnParse( tokens, out nodes );
 
-            this.NodeList = nodes ?? new List<object>();
+            if ( nodes != null )
+            {
+                this.NodeList = nodes;
+            }
 
-            // If the Lava block did not parse some of the tokens, use the default Liquid parsing implementation instead.
-            if ( tokens != null && tokens.Any() )
-            {                
+            // If the Lava block made not attempt to parse the tokens, call the default DotLiquid implementation.
+            if ( this.NodeList == null )
+            {
                 base.Parse( tokens );
             }
         }
