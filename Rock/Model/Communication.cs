@@ -881,8 +881,8 @@ namespace Rock.Model
         /// <param name="smsMediumEntityTypeId">The SMS medium entity type identifier.</param>
         /// <param name="recipientPreference">The recipient preference.</param>
         /// <returns></returns>
-        [Obsolete("Use the override that includes 'pushMediumEntityTypeId' instead.")]
-        [RockObsolete("1.11")]
+        [Obsolete( "Use the override that includes 'pushMediumEntityTypeId' instead." )]
+        [RockObsolete( "1.11" )]
         public static int DetermineMediumEntityTypeId( int emailMediumEntityTypeId, int smsMediumEntityTypeId, params CommunicationType[] recipientPreference )
         {
             return DetermineMediumEntityTypeId( emailMediumEntityTypeId, smsMediumEntityTypeId, 0, recipientPreference );
@@ -1010,10 +1010,10 @@ namespace Rock.Model
             var sendTasks = new List<Task>();
             foreach ( var medium in communication.GetMediums() )
             {
-                sendTasks.Add(Task.Run(()=> medium.Send( communication ));
+                sendTasks.Add( Task.Run( () => medium.Send( communication ) ) );
             }
 
-            while(sendTasks.Count > 0 )
+            while ( sendTasks.Count > 0 )
             {
                 var completedTask = await Task.WhenAny( sendTasks );
                 sendTasks.Remove( completedTask );

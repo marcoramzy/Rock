@@ -20,6 +20,7 @@ using System.Data.Entity;
 using System.Linq;
 using System.Net.Mail;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using Rock.Communication.Transport;
 using Rock.Data;
 using Rock.Model;
@@ -97,6 +98,64 @@ namespace Rock.Communication
             }
 
             return !errorMessages.Any();
+        }
+
+        /// <summary>
+        /// Sends the asnyc.
+        /// </summary>
+        /// <param name="rockMessage">The rock message.</param>
+        /// <param name="mediumEntityTypeId">The medium entity type identifier.</param>
+        /// <param name="mediumAttributes">The medium attributes.</param>
+        /// <param name="errorMessages">The error messages.</param>
+        /// <returns></returns>
+        public override async Task<SendMessageResult> SendAsync( RockMessage rockMessage, int mediumEntityTypeId, Dictionary<string, string> mediumAttributes )
+        {
+            var sendResult = new SendMessageResult();
+
+            var emailMessage = rockMessage as RockEmailMessage;
+            if ( emailMessage == null )
+            {
+                sendResult.Errors.Add( "No email message was provided." );
+                return sendResult;
+            }
+
+            var mergeFields = GetAllMergeFields( rockMessage.CurrentPerson, rockMessage.AdditionalMergeFields );
+            var globalAttributes = GlobalAttributesCache.Get();
+            var fromAddress = GetFromAddress( emailMessage, mergeFields, globalAttributes );
+
+            if ( fromAddress.IsNullOrWhiteSpace() )
+            {
+                sendResult.Errors.Add( "A From address was not provided." );
+                return sendResult;
+            }
+
+            var templateMailMessage = GetTemplateRockEmailMessage( emailMessage, mergeFields, globalAttributes );
+            var organizationEmail = globalAttributes.GetValue( "OrganizationEmail" );
+
+            foreach ( var rockMessageRecipient in rockMessage.GetRecipients() )
+            {
+                try
+                {
+                    var recipientEmailMessage = GetRecipientRockEmailMessage( templateMailMessage, rockMessageRecipient, mergeFields, organizationEmail );
+
+                    var result = SendEmail( recipientEmailMessage );
+
+                    // Create the communication record
+                    if ( recipientEmailMessage.CreateCommunicationRecord )
+                    {
+                        var transaction = new SaveCommunicationTransaction( rockMessageRecipient, recipientEmailMessage.FromName, recipientEmailMessage.FromEmail, recipientEmailMessage.Subject, recipientEmailMessage.Message );
+                        transaction.RecipientGuid = recipientEmailMessage.MessageMetaData["communication_recipient_guid"].AsGuidOrNull();
+                        RockQueue.TransactionQueue.Enqueue( transaction );
+                    }
+                }
+                catch ( Exception ex )
+                {
+                    sendResult.Errors.Add( ex.Message );
+                    ExceptionLogService.LogException( ex );
+                }
+            }
+
+            return sendResult;
         }
 
         /// <summary>
