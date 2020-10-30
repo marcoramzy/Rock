@@ -122,6 +122,8 @@ namespace Rock.Lava.Blocks
                         }
                     }
 
+                    System.Net.ServicePointManager.SecurityProtocol = System.Net.SecurityProtocolType.Tls12;
+
                     IRestResponse response = client.Execute( request );
 
                     if ( response.StatusCode == System.Net.HttpStatusCode.OK )
@@ -154,7 +156,11 @@ namespace Rock.Lava.Blocks
                         else // otherwise assume html and just throw the contents out to the screen
                         {
                             responseData = content;
-                        }                        
+                        }
+                    }
+                    else if ( response.ErrorException != null )
+                    {
+                        responseData = $"Error: {response.ErrorMessage}";
                     }
                     else
                     {

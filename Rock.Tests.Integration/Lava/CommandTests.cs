@@ -41,6 +41,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Net;
 using System.Security.Authentication;
+using Rock.Tests.Shared;
 
 namespace Rock.Tests.Integration.Lava
 {
@@ -116,7 +117,7 @@ Color 1: {{ color }}
 {% cache key:'fav-color' duration:'1200' %}
     Color 2: {{ color }}
     {% assign color = 'red' %}
-    Color 3: {{color }}
+    Color 3: {{ color }}
 {% endcache %}
 
 Color 4: {{ color }}
@@ -552,28 +553,26 @@ Liquid error: Search results not available. Universal search is not enabled for 
         }
 
         [TestMethod]
-        public void WebRequestBlock_RockRepoCommits_ReturnsCommits()
+        public void WebRequestBlock_GetRockRepoCommits_ReturnsValidResponse()
         {
             var input = @"
-{% webrequest url:'https://api.github.com/repos/SparkDevNetwork/Rock/commits' %}
-    <ul>
-    {% for item in results %}
-	    <li>
-            <strong>{{ item.commit.author.name }}</strong><br />
-            {{ item.commit.message }}
-        </li>
-    {% endfor %}
-    </ul>
-{% endwebrequest %}
+{% webrequest url:'https://api.github.com/repos/SparkDevNetwork/Rock/commits' basicauth:'unknown_user,invalid_password' %}
+    <pre>
+        {{ results | ToJSON }}
+    </pre>
+{% endwebrequest %}  
 ";
-
-            var expectedOutput = @"??";
 
             var context = _helper.LavaEngine.NewContext();
 
             context.SetEnabledCommands( "WebRequest" );
 
-            _helper.AssertTemplateOutputRegex( expectedOutput, input, context );
+            var output = _helper.GetTemplateOutput( input, context );
+
+            // The expected "valid" response is a message indicating that the provided credentials are invalid.
+            // This indicates that the webrequest received a correct response from the server.
+            Assert.That.Contains( output, "Unauthorized");
+            Assert.That.Contains( output, "Bad credentials" );
         }
 
         #endregion
