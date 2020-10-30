@@ -120,8 +120,6 @@ namespace Rock.Lava.DotLiquid
 
             dotLiquidRenderParameters.Registers = new Hash();
 
-            //dotLiquidRenderParameters.Registers["EnabledCommands"] = enabledCommands.Distinct().JoinStrings( "," );
-
             dotLiquidRenderParameters.Context.Registers["EnabledCommands"] = enabledCommands.Distinct().JoinStrings( "," );
 
             output = _dotLiquidTemplate.Render( dotLiquidRenderParameters );
