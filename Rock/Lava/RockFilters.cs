@@ -4538,10 +4538,13 @@ namespace Rock.Lava
         /// <returns></returns>
         public static string AddScriptLink( string input, bool fingerprintLink = false )
         {
-            RockPage page = HttpContext.Current.Handler as RockPage;
-            RockPage.AddScriptLink( page, ResolveRockUrl( input ), fingerprintLink );
+            if ( HttpContext.Current != null )
+            {
+                RockPage page = HttpContext.Current.Handler as RockPage;
+                RockPage.AddScriptLink( page, ResolveRockUrl( input ), fingerprintLink );
+            }
 
-            return String.Empty;
+            return string.Empty;
         }
 
         /// <summary>
@@ -4552,10 +4555,13 @@ namespace Rock.Lava
         /// <returns></returns>
         public static string AddCssLink( string input, bool fingerprintLink = false )
         {
-            RockPage page = HttpContext.Current.Handler as RockPage;
-            RockPage.AddCSSLink( page, ResolveRockUrl( input ), fingerprintLink );
+            if ( HttpContext.Current != null )
+            {
+                RockPage page = HttpContext.Current.Handler as RockPage;
+                RockPage.AddCSSLink( page, ResolveRockUrl( input ), fingerprintLink );
+            }
 
-            return String.Empty;
+            return string.Empty;
         }
 
         /// <summary>
