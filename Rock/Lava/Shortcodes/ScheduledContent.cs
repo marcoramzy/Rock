@@ -65,7 +65,7 @@ namespace Rock.Lava.Shortcodes
         </ul>",
         "scheduleid,showwhen,roleid",
         "" )]
-    public class ScheduledContent : RockLavaShortcodeBase
+    public class ScheduledContent : RockLavaShortcodeBase, IRockLavaBlock
     {
         //private static readonly Regex Syntax = new Regex( @"(\w+)" );
 

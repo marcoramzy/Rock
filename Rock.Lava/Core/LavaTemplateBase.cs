@@ -37,6 +37,22 @@ namespace Rock.Lava.DotLiquid
         //    return TryRender( parameters, out output, out errors );
         //}
 
+        /// <summary>
+        /// Try to render the template.
+        /// Errors will be included in the rendered output.
+        /// </summary>
+        /// <returns></returns>        
+        public string Render()
+        {
+            return Render( null );
+        }
+
+        /// <summary>
+        /// Try to render the template using the provided context values.
+        /// Errors will be included in the rendered output.
+        /// </summary>
+        /// <param name="values"></param>
+        /// <returns></returns>        
         public string Render( IDictionary<string, object> values )
         {
             string output;
@@ -91,6 +107,13 @@ namespace Rock.Lava.DotLiquid
             return OnTryRender( parameters, out output, out errors );
         }
 
+        /// <summary>
+        /// Override this method to implement the rendering using a Liquid rendering engine implementation.
+        /// </summary>
+        /// <param name="parameters"></param>
+        /// <param name="output"></param>
+        /// <param name="errors"></param>
+        /// <returns></returns>
         protected abstract bool OnTryRender( LavaRenderParameters parameters, out string output, out IList<Exception> errors );
     }
 }

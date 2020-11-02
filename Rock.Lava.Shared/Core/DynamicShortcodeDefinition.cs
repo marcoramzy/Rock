@@ -25,11 +25,27 @@ namespace Rock.Lava
     /// </summary>
     public class DynamicShortcodeDefinition
     {
+        public DynamicShortcodeDefinition()
+        {
+            this.Parameters = new Dictionary<string, string>();
+            this.EnabledLavaCommands = new List<string>();
+        }
+
         public string Name { get; set; }
 
         public string TemplateMarkup { get; set; }
 
-        public List<string> Tokens { get; set; }
+        //public List<string> Tokens { get; set; }
+
+        /// <summary>
+        /// The set of parameter names and values that are injected into the shortcode template.
+        /// </summary>
+        public Dictionary<string, string> Parameters { get; set; }
+
+        /// <summary>
+        /// The set of Lava Commands specifically enabled for this shortcode.
+        /// </summary>
+        public List<string> EnabledLavaCommands { get; set; }
 
         public LavaShortcodeTypeSpecifier ElementType { get; set; }
     }

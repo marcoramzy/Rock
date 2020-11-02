@@ -33,7 +33,14 @@ namespace Rock.Lava.DotLiquid
 
         public static void RegisterFactory( string name, Func<string, IRockLavaBlock> factoryMethod )
         {
-            _factoryMethods.Add( name, factoryMethod );
+            if ( string.IsNullOrWhiteSpace( name ) )
+            {
+                throw new ArgumentException( "Name must be specified." );
+            }
+
+            name = name.Trim().ToLower();
+
+            _factoryMethods[name] = factoryMethod;
         }
 
         private IRockLavaBlock _lavaBlock = null;
@@ -95,19 +102,27 @@ namespace Rock.Lava.DotLiquid
             // Parse the tokens using the Lava block implementation.
             List<object> nodes;
 
+            int tokenCount = tokens.Count;
+
             // The output of the parsing process is a set of nodes that can be rendered by the DotLiquid rendering engine.
             // Tokens should be removed sequentially from the list as they are parsed into nodes.
             _lavaBlock.OnParse( tokens, out nodes );
 
-            if ( nodes != null )
-            {
-                this.NodeList = nodes;
-            }
+            //if ( nodes != null )
+            //{
+            //    this.NodeList = nodes;
+            //}
 
-            // If the Lava block made not attempt to parse the tokens, call the default DotLiquid implementation.
-            if ( this.NodeList == null )
+            // If the Lava block did not process any tokens or create any nodes, call the default DotLiquid implementation.
+            if ( nodes == null
+                 && tokens.Count == tokenCount )
             {
                 base.Parse( tokens );
+            }
+
+            if ( this.NodeList == null )
+            {
+                this.NodeList = new List<object>();
             }
         }
 

@@ -57,7 +57,7 @@ namespace Rock.Lava.Shortcodes
             foreach(var shortcode in blockShortCodes )
             {
                 // register this shortcode
-                LavaEngine.Instance.RegisterShortcode(( shortcode.TagName );
+                LavaEngine.Instance.RegisterShortcode( shortcode.TagName );
             }
         }
 

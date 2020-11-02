@@ -17,30 +17,18 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using DotLiquid;
 
 namespace Rock.Lava
 {
 
-    //public abstract class RockLavaShortcodeBlockBase : RockLavaShortcodeBase, IRockLavaBlock
-    //{
-    //}
-
-    //public abstract class RockLavaShortcodeTagBase : RockLavaShortcodeBase, IRockLavaTag
-    //{
-    //}
-
     /// <summary>
-    /// 
+    /// Provides base functionality for a Lava shortcode element.
     /// </summary>
     public abstract class RockLavaShortcodeBase : IRockShortcode, ILiquidFrameworkRenderer
     {
         private string _elementName = null;
         private string _internalName = null;
 
-        //private IRockLavaElement _tagProxy = null;
-        //private IRockLavaElement _lavaElement = null;
         private ILiquidFrameworkRenderer _frameworkProxy = null;
 
         /// <summary>
@@ -142,28 +130,6 @@ namespace Rock.Lava
             nodes = null;
 
             return;
-
-
-            //nodes = null;
-            _frameworkProxy = this as ILiquidFrameworkRenderer;
-
-            if ( _frameworkProxy == null )
-            {
-                throw new Exception( "RenderFrameworkObject failed. The supplied Framework object is does not implement the ILiquidFrameworkComponent interface." );
-            }
-
-            // By default, call the underlying engine to parse this element.
-            //_frameworkProxy.Parse( tokens, out nodes );
-
-            //if ( _tagProxy != null )
-            //{
-            //    _tagProxy.onp.OnRender( context, result );
-            //}
-            //else if ( _blockProxy != null )
-            //{
-            //    _blockProxy.OnRender( context, result );
-            //}
-
         }
 
         #endregion
@@ -176,11 +142,9 @@ namespace Rock.Lava
             //
         }
 
-
         protected virtual void AssertMissingDelimitation()
         {
             throw new Exception( string.Format( "BlockTagNotClosedException: {0}", this.SourceElementName ) );
-            //throw new SyntaxException( Liquid.ResourceManager.GetString( "BlockTagNotClosedException" ), BlockName );
         }
 
         /// <summary>
@@ -199,88 +163,6 @@ namespace Rock.Lava
 
         public abstract LavaShortcodeTypeSpecifier ElementType { get; }
 
-        /*
-        private string _blockName = null;
-        private IRockLavaBlock _blockProxy;
-
-        private string _registeredTagName;
-        private string _markup;
-        private List<string> _tokens;
-
-        public virtual string Name
-        {
-            get
-            {
-                return this.GetType().Name.ToLower();
-            }
-        }
-
-        public abstract LavaElementTypeSpecifier ElementType { get; }
-
-        public void Initialize( string tagName, string markup, IEnumerable<string> tokens )
-        {
-            _registeredTagName = tagName;
-            _markup = markup;
-            _tokens = tokens.ToList();
-
-            OnInitialize( tagName, markup, _tokens );
-        }
-
-        public abstract void OnInitialize( string tagName, string markup, List<string> tokens );
-
-        public void Render( ILavaContext context, TextWriter result )
-        {
-            OnRender( context, result );
-            //throw new System.Exception( "Render is not implemented. This needs to be forwarded to a Liquid framework" );
-            //base.Render( context, result );
-        }
-
-        /// <summary>
-        /// Renders the specified context.
-        /// </summary>
-        /// <param name="context">The context.</param>
-        /// <param name="result">The result.</param>
-        public virtual void OnRender( ILavaContext context, TextWriter result )
-        {
-            result.Write( _markup );
-        }
-
-        public void Parse( List<string> tokens, out List<object> nodes )
-        {
-            OnParse( tokens, out nodes );
-        }
-
-        /// <summary>
-        /// Parse a set of Lava tokens into a set of document nodes that can be processed by the underlying rendering framework.
-        /// </summary>
-        /// <param name="tokens"></param>
-        /// <param name="nodes"></param>
-        protected virtual void OnParse( List<string> tokens, out List<object> nodes )
-        {
-            nodes = null;
-        }
-
-        /// <summary>
-        /// All IRockStartup classes will be run in order by this value. If class does not depend on an order, return zero.
-        /// </summary>
-        /// <value>
-        /// The order.
-        /// </value>
-        //public int StartupOrder { get { return 0; } }
-
-        /// <summary>
-        /// Method that will be run at Rock startup
-        /// </summary>
-        //public virtual void OnStartup()
-        //{
-        //}
-
-        protected virtual void AssertMissingDelimitation()
-        {
-            throw new Exception( string.Format( "Block Tag not closed: {0}", _registeredTagName ) );
-        }
-
-    */
         #region ILiquidFrameworkRenderer implementation
 
         private ILiquidFrameworkRenderer _baseRenderer = null;
@@ -297,26 +179,6 @@ namespace Rock.Lava
 
             // Forward this call through to the implementation provided by the shortcode component.
             OnRender( context, result );
-
-            //return;
-
-            //_frameworkProxy = frameworkObject as ILiquidFrameworkRenderer;
-
-            //if ( _frameworkProxy == null )
-            //{
-            //    throw new Exception( "RenderFrameworkObject failed. The supplied Framework object is does not implement the ILiquidFrameworkComponent interface." );
-            //}
-
-            //_tagProxy = frameworkObject as IRockLavaTag;
-            //_blockProxy = frameworkObject as IRockLavaBlock;
-
-            //if ( _tagProxy == null
-            //     && _blockProxy == null )
-            //{
-            //    throw new Exception( "RenderFrameworkObject failed. The supplied Framework object is not an expected Type." );
-            //}
-
-            //this.OnRender( context, result );
         }
 
         void ILiquidFrameworkRenderer.Parse( ILiquidFrameworkRenderer baseRenderer, List<string> tokens, out List<object> nodes )
@@ -329,38 +191,6 @@ namespace Rock.Lava
 
             // Forward this call through to the implementation provided by the shortcode component.
             baseRenderer.Parse( null, tokens, out nodes );
-
-            // TODO: whatever called this and supplied frameworkObject should just call the Parse method directly?
-            //_frameworkProxy = frameworkObject as ILiquidFrameworkRenderer;
-
-            //if ( _frameworkProxy == null )
-            //{
-            //    throw new Exception( "RenderFrameworkObject failed. The supplied Framework object is does not implement the ILiquidFrameworkComponent interface." );
-            //}
-
-            //_tagProxy = frameworkObject as IRockLavaTag;
-            //_blockProxy = frameworkObject as IRockLavaBlock;
-
-            //if ( _tagProxy == null
-            //     && _blockProxy == null )
-            //{
-            //    throw new Exception( "RenderFrameworkObject failed. The supplied Framework object is not an expected Type." );
-            //}
-
-            //if ( _blockProxy != null )
-            //{
-            //    _blockProxy.OnParse( tokens, out nodes );
-            //}
-            //else if ( _tagProxy != null )
-            //{
-            //    _tagProxy.OnParse( tokens, out nodes );
-            //}
-            //else
-            //{
-            //    nodes = null;
-            //}
-
-            //OnParse( tokens, out nodes );
         }
 
         #endregion

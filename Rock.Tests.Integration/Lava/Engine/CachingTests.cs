@@ -1,5 +1,6 @@
 ﻿using DotLiquid;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Rock.Lava;
 
 namespace Rock.Tests.Integration.Lava
 {
@@ -29,7 +30,7 @@ namespace Rock.Tests.Integration.Lava
             // Get access to the private GetTemplate method so we can use the internal Lava template caching mechanism.
             var GetTemplateMethodsInfo = typeof( ExtensionMethods ).GetMethod( "GetTemplate", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic );
 
-            var template = GetTemplateMethodsInfo.Invoke( null, new object[] { templateContent } ) as Template;
+            var template = GetTemplateMethodsInfo.Invoke( null, new object[] { templateContent } ) as ILavaTemplate;
 
             var output = template.Render();
 

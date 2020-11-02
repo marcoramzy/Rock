@@ -45,7 +45,7 @@ namespace Rock.Lava.DotLiquid
 
             name = name.Trim().ToLower();
 
-            _factoryMethods.Add( name, factoryMethod );
+            _factoryMethods[name] = factoryMethod;
         }
 
         private IRockLavaTag _lavaElement = null;

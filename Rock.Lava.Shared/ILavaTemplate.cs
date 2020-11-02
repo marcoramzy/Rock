@@ -33,6 +33,13 @@ namespace Rock.Lava
         void SetContextValue( string key, object value );
 
         /// <summary>
+        /// Try to render the template.
+        /// Errors will be included in the rendered output.
+        /// </summary>
+        /// <returns></returns>        
+        string Render();
+
+        /// <summary>
         /// Try to render the template using the provided context values.
         /// Errors will be included in the rendered output.
         /// </summary>

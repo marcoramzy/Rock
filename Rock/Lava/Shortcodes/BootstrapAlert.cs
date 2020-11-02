@@ -42,14 +42,6 @@ namespace Rock.Lava.Shortcodes
             }
         }
 
-        public string SourceElementName
-        {
-            get
-            {
-                return this.GetType().Name;
-            }
-        }
-
         /// <summary>
         /// Initializes the specified tag name.
         /// </summary>

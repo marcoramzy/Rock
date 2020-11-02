@@ -23,6 +23,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Rock.Lava;
 using Rock.Model;
 using Rock.Tests.Shared;
+using Rock.Utility;
 using Rock.Web.Cache;
 
 namespace Rock.Tests.Integration.Lava
@@ -179,7 +180,12 @@ namespace Rock.Tests.Integration.Lava
 
                     newShortcode.Name = shortcodeDefinition.Name;
                     newShortcode.TemplateMarkup = shortcodeDefinition.Markup;
-                    newShortcode.Tokens = shortcodeDefinition.Parameters.SplitDelimitedValues( ";" ).ToList();
+
+                    var parameters = RockSerializableDictionary.FromUriEncodedString( shortcodeDefinition.Parameters );
+
+                    newShortcode.Parameters = new Dictionary<string, string>( parameters.Dictionary );
+
+                    newShortcode.EnabledLavaCommands = shortcodeDefinition.EnabledLavaCommands.SplitDelimitedValues( ",", StringSplitOptions.RemoveEmptyEntries ).ToList();
 
                     if ( shortcodeDefinition.TagType == TagType.Block )
                     {
@@ -317,6 +323,7 @@ namespace Rock.Tests.Integration.Lava
             }
 
             expectedOutput = Regex.Escape( expectedOutput );
+            expectedOutput = expectedOutput.Replace( "/", @"\/" );
 
             expectedOutput = expectedOutput.Replace( "<<<wildCard>>>", "(.*)" );
 

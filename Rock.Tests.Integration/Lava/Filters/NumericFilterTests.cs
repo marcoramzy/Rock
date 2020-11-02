@@ -38,15 +38,6 @@ namespace Rock.Tests.Integration.Lava
         /// Decimal input should be formatted using the supplied currency symbol.
         /// </summary>
         [TestMethod]
-        public void FormatAsCurrency_DecimalInputWithSpecifiedSymbol_ProducesValidCurrencyFormat()
-        {
-            _helper.AssertTemplateOutput( "AUD1,234,567.89", "{{ '1234567.89' | FormatAsCurrency:'AUD' }}" );
-        }
-
-        /// <summary>
-        /// Decimal input should be formatted using the supplied currency symbol.
-        /// </summary>
-        [TestMethod]
         public void FormatAsCurrency_DecimalInputWithNoSymbol_ProducesDefaultCurrencyFormat()
         {
             _helper.AssertTemplateOutput( "$1,234,567.89", "{{ '1234567.89' | FormatAsCurrency }}" );

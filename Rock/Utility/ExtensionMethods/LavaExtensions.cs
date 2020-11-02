@@ -543,7 +543,7 @@ namespace Rock
         /// <param name="content">The content.</param>
         /// <param name="mergeObjects">The merge objects.</param>
         /// <param name="currentPersonOverride">The current person override.</param>
-        /// <param name="enabledLavaCommands">The enabled lava commands.</param>
+        /// <param name="enabledLavaCommands">A comma-delimited list of the lava commands that are enabled for this template.</param>
         /// <returns>If lava present returns merged string, if no lava returns original string, if null returns empty string</returns>
         public static string ResolveMergeFields( this string content, IDictionary<string, object> mergeObjects, Person currentPersonOverride, string enabledLavaCommands )
         {
@@ -565,13 +565,21 @@ namespace Rock
 
                 var renderParameters = new LavaRenderParameters();
 
-                renderParameters.Registers.AddOrReplace( "EnabledCommands", enabledLavaCommands );
-                renderParameters.InstanceAssigns.AddOrReplace( "CurrentPerson", currentPersonOverride );
+                var enabledCommands = enabledLavaCommands.SplitDelimitedValues( ",", StringSplitOptions.RemoveEmptyEntries );
 
-                string output;
+                if ( enabledCommands.Any() )
+                {
+                    renderParameters.EnabledCommands.AddRange( enabledCommands );
+                }
+                
+                renderParameters.Registers.AddOrReplace( "CurrentPerson", currentPersonOverride );
+
+                renderParameters.LocalVariables = mergeObjects;
+
                 IList<Exception> errors;
+                string output;
 
-                var isRendered = template.TryRender( mergeObjects, out output, out errors );
+                var isRendered = template.TryRender( renderParameters, out output, out errors );
 
                 return output;
             }

@@ -34,6 +34,7 @@ namespace Rock.Lava.DotLiquid
     /// A dynamic shortcode block is a Lava shortcode whose definition is loaded from a data store at runtime.
     /// By contrast, a static shortcode has a fixed definition that is defined in a Rock code component.
     /// </summary>
+    [Obsolete("Reimplemented using DotLiquidBlockProxy")]
     public class DotLiquidDynamicShortcodeBlockProxy : Block, ILiquidFrameworkRenderer //, IRockShortcode
     {
         private static readonly Regex Syntax = new Regex( @"(\w+)" );

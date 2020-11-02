@@ -36,6 +36,7 @@ namespace Rock.Tests.Integration.Lava
         [ClassInitialize]
         public static void Initialize( TestContext context )
         {
+            // Initialize the global DotLiquid Lava Processor;
             _helper = LavaTestHelper.NewForDotLiquidProcessor();
 
 
@@ -49,9 +50,9 @@ namespace Rock.Tests.Integration.Lava
         /// Using the Scripturize shortcode produces the expected output.
         /// </summary>
         [DataTestMethod]
-        [DataRow( "{[ bootstrapalert type='info' ]}", "<div class='alert alert-info'></div>" )]
+        [DataRow( "{[ bootstrapalert type='info' ]}This is an information message.{[ endbootstrapalert ]}", "<div class='alert alert-info'>This is an information message.</div>" )]
 
-        public void BootstrapAlertShortcode_x_SimpleCase( string input, string expectedResult )
+        public void BootstrapAlertShortcode_VariousTypes_ProducesCorrectHtml( string input, string expectedResult )
         {
             
             _helper.AssertTemplateOutput( expectedResult,
@@ -93,7 +94,7 @@ ScheduleName:Saturday4:30pm<br>ScheduleLive:true<br>
         [DataRow( "Jn 3:16", "<a href=\"https://www.bible.com/bible/116/JHN.3.16.NLT\"  class=\"scripture\" title=\"YouVersion\">Jn 3:16</a>" )]
         [DataRow( "John 3", "<a href=\"https://www.bible.com/bible/116/JHN.3..NLT\"  class=\"scripture\" title=\"YouVersion\">John 3</a>" )]
 
-        public void ScripturizeShortcode_YouVersion_SimpleCase( string input, string expectedResult )
+        public void ScripturizeShortcode_YouVersion_ProducesCorrectHtml( string input, string expectedResult )
         {
             _helper.AssertTemplateOutput( expectedResult,
                                           "{[ scripturize defaulttranslation:'NLT' landingsite:'YouVersion' cssclass:'scripture' ]}" + input + "{[ endscripturize ]}" );

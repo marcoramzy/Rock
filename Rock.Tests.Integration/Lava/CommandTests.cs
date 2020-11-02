@@ -217,55 +217,25 @@ Color 4: blue
         [TestMethod]
         public void ExecuteBlock_WithImports_ReturnsExpectedOutput()
         {
-            var client = new RestClient( "http://api.github.com" );
-            var request = new RestRequest( "repos/SparkDevNetwork/Rock/commits", Method.GET );
-
-            const SslProtocols _Tls12 = (SslProtocols)0x00000C00;
-            const SecurityProtocolType Tls12 = (SecurityProtocolType)_Tls12;
-            ServicePointManager.SecurityProtocol = Tls12;
-
-            //ServicePointManager.SecurityProtocol = System.Net.SecurityProtocolType.Tls12;
-
-            IRestResponse response = client.Execute( request );
-
-            JArray commitArray = JArray.Parse( response.Content );
-
-            dynamic firstCommit = commitArray.First["commit"];
-
-            var message = firstCommit.message + "<br/>" + firstCommit.author.name;
-
-            // Get the most recent commits from the Rock GitHub repository.
-
-            // https://api.github.com/repos/SparkDevNetwork/Rock/commits?page=917
             var input = @"
-{% execute import:'RestSharp,Newtonsoft.Json,Newtonsoft.Json.Linq,System.Net,System.Security.Authentication' %}
+{% execute import:'Newtonsoft.Json,Newtonsoft.Json.Linq' %}
 
-const SslProtocols _Tls12 = (SslProtocols)0x00000C00;
-const SecurityProtocolType Tls12 = (SecurityProtocolType)_Tls12;
-ServicePointManager.SecurityProtocol = Tls12;
+    JArray itemArray = JArray.Parse( ``['Banana','Orange','Apple']`` );
 
-//ServicePointManager.SecurityProtocol = System.Net.SecurityProtocolType.Tls12;
-
-var client = new RestClient( ""https://api.github.com"" );
-var request = new RestRequest( ""repos/SparkDevNetwork/Rock/commits"", Method.GET );
-
-IRestResponse response = client.Execute( request );
-
-JArray commitArray = JArray.Parse( response.Content );
-
-dynamic firstCommit = commitArray.First[""commit""];
-return firstCommit.message + ""<br />"" + firstCommit.author.name;
+    return ``Fruit: `` + itemArray[1];
 
 {% endexecute %}
-";
+    ";
 
-            var expectedOutput = @"Hello World!";
+            input = input.Replace( "``", @"""" );
+
+            var expectedOutput = @"Fruit: Orange";
 
             var context = _helper.LavaEngine.NewContext();
 
             context.SetEnabledCommands( "execute" );
 
-            var output = _helper.GetTemplateOutput( input, context );
+            _helper.AssertTemplateOutput( expectedOutput, input, context );
         }
 
         [TestMethod]
