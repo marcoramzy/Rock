@@ -1930,7 +1930,10 @@ namespace Rock.Lava
                 return null;
             }
 
-            if ( input is string )
+            var inputAsDecimal = input.ToString().AsDecimalOrNull();
+
+            if ( inputAsDecimal == null
+                 && input is string )
             {
                 // if the input is a string, just append the currency symbol to the front, even if it can't be converted to a number
                 var currencySymbol = GlobalAttributesCache.Value( "CurrencySymbol" );
@@ -1939,7 +1942,6 @@ namespace Rock.Lava
             else
             {
                 // if the input an integer, decimal, double or anything else that can be parsed as a decimal, format that
-                decimal? inputAsDecimal = input.ToString().AsDecimalOrNull();
                 return inputAsDecimal.FormatAsCurrency();
             }
         }
