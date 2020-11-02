@@ -21,7 +21,7 @@ using System.Linq;
 using System.Net.Mail;
 using System.Net.Mime;
 using System.Text.RegularExpressions;
-
+using System.Threading.Tasks;
 using Rock.Data;
 using Rock.Model;
 using Rock.Transactions;
@@ -127,6 +127,24 @@ namespace Rock.Communication.Transport
             var mailMessage = GetMailMessageFromRockEmailMessage( rockEmailMessage );
             var smtpClient = GetSmtpClient();
             smtpClient.Send( mailMessage );
+
+            return new EmailSendResponse
+            {
+                Status = CommunicationRecipientStatus.Delivered,
+                StatusNote = StatusNote
+            };
+        }
+
+        /// <summary>
+        /// Sends the email asynchronous.
+        /// </summary>
+        /// <param name="rockEmailMessage">The rock email message.</param>
+        /// <returns></returns>
+        protected override async Task<EmailSendResponse> SendEmailAsync( RockEmailMessage rockEmailMessage )
+        {
+            var mailMessage = GetMailMessageFromRockEmailMessage( rockEmailMessage );
+            var smtpClient = GetSmtpClient();
+            await smtpClient.SendMailAsync( mailMessage );
 
             return new EmailSendResponse
             {

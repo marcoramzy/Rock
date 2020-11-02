@@ -1010,13 +1010,32 @@ namespace Rock.Model
             var sendTasks = new List<Task>();
             foreach ( var medium in communication.GetMediums() )
             {
-                sendTasks.Add( Task.Run( () => medium.Send( communication ) ) );
+                var asyncMedium = medium as IAsyncMediumComponent;
+
+                if ( asyncMedium == null )
+                {
+                    sendTasks.Add( Task.Run( () => medium.Send( communication ) ) );
+                }
+                else
+                {
+                    sendTasks.Add( asyncMedium.SendAsync( communication ) );
+                }
             }
 
+            var aggregateExceptions = new List<Exception>();
             while ( sendTasks.Count > 0 )
             {
-                var completedTask = await Task.WhenAny( sendTasks );
+                var completedTask = await Task.WhenAny( sendTasks ).ConfigureAwait( false );
+                if ( completedTask.Exception != null )
+                {
+                    aggregateExceptions.AddRange( completedTask.Exception.InnerExceptions );
+                }
                 sendTasks.Remove( completedTask );
+            }
+
+            if ( aggregateExceptions.Count > 0 )
+            {
+                throw new AggregateException( aggregateExceptions );
             }
 
             using ( var rockContext = new RockContext() )

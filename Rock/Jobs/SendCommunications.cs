@@ -27,6 +27,7 @@ using Rock.Attribute;
 using Rock.Data;
 using Rock.Logging;
 using Rock.Model;
+using Rock.Utility;
 
 namespace Rock.Jobs
 {
@@ -82,28 +83,40 @@ namespace Rock.Jobs
             int communicationsSent = 0;
 
             stopWatch = Stopwatch.StartNew();
-            var sendCommunicationTasks = new Task[sendCommunications.Count()];
+            var sendCommunicationTasks = new List<Task<SendCommunicationAsyncResult>>();
 
             for ( var i = 0; i < sendCommunications.Count(); i++ )
             {
                 var comm = sendCommunications[i];
-                sendCommunicationTasks[i] = SendCommunicationAsync( comm );
+                sendCommunicationTasks.Add( SendCommunicationAsync( comm ) );
             }
 
-            Task.WaitAll( sendCommunicationTasks );
-
-            for ( var i = 0; i < sendCommunicationTasks.Length; i++ )
+            while ( sendCommunicationTasks.Count > 0 )
             {
-                var task = sendCommunicationTasks[i];
-                if ( task.Exception != null )
+                var completedTask = AsyncHelper.RunSync<Task<SendCommunicationAsyncResult>>( () => Task.WhenAny<SendCommunicationAsyncResult>( sendCommunicationTasks.ToArray() ));
+                var communicationResult = completedTask.Result;
+                if ( communicationResult.Exception != null )
                 {
-                    exceptionMsgs.Add( $"Exception occurred sending communication ID:{sendCommunications[i].Id}:{Environment.NewLine}    {task.Exception.Messages().AsDelimited( Environment.NewLine + "   " )}" );
-                    ExceptionLogService.LogException( task.Exception, System.Web.HttpContext.Current );
+                    var agException = communicationResult.Exception as AggregateException;
+                    if(agException == null )
+                    {
+                        exceptionMsgs.Add( $"Exception occurred sending communication ID:{communicationResult.Communication.Id}:{Environment.NewLine}    {communicationResult.Exception.Messages().AsDelimited( Environment.NewLine + "   " )}" );
+                    }
+                    else
+                    {
+                        var allExceptions = agException.Flatten();
+                        foreach ( var ex in allExceptions.InnerExceptions )
+                        {
+                            exceptionMsgs.Add( $"Exception occurred sending communication ID:{communicationResult.Communication.Id}:{Environment.NewLine}    {ex.Messages().AsDelimited( Environment.NewLine + "   " )}" );
+                        }
+                    }
+                    ExceptionLogService.LogException( communicationResult.Exception, System.Web.HttpContext.Current );
                 }
                 else
                 {
                     communicationsSent++;
                 }
+                sendCommunicationTasks.Remove( completedTask );
             }
 
             RockLogger.Log.Information( RockLogDomains.Jobs, "{0}: Send communications runtime: {1} ms", nameof( SendCommunications ), stopWatch.ElapsedMilliseconds );
@@ -145,11 +158,29 @@ namespace Rock.Jobs
             RockLogger.Log.Information( RockLogDomains.Jobs, "{0}: Mark failed communications runtime: {1} ms", nameof( SendCommunications ), stopWatch.ElapsedMilliseconds );
         }
 
-        private async Task SendCommunicationAsync( Model.Communication comm )
+        private class SendCommunicationAsyncResult
         {
+            public Exception Exception { get; set; }
+            public Model.Communication Communication { get; set; }
+        }
+
+        private async Task<SendCommunicationAsyncResult> SendCommunicationAsync( Model.Communication comm )
+        {
+            var communicationResult = new SendCommunicationAsyncResult
+            {
+                Communication = comm
+            };
+
             var communicationStopWatch = Stopwatch.StartNew();
-            await Model.Communication.SendAsync( comm );
+            try
+            {
+                await Model.Communication.SendAsync( comm ).ConfigureAwait( false );
+            } catch (Exception ex )
+            {
+                communicationResult.Exception = ex;
+            }
             RockLogger.Log.Information( RockLogDomains.Jobs, "{0}: {1} took {2} ms", nameof( SendCommunications ), comm.Name, communicationStopWatch.ElapsedMilliseconds );
+            return communicationResult;
         }
     }
 }

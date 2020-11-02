@@ -532,6 +532,7 @@
     <Compile Include="CheckIn\LocalDeviceConfiguration.cs" />
     <Compile Include="CheckIn\RosterAttendee.cs" />
     <Compile Include="Communication\CommunicationHelper.cs" />
+    <Compile Include="Communication\IAsyncMediumComponent.cs" />
     <Compile Include="Communication\IRockMobilePush.cs" />
     <Compile Include="Communication\PushData.cs" />
     <Compile Include="Communication\CreateMessageResult.cs" />
@@ -610,6 +611,7 @@
     <Compile Include="SystemKey\DeviceAttributeKey.cs" />
     <Compile Include="SystemKey\TwilioAttributeKey.cs" />
     <Compile Include="Transactions\AchievementsProcessTransaction.cs" />
+    <Compile Include="Utility\AsyncHelper.cs" />
     <Compile Include="Utility\Enums\PushOpenAction.cs" />
     <Compile Include="Utility\ExtensionMethods\StreamExtensions.cs" />
     <Compile Include="Utility\KeyHelper.cs" />

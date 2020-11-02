@@ -17,7 +17,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using System.Threading.Tasks;
 using Rock.Attribute;
 using Rock.Extension;
 using Rock.Model;
@@ -30,7 +30,7 @@ namespace Rock.Communication
     /// Base class for components communication mediums (i.e. email, sms, twitter, etc) 
     /// </summary>
     [ComponentField( "Rock.Communication.TransportContainer, Rock", "Transport Container", "", false, "", "", 1 )]
-    public abstract class MediumComponent : Component
+    public abstract class MediumComponent : Component, IAsyncMediumComponent
     {
         /// <summary>
         /// Gets the transport.
@@ -95,15 +95,7 @@ namespace Rock.Communication
                 int mediumEntityTypeId = EntityTypeCache.Get( this.GetType() ).Id;
 
                 // Add the Medium's settings as attributes for the Transport to use.
-                var mediumAttributes = new Dictionary<string, string>();
-                foreach ( var attr in this.Attributes.Select( a => a.Value ) )
-                {
-                    string value = this.GetAttributeValue( attr.Key );
-                    if ( value.IsNotNullOrWhiteSpace() )
-                    {
-                        mediumAttributes.Add( attr.Key, GetAttributeValue( attr.Key ) );
-                    }
-                }
+                var mediumAttributes = GetMediumAttributes();
 
                 // If there have not been any EnabledLavaCommands explicitly set, then use the global defaults.
                 if ( rockMessage.EnabledLavaCommands == null )
@@ -127,7 +119,7 @@ namespace Rock.Communication
                 errorMessages = new List<string> { "Inactive Medium." };
             }
         }
-        
+
         /// <summary>
         /// Sends the specified communication.
         /// </summary>
@@ -140,23 +132,51 @@ namespace Rock.Communication
                 int mediumEntityTypeId = EntityTypeCache.Get( this.GetType() ).Id;
 
                 // Add the Medium's settings as attributes for the Transport to use.
-                var mediumAttributes = new Dictionary<string, string>();
-                foreach ( var attr in this.Attributes.Select( a => a.Value ) )
+                var mediumAttributes = GetMediumAttributes();
+
+                // Use the transport to send communication
+                if ( Transport != null && Transport.IsActive )
                 {
-                    string value = this.GetAttributeValue( attr.Key );
-                    if ( value.IsNotNullOrWhiteSpace() )
-                    {
-                        mediumAttributes.Add( attr.Key, GetAttributeValue( attr.Key ) );
-                    }
+                    Transport.Send( communication, mediumEntityTypeId, mediumAttributes );
                 }
+            }
+        }
+
+        /// <summary>
+        /// Sends the asynchronous.
+        /// </summary>
+        /// <param name="communication">The communication.</param>
+        public virtual async Task SendAsync( Model.Communication communication )
+        {
+            if ( this.IsActive )
+            {
+                // Get the Medium's Entity Type Id
+                int mediumEntityTypeId = EntityTypeCache.Get( this.GetType() ).Id;
+
+                // Add the Medium's settings as attributes for the Transport to use.
+                var mediumAttributes = GetMediumAttributes();
 
                 // Use the transport to send communication
                 var transport = Transport;
                 if ( transport != null && transport.IsActive )
                 {
-                    transport.Send( communication, mediumEntityTypeId, mediumAttributes );
+                    await transport.SendAsync( communication, mediumEntityTypeId, mediumAttributes );
                 }
             }
+        }
+
+        private Dictionary<string, string> GetMediumAttributes()
+        {
+            var mediumAttributes = new Dictionary<string, string>();
+            foreach ( var attr in this.Attributes.Select( a => a.Value ) )
+            {
+                string value = this.GetAttributeValue( attr.Key );
+                if ( value.IsNotNullOrWhiteSpace() )
+                {
+                    mediumAttributes.Add( attr.Key, GetAttributeValue( attr.Key ) );
+                }
+            }
+            return mediumAttributes;
         }
     }
 }
