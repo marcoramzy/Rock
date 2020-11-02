@@ -30,7 +30,7 @@ namespace Rock.Tests.UnitTests.Lava
         [ClassInitialize]
         public static void Initialize( TestContext context )
         {
-            _helper = LavaTestHelper.NewForDotLiquidProcessor();
+            _helper = LavaTestHelper.NewForCurrentProcessor();
         }
 
         #endregion
