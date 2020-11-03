@@ -664,9 +664,7 @@
     <Compile Include="Plugin\HotFixes\106_EnableLavaDefaultSetting.cs" />
     <Compile Include="Utility\Enums\IntervalTimeUnit.cs" />
     <Compile Include="Utility\GuidConverter.cs" />
-    <Compile Include="Utility\RockCacheability.cs">
-      <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
-    </Compile>
+    <Compile Include="Utility\RockCacheability.cs" />
     <Compile Include="Utility\Settings\RockInstanceConfig.cs" />
     <Compile Include="Utility\Settings\RockInstanceConfigurationService.cs" />
     <Compile Include="Utility\Settings\RockInstanceDatabaseConfiguration.cs" />
