@@ -18,5 +18,11 @@ namespace Rock.Communication
         /// <returns></returns>
         Task SendAsync( Model.Communication communication );
 
+        /// <summary>
+        /// Sends the asynchronous.
+        /// </summary>
+        /// <param name="rockMessage">The rock message.</param>
+        /// <returns></returns>
+        Task<SendMessageResult> SendAsync( RockMessage rockMessage );
     }
 }

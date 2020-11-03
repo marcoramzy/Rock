@@ -121,6 +121,50 @@ namespace Rock.Communication
         }
 
         /// <summary>
+        /// Sends the asynchronous.
+        /// </summary>
+        /// <param name="rockMessage">The rock message.</param>
+        /// <returns></returns>
+        public virtual async Task<SendMessageResult> SendAsync( RockMessage rockMessage )
+        {
+            if ( this.IsActive )
+            {
+                // Get the Medium's Entity Type Id
+                int mediumEntityTypeId = EntityTypeCache.Get( this.GetType() ).Id;
+
+                // Add the Medium's settings as attributes for the Transport to use.
+                var mediumAttributes = GetMediumAttributes();
+
+                // If there have not been any EnabledLavaCommands explicitly set, then use the global defaults.
+                if ( rockMessage.EnabledLavaCommands == null )
+                {
+                    rockMessage.EnabledLavaCommands = GlobalAttributesCache.Get().GetValue( "DefaultEnabledLavaCommands" );
+                }
+
+                // Use the transport to send communication
+                var transport = Transport;
+                if ( transport != null && transport.IsActive )
+                {
+                    return await transport.SendAsync( rockMessage, mediumEntityTypeId, mediumAttributes );
+                }
+                else
+                {
+                    return new SendMessageResult
+                    {
+                        Errors = new List<string> { "Invalid or Inactive Transport." }
+                    };
+                }
+            }
+            else
+            {
+                return new SendMessageResult
+                {
+                    Errors = new List<string> { "Inactive Medium." }
+                };
+            }
+        }
+
+        /// <summary>
         /// Sends the specified communication.
         /// </summary>
         /// <param name="communication">The communication.</param>
