@@ -313,12 +313,6 @@ namespace Rock.Web.UI.Controls
                     _maxSharedAgeUnit.SelectedValue = CurrentCacheability.SharedMaxAge?.Unit.ConvertToInt().ToStringSafe();
                 }
             }
-
-            _cacheabilityType.Enabled = Enabled;
-            _maxAgeUnit.Enabled = Enabled;
-            _maxAgeValue.Enabled = Enabled;
-            _maxSharedAgeUnit.Enabled = Enabled;
-            _maxSharedAgeValue.Enabled = Enabled;
         }
 
         /// <summary>
