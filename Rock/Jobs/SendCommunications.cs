@@ -15,12 +15,13 @@
 // </copyright>
 //
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data.Entity;
 using System.Diagnostics;
 using System.Linq;
-
+using System.Threading.Tasks;
 using Quartz;
 
 using Rock.Attribute;
@@ -77,26 +78,31 @@ namespace Rock.Jobs
                 context.Result = "No communications to send";
             }
 
-            var exceptionMsgs = new List<string>();
-            int communicationsSent = 0;
-
+            var exceptionMsgs = new ConcurrentQueue<string>();
+            
             stopWatch = Stopwatch.StartNew();
-            foreach ( var comm in sendCommunications )
+
+            Parallel.ForEach( sendCommunications, comm =>
             {
                 try
                 {
                     Rock.Model.Communication.Send( comm );
-                    communicationsSent++;
                 }
-
                 catch ( Exception ex )
                 {
-                    exceptionMsgs.Add( string.Format( "Exception occurred sending communication ID:{0}:{1}    {2}", comm.Id, Environment.NewLine, ex.Messages().AsDelimited( Environment.NewLine + "   " ) ) );
+                    exceptionMsgs.Enqueue( string.Format( "Exception occurred sending communication ID:{0}:{1}    {2}", comm.Id, Environment.NewLine, ex.Messages().AsDelimited( Environment.NewLine + "   " ) ) );
                     ExceptionLogService.LogException( ex, System.Web.HttpContext.Current );
                 }
-            }
+            } );
+
             RockLogger.Log.Information( RockLogDomains.Jobs, "{0}: Send communications runtime: {1} ms", nameof( SendCommunications ), stopWatch.ElapsedMilliseconds );
 
+            if ( exceptionMsgs.Any() )
+            {
+                throw new Exception( "One or more exceptions occurred sending communications..." + Environment.NewLine + exceptionMsgs.ToList().AsDelimited( Environment.NewLine ) );
+            }
+
+            var communicationsSent = sendCommunications.Count();
             if ( communicationsSent > 0 )
             {
                 context.Result = string.Format( "Sent {0} {1}", communicationsSent, "communication".PluralizeIf( communicationsSent > 1 ) );
@@ -104,12 +110,7 @@ namespace Rock.Jobs
             else
             {
                 context.Result = "No communications to send";
-            }
-
-            if ( exceptionMsgs.Any() )
-            {
-                throw new Exception( "One or more exceptions occurred sending communications..." + Environment.NewLine + exceptionMsgs.AsDelimited( Environment.NewLine ) );
-            }
+            }            
 
             // check for communications that have not been sent but are past the expire date. Mark them as failed and set a warning.
             var expireDateTimeEndWindow = RockDateTime.Now.AddDays( 0 - expirationDays );
