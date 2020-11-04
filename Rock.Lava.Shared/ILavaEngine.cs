@@ -21,104 +21,6 @@ using System.IO;
 
 namespace Rock.Lava
 {
-    /// <summary>
-    /// Represents information about a Lava template element, such as a tag or block.
-    /// </summary>
-    public interface ILavaElementInfo
-    {
-        string Name { get; }
-        string SystemTypeName { get; }
-        string ToString();
-
-        /// <summary>
-        /// Can the factory method successfully produce an instance of this tag?
-        /// </summary>
-        bool IsAvailable { get; set; }
-
-        LavaShortcodeTypeSpecifier ElementType { get; }
-    }
-
-    public class LavaTagInfo : ILavaElementInfo
-    {
-        public LavaTagInfo()
-        {
-            //
-        }
-
-        public LavaTagInfo( string name, string systemTypeName )
-        {
-            Name = name;
-            SystemTypeName = systemTypeName;
-        }
-
-        public string Name { get; set; }
-
-        public string SystemTypeName { get; set; }
-
-        /// <summary>
-        /// The factory method used to create a new instance of this tag.
-        /// </summary>
-        public Func<string, IRockLavaTag> FactoryMethod { get; set; }
-
-        /// <summary>
-        /// Can the factory method successfully produce an instance of this tag?
-        /// </summary>
-        public bool IsAvailable { get; set; }
-
-        public LavaShortcodeTypeSpecifier ElementType
-        {
-            get
-            {
-                return LavaShortcodeTypeSpecifier.Inline;
-            }
-        }
-
-        public override string ToString()
-        {
-            return string.Format( "{0} [{1}]", Name, SystemTypeName );
-        }
-    }
-
-    public class LavaBlockInfo : ILavaElementInfo
-    {
-        public LavaBlockInfo()
-        {
-            //
-        }
-
-        public LavaBlockInfo( string name, string systemTypeName )
-        {
-            Name = name;
-            SystemTypeName = systemTypeName;
-        }
-
-        public string Name { get; set; }
-
-        public string SystemTypeName { get; set; }
-
-        /// <summary>
-        /// The factory method used to create a new instance of this block.
-        /// </summary>
-        public Func<string, IRockLavaBlock> FactoryMethod { get; set; }
-
-        /// <summary>
-        /// Can the factory method successfully produce an instance of this block?
-        /// </summary>
-        public bool IsAvailable { get; set; }
-
-        public LavaShortcodeTypeSpecifier ElementType
-        {
-            get
-            {
-                return LavaShortcodeTypeSpecifier.Block;
-            }
-        }
-
-        public override string ToString()
-        {
-            return string.Format( "{0} [{1}]", Name, SystemTypeName );
-        }
-    }
 
     public enum LavaEngineTypeSpecifier
     {
@@ -133,6 +35,8 @@ namespace Rock.Lava
     /// </summary>
     public interface ILavaEngine
     {
+        void Initialize( ILavaFileSystem fileSystem, IList<Type> filterImplementationTypes = null );
+
         /// <summary>
         /// The descriptive name of the templating framework on which Lava is currently operating.
         /// </summary>

@@ -17,7 +17,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Rock.Lava.DotLiquid
+namespace Rock.Lava
 {
     /// <summary>
     /// Provides base functionality for a Lava template.
@@ -31,11 +31,6 @@ namespace Rock.Lava.DotLiquid
         /// </summary>
         [Obsolete("Do Lava Commands need to be enabled (and cached) for a Template, or only at the context level?")]
         public IList<string> EnabledCommands { get; set; }
-
-        //public bool TryRender( LavaRenderParameters parameters, out string output, out IList<Exception> errors )
-        //{
-        //    return TryRender( parameters, out output, out errors );
-        //}
 
         /// <summary>
         /// Try to render the template.
@@ -72,7 +67,7 @@ namespace Rock.Lava.DotLiquid
             return output;           
         }
 
-        [Obsolete]
+        [Obsolete("Not used?")]
         public abstract void SetContextValue( string key, object value );
 
         public bool TryRender( IDictionary<string, object> values, out string output, out IList<Exception> errors )
@@ -98,11 +93,6 @@ namespace Rock.Lava.DotLiquid
             {
                 parameters = new LavaRenderParameters();
             }
-
-            // Add the EnabledCommands setting to the context.
-            //values["EnabledCommands"] = this.EnabledCommands;
-
-            //parameters.LocalVariables = values;
 
             return OnTryRender( parameters, out output, out errors );
         }

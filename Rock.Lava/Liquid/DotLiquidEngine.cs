@@ -69,7 +69,7 @@ namespace Rock.Lava.DotLiquid
         /// so that the standard filters are loaded prior to the custom RockFilter.
         /// This is to allow the custom 'Date' filter to replace the standard Date filter.
         /// </summary>
-        public void Initialize( ILavaFileSystem fileSystem, IList<Type> filterImplementationTypes = null )
+        public override void Initialize( ILavaFileSystem fileSystem, IList<Type> filterImplementationTypes = null )
         {
             // DotLiquid uses a RubyDateFormat by default,
             // but since we aren't using Ruby, we want to disable that
@@ -257,12 +257,12 @@ namespace Rock.Lava.DotLiquid
         //    Template.RegisterTag<DotLiquidDynamicShortcodeBlockProxy>( registrationName );
         //}
 
-        private string GetShortcodeInternalName(string shortcodeName )
-        {
-            var internalName = shortcodeName + ShortcodeNameSuffix;
+        //private string GetShortcodeInternalName(string shortcodeName )
+        //{
+        //    var internalName = shortcodeName + ShortcodeNameSuffix;
 
-            return internalName.Trim().ToLower();
-        }
+        //    return internalName.Trim().ToLower();
+        //}
 
         //public override void RegisterShortcode<T>( string name )
         //{
@@ -312,33 +312,33 @@ namespace Rock.Lava.DotLiquid
         //    throw new NotImplementedException();
         //}
 
-        private object GetDotLiquidCompatibleValue( object value )
-        {
-            if ( value == null
-                 || value is string
-                 || value is IEnumerable
-                 || value is decimal
-                 || value is DateTime
-                 || value is DateTimeOffset
-                 || value is TimeSpan
-                 || value is Guid
-                 || value is Enum
-                 || value is KeyValuePair<string, object>
-                 || value.GetType().IsPrimitive
-                 )
-            {
-                return value;
-            }
+        //private object GetDotLiquidCompatibleValue( object value )
+        //{
+        //    if ( value == null
+        //         || value is string
+        //         || value is IEnumerable
+        //         || value is decimal
+        //         || value is DateTime
+        //         || value is DateTimeOffset
+        //         || value is TimeSpan
+        //         || value is Guid
+        //         || value is Enum
+        //         || value is KeyValuePair<string, object>
+        //         || value.GetType().IsPrimitive
+        //         )
+        //    {
+        //        return value;
+        //    }
 
-            var safeTypeTransformer = Template.GetSafeTypeTransformer( value.GetType() );
+        //    var safeTypeTransformer = Template.GetSafeTypeTransformer( value.GetType() );
 
-            if ( safeTypeTransformer != null )
-            {
-                return safeTypeTransformer( value );
-            }
+        //    if ( safeTypeTransformer != null )
+        //    {
+        //        return safeTypeTransformer( value );
+        //    }
 
-            return value;
-        }
+        //    return value;
+        //}
 
         // Convert a LavaContext to a DotLiquid RenderParameters object.
         private RenderParameters GetDotLiquidRenderParametersFromLavaContext( ILavaContext context )
@@ -436,7 +436,7 @@ namespace Rock.Lava.DotLiquid
 
         public override ILavaTemplate ParseTemplate( string inputTemplate )
         {
-            var lavaTemplate = new DotLiquidLavaTemplate( CreateNewDotLiquidTemplate( inputTemplate ) );
+            var lavaTemplate = new DotLiquidTemplateProxy( CreateNewDotLiquidTemplate( inputTemplate ) );
 
             return lavaTemplate;
         }
@@ -448,10 +448,10 @@ namespace Rock.Lava.DotLiquid
             return condition( left, right );
         }
 
-        internal static readonly Regex IsShortCode = new Regex( string.Format( @"^{0}", Liquid.ShortCodeStart ), RegexOptions.Compiled );
+        //internal static readonly Regex IsShortCode = new Regex( string.Format( @"^{0}", Liquid.ShortCodeStart ), RegexOptions.Compiled );
         internal static readonly Regex FullShortCodeToken = new Regex( @"{\[\s*(\w+)\s*([^\]}]*)?\]}", RegexOptions.Compiled );
-        public static readonly string ShortCodeStart = @"(?-mix:\{\[)"; // R.Q( @"\{\[" );
-        public static readonly string ShortCodeEnd = @"(?-mix:\]\})"; // R.Q( @"\]\}" );
+        //public static readonly string ShortCodeStart = @"(?-mix:\{\[)"; // R.Q( @"\{\[" );
+        //public static readonly string ShortCodeEnd = @"(?-mix:\]\})"; // R.Q( @"\]\}" );
 
         public static string ShortcodeNameSuffix = "_sc";
 
@@ -460,58 +460,13 @@ namespace Rock.Lava.DotLiquid
             /* Lava shortcode syntax is not recognized as a valid document element by Liquid parsers.
              * Replace the shortcode token "{[ ]}" with the Liquid tag token "{% %}",
              * and add a prefix to avoid naming collisions with existing registered tags.
-             * The shortcode can then be processed correctly as a custom tag by the Liquid templating engine.
+             * The shortcode can then be processed as a regular custom tag by the Liquid templating engine.
              */
             var newBlockName = "{% $1<suffix> $2 %}".Replace( "<suffix>", ShortcodeNameSuffix );
 
             inputTemplate = FullShortCodeToken.Replace( inputTemplate, newBlockName );
 
             return inputTemplate;
-
-            //var shortcodeTokens = FullShortCodeToken.Matches( inputTemplate ); // .Replace( inputTemplate, MatchEvaluator., ")
-            ////else if ( isShortCodeMatch.Success )
-            ////{
-            //foreach ( Match fullShortCodeMatch in shortcodeTokens )
-            //{ 
-            //    fullShortCodeMatch.
-
-            //    //Match fullShortCodeMatch = FullShortCodeToken.Match( token );
-            //    //if ( fullShortCodeMatch.Success )
-            //    //{
-            //        // If we found the proper block delimitor just end parsing here and let the outer block
-            //        // proceed
-            //        if ( BlockDelimiter == fullShortCodeMatch.Groups[1].Value )
-            //        {
-            //            EndTag();
-            //            return;
-            //        }
-
-            //        // Fetch the shortcode from registered shortcodes
-            //        Type shortcodeType;
-            //        if ( ( shortcodeType = Template.GetShortcodeType( fullShortCodeMatch.Groups[1].Value ) ) != null )
-            //        {
-            //            Tag shortcode = (Tag)Activator.CreateInstance( shortcodeType );
-            //            shortcode.Initialize( fullShortCodeMatch.Groups[1].Value, fullShortCodeMatch.Groups[2].Value, tokens );
-            //            NodeList.Add( shortcode );
-
-            //            // If the tag has some rules (eg: it must occur once) then check for them
-            //            shortcode.AssertTagRulesViolation( NodeList );
-            //        }
-            //        else
-            //        {
-            //            // This tag is not registered with the system
-            //            // pass it to the current block for special handling or error reporting
-            //            UnknownTag( fullShortCodeMatch.Groups[1].Value, fullShortCodeMatch.Groups[2].Value, tokens );
-            //        }
-            //    //}
-
-            //}
         }
-
-        //public override void RenderTag( IRockLavaBlock tag, ILavaContext context, TextWriter result )
-        //{
-        //    //global::DotLiquid.Block.
-        //    throw new NotImplementedException();
-        //}
     }
 }

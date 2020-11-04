@@ -4,6 +4,7 @@ using Rock.Lava.DotLiquid;
 using Rock.Lava.Blocks;
 using System.IO;
 using Rock.Lava.Shortcodes;
+using Rock.Lava.Fluid;
 
 namespace Rock.Lava
 {
@@ -45,7 +46,27 @@ namespace Rock.Lava
 
             _instance = liquidEngine;
         }
-        
+
+        public static void Initialize( LavaEngineTypeSpecifier? engineType, ILavaFileSystem fileSystem = null, IList<Type> filterImplementationTypes = null )
+        {
+            _liquidFramework = engineType ?? LavaEngineTypeSpecifier.DotLiquid;
+
+            ILavaEngine engine;
+
+            if ( _liquidFramework == LavaEngineTypeSpecifier.Fluid )
+            {
+                engine = new FluidEngine();
+            }
+            else
+            {
+                engine = new DotLiquidEngine();
+            }
+
+            engine.Initialize( fileSystem, filterImplementationTypes );
+
+            _instance = engine;
+        }
+
         public static ILavaEngine Instance
         {
             get
@@ -71,6 +92,8 @@ namespace Rock.Lava
     //TODO: Implement IRockStartup.
     public abstract class LavaEngineBase : ILavaEngine // ,IRockStartup
     {
+        public abstract void Initialize( ILavaFileSystem fileSystem, IList<Type> filterImplementationTypes = null );
+
         public abstract string EngineName { get; }
 
         public abstract ILavaContext NewContext();

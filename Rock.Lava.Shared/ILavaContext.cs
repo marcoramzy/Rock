@@ -110,8 +110,7 @@ namespace Rock.Lava
         /// <returns></returns>
         IDictionary<string, object> GetMergeFieldsInContainerScope();
 
-        string ResolveMergeFields( string content, IDictionary<string, object> mergeObjects, string enabledLavaCommands, bool encodeStrings = false, bool throwExceptionOnErrors = false );
-        string ResolveMergeFields( string content, IDictionary<string, object> mergeObjects );
+        string ResolveMergeFields( string content, IDictionary<string, object> mergeObjects, string enabledLavaCommands = null, bool encodeStrings = false, bool throwExceptionOnErrors = false );
 
         /// <summary>
         /// pushes a new local scope on the stack, pops it at the end of the block

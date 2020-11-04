@@ -27,7 +27,7 @@ namespace Rock.Lava.DotLiquid
     /// <summary>
     /// A Lava wrapper for the DotLiquid implementation of a Liquid Template.
     /// </summary>
-    public class DotLiquidLavaTemplate : LavaTemplateBase
+    public class DotLiquidTemplateProxy : LavaTemplateBase
     {
         #region Constructors
 
@@ -36,7 +36,7 @@ namespace Rock.Lava.DotLiquid
 
         private Hash _Context = new Hash();
 
-        public DotLiquidLavaTemplate( Template template )
+        public DotLiquidTemplateProxy( Template template )
         {
             _dotLiquidTemplate = template;            
         }
@@ -98,7 +98,7 @@ namespace Rock.Lava.DotLiquid
             // Rock requires all templates to be thread-safe, so we need to supply a Liquid context here rather than using the LocalVariables and Registers parameters.
             var dotLiquidRenderParameters = new RenderParameters();
 
-            dotLiquidRenderParameters.Context = new Context(); // null, null, Hash.FromDictionary( parameters.Registers ), true );
+            dotLiquidRenderParameters.Context = new Context();
 
             dotLiquidRenderParameters.Context.Merge( Hash.FromDictionary( values ) );
 

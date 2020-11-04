@@ -26,48 +26,6 @@ using Rock.Common;
 
 namespace Rock.Lava.DotLiquid
 {
-    public abstract class LavaContextBase : ILavaContext
-    {
-        public object this[string key]
-        {
-            get
-            {
-                return GetMergeFieldValue( key, null );
-            }
-            set
-            {
-                SetMergeFieldValue( key, value );
-            }
-        }
-
-        public abstract ILavaEngine LavaEngine { get; }
-
-        public abstract List<string> GetEnabledCommands();
-        public abstract IList<LavaDictionary> GetEnvironments();
-        public abstract LavaDictionary GetMergeFieldsForLocalScope();
-        public abstract IDictionary<string, object> GetMergeFieldsInContainerScope();
-        public abstract IDictionary<string, object> GetMergeFieldsInScope();
-        public abstract object GetMergeFieldValue( string key, object defaultValue );
-        public abstract LavaDictionary GetMergeFieldValues();
-        public abstract IList<LavaDictionary> GetScopes();
-        //public abstract LavaDictionary Pop();
-        //public abstract void Push( LavaDictionary newScope );
-        public abstract string ResolveMergeFields( string content, IDictionary<string, object> mergeObjects, string enabledLavaCommands, bool encodeStrings = false, bool throwExceptionOnErrors = false );
-        public abstract string ResolveMergeFields( string content, IDictionary<string, object> mergeObjects );
-        public abstract void SetEnabledCommands( IEnumerable<string> commands );
-        public void SetEnabledCommands( string commandList, string delimiter = "," )
-        {
-            var commands = commandList.SplitDelimitedValues( delimiter );
-
-            SetEnabledCommands( commands );
-        }
-
-        public abstract void SetMergeFieldValue( string key, object value );
-        public abstract void SetMergeFieldValue( string key, object value, string scopeSelector );
-        public abstract void SetMergeFieldValues( LavaDictionary values );
-        //public abstract void Stack( LavaDictionary newScope, Action callback );
-        public abstract void Stack( Action callback );
-    }
 
     public class DotLiquidLavaContext : LavaContextBase
     {
@@ -85,19 +43,6 @@ namespace Rock.Lava.DotLiquid
                 return _context;
             }
         }
-
-        //public object this[string key]
-        //{
-        //    get
-        //    {
-        //        return _context[key];
-        //    }
-        //    set
-        //    {
-        //        _context[key] = value;
-        //    }
-        //}
-
 
         public override IList<LavaDictionary> GetEnvironments()
         {
@@ -213,7 +158,7 @@ namespace Rock.Lava.DotLiquid
             return LavaDictionary.FromDictionary( _context.Registers );
         }
 
-        public override string ResolveMergeFields( string content, IDictionary<string, object> mergeObjects, string enabledLavaCommands, bool encodeStrings = false, bool throwExceptionOnErrors = false )
+        public override string ResolveMergeFields( string content, IDictionary<string, object> mergeObjects, string enabledLavaCommands = null, bool encodeStrings = false, bool throwExceptionOnErrors = false )
         {
             try
             {
@@ -230,10 +175,15 @@ namespace Rock.Lava.DotLiquid
                     //enabledLavaCommands = GlobalAttributesCache.Value( "DefaultEnabledLavaCommands" );
                 }
 
-                Template template = GetTemplate( content );
-                template.Registers.AddOrReplace( "EnabledCommands", enabledLavaCommands );
+                var dotLiquidTemplate = GetTemplate( content );
+
+                dotLiquidTemplate.Registers.AddOrReplace( "EnabledCommands", enabledLavaCommands );
+
+                var output = dotLiquidTemplate.Render( Hash.FromDictionary( mergeObjects ) );
+
                 //template.InstanceAssigns.AddOrReplace( "CurrentPerson", currentPersonOverride );
-                return template.Render( Hash.FromDictionary( mergeObjects ) );
+
+                return output;
             }
             catch ( Exception ex )
             {
@@ -241,12 +191,6 @@ namespace Rock.Lava.DotLiquid
                 //ExceptionLogService.LogException( ex, System.Web.HttpContext.Current );
                 //return "Error resolving Lava merge fields: " + ex.Message;
             }
-        }
-
-        public override string ResolveMergeFields( string content, IDictionary<string, object> mergeObjects )
-        {
-            var enabledCommands = string.Empty; // GlobalAttributesCache.Get().GetValue( "DefaultEnabledLavaCommands" );
-            return ResolveMergeFields( content, mergeObjects, enabledCommands );
         }
 
         public override void SetMergeFieldValue( string key, object value )

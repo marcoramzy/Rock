@@ -24,15 +24,6 @@ using DotLiquid.FileSystems;
 
 namespace Rock.Lava
 {
-    public interface ILavaFileSystem
-    {
-        /// <summary>
-        /// Called by Lava to retrieve a template file.
-        /// </summary>
-        /// <param name="templatePath"></param>
-        /// <returns></returns>
-        string ReadTemplateFile( ILavaContext context, string templateName );
-    }
 
     /// <summary>
     /// Lava's <seealso cref="IFileSystem"/>. This is used when Lava templates retrieve other Lava templates when using the include tag.
