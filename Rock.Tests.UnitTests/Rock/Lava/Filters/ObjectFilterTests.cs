@@ -31,7 +31,7 @@ namespace Rock.Tests.UnitTests.Lava
         [ClassInitialize]
         public static void Initialize( TestContext context )
         {
-            _helper = LavaTestHelper.NewForCurrentProcessor();
+            _helper = LavaTestHelper.New();
 
             _helper.LavaEngine.RegisterSafeType( typeof( TestPerson ) );
             _helper.LavaEngine.RegisterSafeType( typeof( TestCampus ) );

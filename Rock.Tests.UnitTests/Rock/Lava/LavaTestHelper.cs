@@ -25,27 +25,23 @@ namespace Rock.Tests.UnitTests.Lava
 {
     public class LavaTestHelper
     {
-        public static LavaTestHelper NewForCurrentProcessor()
+        public static LavaTestHelper New( LavaEngineTypeSpecifier? engineType = null )
         {
-            return NewForDotLiquidProcessor();
-        }
-
-        public static LavaTestHelper NewForDotLiquidProcessor()
-        {
-            global::Rock.Lava.LavaEngine.InitializeDotLiquidFramework( null, new List<Type> { typeof( RockFilters ) } );
+            global::Rock.Lava.LavaEngine.Initialize( engineType, null, new List<Type> { typeof( RockFilters ) } );
 
             var helper = new LavaTestHelper();
 
             return helper;
         }
-        public static LavaTestHelper NewForFluidProcessor()
-        {
-            global::Rock.Lava.LavaEngine.InitializeDotLiquidFramework( null, new List<Type> { typeof( RockFilters ) } );
 
-            var helper = new LavaTestHelper();
+        //public static LavaTestHelper New()
+        //{
+        //    global::Rock.Lava.LavaEngine.InitializeDotLiquidFramework( null, new List<Type> { typeof( RockFilters ) } );
 
-            return helper;
-        }
+        //    var helper = new LavaTestHelper();
+
+        //    return helper;
+        //}
 
         public ILavaEngine LavaEngine
         {
