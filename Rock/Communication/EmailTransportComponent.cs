@@ -32,8 +32,10 @@ namespace Rock.Communication
     /// This abstract class implements the code needed to create an email with all of the validation, lava substitution, and error checking completed.
     /// </summary>
     /// <seealso cref="Rock.Communication.TransportComponent" />
-    public abstract class EmailTransportComponent : TransportComponent
+    public abstract class EmailTransportComponent : TransportComponent, IMaxParallelization
     {
+        public virtual int MaxParallelization { get => 1; }
+
         /// <summary>
         /// Send the implementation specific email. This class will call this method and pass the post processed data in a  rock email message which
         /// can then be used to send the implementation specific message.
@@ -73,6 +75,10 @@ namespace Rock.Communication
             var templateMailMessage = GetTemplateRockEmailMessage( emailMessage, mergeFields, globalAttributes );
             var organizationEmail = globalAttributes.GetValue( "OrganizationEmail" );
 
+            if(MaxParallelization > 1 )
+            {
+
+            }
             foreach ( var rockMessageRecipient in rockMessage.GetRecipients() )
             {
                 try
@@ -129,14 +135,14 @@ namespace Rock.Communication
                 // If there are no pending recipients than just exit the method
                 var communicationRecipientService = new CommunicationRecipientService( communicationRockContext );
 
-                var hasUnprocessedRecipients = communicationRecipientService
+                var unprocessedRecipients = communicationRecipientService
                     .Queryable()
                     .ByCommunicationId( communication.Id )
                     .ByStatus( CommunicationRecipientStatus.Pending )
                     .ByMediumEntityTypeId( mediumEntityTypeId )
                     .Any();
 
-                if ( !hasUnprocessedRecipients )
+                if ( !unprocessedRecipients )
                 {
                     return;
                 }

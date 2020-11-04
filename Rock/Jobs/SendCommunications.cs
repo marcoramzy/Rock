@@ -16,7 +16,6 @@
 //
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data.Entity;
 using System.Diagnostics;
@@ -40,6 +39,7 @@ namespace Rock.Jobs
 
     [IntegerField( "Delay Period", "The number of minutes to wait before sending any new communication (If the communication block's 'Send When Approved' option is turned on, then a delay should be used here to prevent a send overlap).", false, 30, "", 0 )]
     [IntegerField( "Expiration Period", "The number of days after a communication was created or scheduled to be sent when it should no longer be sent.", false, 3, "", 1 )]
+    [IntegerField( "Concurrent Send Workers", "The number of communications that should be processed at the same time.", false, 10, "", 1 )]
     [DisallowConcurrentExecution]
     public class SendCommunications : IJob
     {
@@ -59,6 +59,12 @@ namespace Rock.Jobs
             JobDataMap dataMap = context.JobDetail.JobDataMap;
             int expirationDays = dataMap.GetInt( "ExpirationPeriod" );
             int delayMinutes = dataMap.GetInt( "DelayPeriod" );
+            int maxDegreeOfParallelism = dataMap.GetInt( "ParallelCommunicationCount" );
+
+            if ( maxDegreeOfParallelism < 1 )
+            {
+                maxDegreeOfParallelism = 1;
+            }
 
             IOrderedEnumerable<Model.Communication> sendCommunications = null;
             var stopWatch = Stopwatch.StartNew();
@@ -71,7 +77,7 @@ namespace Rock.Jobs
                     .OrderBy( c => c.Id );
             }
 
-            RockLogger.Log.Information( RockLogDomains.Jobs, "{0}: Queued communication query runtime: {1} ms", nameof(SendCommunications), stopWatch.ElapsedMilliseconds );
+            RockLogger.Log.Information( RockLogDomains.Jobs, "{0}: Queued communication query runtime: {1} ms", nameof( SendCommunications ), stopWatch.ElapsedMilliseconds );
 
             if ( sendCommunications == null )
             {
@@ -79,10 +85,10 @@ namespace Rock.Jobs
             }
 
             var exceptionMsgs = new ConcurrentQueue<string>();
-            
+
             stopWatch = Stopwatch.StartNew();
 
-            Parallel.ForEach( sendCommunications, comm =>
+            Parallel.ForEach( sendCommunications, new ParallelOptions { MaxDegreeOfParallelism = maxDegreeOfParallelism }, comm =>
             {
                 try
                 {
@@ -97,11 +103,6 @@ namespace Rock.Jobs
 
             RockLogger.Log.Information( RockLogDomains.Jobs, "{0}: Send communications runtime: {1} ms", nameof( SendCommunications ), stopWatch.ElapsedMilliseconds );
 
-            if ( exceptionMsgs.Any() )
-            {
-                throw new Exception( "One or more exceptions occurred sending communications..." + Environment.NewLine + exceptionMsgs.ToList().AsDelimited( Environment.NewLine ) );
-            }
-
             var communicationsSent = sendCommunications.Count();
             if ( communicationsSent > 0 )
             {
@@ -110,7 +111,12 @@ namespace Rock.Jobs
             else
             {
                 context.Result = "No communications to send";
-            }            
+            }
+
+            if ( exceptionMsgs.Any() )
+            {
+                throw new Exception( "One or more exceptions occurred sending communications..." + Environment.NewLine + exceptionMsgs.ToList().AsDelimited( Environment.NewLine ) );
+            }
 
             // check for communications that have not been sent but are past the expire date. Mark them as failed and set a warning.
             var expireDateTimeEndWindow = RockDateTime.Now.AddDays( 0 - expirationDays );

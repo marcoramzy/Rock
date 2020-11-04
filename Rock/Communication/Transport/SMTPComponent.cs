@@ -36,6 +36,8 @@ namespace Rock.Communication.Transport
     {
         #region Properties
 
+        public override int MaxParallelization { get => GetAttributeValue( "MaxParallelization" ); }
+
         /// <summary>
         /// Gets or sets the server.
         /// </summary>
@@ -113,6 +115,7 @@ namespace Rock.Communication.Transport
         /// The status note.
         /// </value>
         public virtual string StatusNote { get { return string.Empty; } }
+
 
         #endregion
 

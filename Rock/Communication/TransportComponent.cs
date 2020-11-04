@@ -24,6 +24,11 @@ using Rock.Model;
 
 namespace Rock.Communication
 {
+    interface IMaxParallelization
+    {
+        int MaxParallelization { get; }
+    }
+
     /// <summary>
     /// Base class for components that perform actions for a workflow
     /// </summary>
@@ -42,7 +47,7 @@ namespace Rock.Communication
                 return false;
             }
         }
-
+                
         /// <summary>
         /// Sends the specified rock message.
         /// </summary>
