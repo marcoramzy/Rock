@@ -567,6 +567,13 @@ namespace RockWeb.Blocks.Administration
             {
                 cpCacheSettings.CurrentCacheability = JsonConvert.DeserializeObject<RockCacheability>( page.CacheControlHeaderSettings );
             }
+            else
+            {
+                cpCacheSettings.CurrentCacheability = new RockCacheability
+                {
+                    RockCacheablityType = RockCacheablityType.Private
+                };
+            }
 
             tbDescription.Text = page.Description;
             ceHeaderContent.Text = page.HeaderContent;
