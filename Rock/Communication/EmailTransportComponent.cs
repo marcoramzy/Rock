@@ -20,9 +20,11 @@ using System.Data.Entity;
 using System.Linq;
 using System.Net.Mail;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using Rock.Communication.Transport;
 using Rock.Data;
+using Rock.Logging;
 using Rock.Model;
 using Rock.Transactions;
 using Rock.Web.Cache;
@@ -33,8 +35,16 @@ namespace Rock.Communication
     /// This abstract class implements the code needed to create an email with all of the validation, lava substitution, and error checking completed.
     /// </summary>
     /// <seealso cref="Rock.Communication.TransportComponent" />
-    public abstract class EmailTransportComponent : TransportComponent
+    public abstract class EmailTransportComponent : TransportComponent, IAsyncTransport
     {
+        /// <summary>
+        /// Gets the maximum parallelization.
+        /// </summary>
+        /// <value>
+        /// The maximum parallelization.
+        /// </value>
+        public virtual int MaxParallelization { get => 10; }
+
         /// <summary>
         /// Send the implementation specific email. This class will call this method and pass the post processed data in a  rock email message which
         /// can then be used to send the implementation specific message.
@@ -48,7 +58,10 @@ namespace Rock.Communication
         /// </summary>
         /// <param name="rockEmailMessage">The rock email message.</param>
         /// <returns></returns>
-        protected abstract Task<EmailSendResponse> SendEmailAsync( RockEmailMessage rockEmailMessage );
+        protected virtual Task<EmailSendResponse> SendEmailAsync( RockEmailMessage rockEmailMessage )
+        {
+            throw new NotImplementedException();
+        }
 
         /// <summary>
         /// Sends the specified rock message.
@@ -309,10 +322,10 @@ namespace Rock.Communication
         /// <param name="mediumAttributes">The medium attributes.</param>
         public override async Task SendAsync( Model.Communication communication, int mediumEntityTypeId, Dictionary<string, string> mediumAttributes )
         {
-            using ( var rockContext = new RockContext() )
+            using ( var communicationRockContext = new RockContext() )
             {
                 // Requery the Communication
-                communication = GetSendableCommunication( communication.Id, rockContext );
+                communication = GetSendableCommunication( communication.Id, communicationRockContext );
 
                 if ( communication == null )
                 {
@@ -320,16 +333,16 @@ namespace Rock.Communication
                 }
 
                 // If there are no pending recipients than just exit the method
-                var communicationRecipientService = new CommunicationRecipientService( rockContext );
+                var communicationRecipientService = new CommunicationRecipientService( communicationRockContext );
 
-                var hasUnprocessedRecipients = communicationRecipientService
+                var unprocessedRecipientCount = communicationRecipientService
                     .Queryable()
                     .ByCommunicationId( communication.Id )
                     .ByStatus( CommunicationRecipientStatus.Pending )
                     .ByMediumEntityTypeId( mediumEntityTypeId )
-                    .Any();
+                    .Count();
 
-                if ( !hasUnprocessedRecipients )
+                if ( unprocessedRecipientCount == 0 )
                 {
                     return;
                 }
@@ -349,72 +362,278 @@ namespace Rock.Communication
                 var communicationCategoryGuid = Rock.SystemGuid.Category.HISTORY_PERSON_COMMUNICATIONS.AsGuid();
 
                 // Loop through recipients and send the email
-                var recipientFound = true;
-                while ( recipientFound )
-                {
-                    using ( var rockContextRecipient = new RockContext() )
-                    {
+                
+                var sendingTask = new List<Task>( unprocessedRecipientCount );
 
-                        var recipient = Model.Communication.GetNextPending( communication.Id, mediumEntityTypeId, rockContextRecipient );
+                using ( var mutex = new SemaphoreSlim( MaxParallelization ) )
+                {
+                    async Task ThrottledExecute( Func<Task> throttledMethod )
+                    {
+                        try
+                        {
+                            await throttledMethod().ConfigureAwait( false );
+                        }
+                        catch ( Exception ex )
+                        {
+                            ExceptionLogService.LogException( ex, null );
+                        }
+                        finally
+                        {
+                            mutex.Release();
+                        }
+                    }
+                    var recipientFound = true;
+                    while ( recipientFound )
+                    {
+                        var getRecipientTimer = System.Diagnostics.Stopwatch.StartNew();
+                        var recipient = GetNextPending( communication.Id, mediumEntityTypeId, communication.IsBulkCommunication );
+                        RockLogger.Log.Debug( RockLogDomains.Communications, "{0}: It took {1} ticks to get the next pending recipient.", nameof( SendAsync ), getRecipientTimer.ElapsedTicks );
 
                         // This means we are done, break the loop
                         if ( recipient == null )
                         {
                             recipientFound = false;
-                            break;
-                        }
-
-                        // Not valid save the obj with the status messages then go to the next one
-                        if ( !ValidRecipient( recipient, communication.IsBulkCommunication ) )
-                        {
-                            rockContextRecipient.SaveChanges();
                             continue;
                         }
+                        var startMutexWait = System.Diagnostics.Stopwatch.StartNew();
+                        await mutex.WaitAsync().ConfigureAwait( false );
 
-                        try
-                        {
-                            // Create merge field dictionary
-                            var mergeObjects = recipient.CommunicationMergeValues( mergeFields );
-                            var recipientEmailMessage = GetRecipientRockEmailMessage( templateEmailMessage, communication, recipient, mergeObjects, organizationEmail, mediumAttributes );
+                        RockLogger.Log.Debug( RockLogDomains.Communications, "{0}: Starting to send {1} to {2} with a {3} tick wait.", nameof( SendAsync ), communication.Name, recipient.Id, startMutexWait.ElapsedTicks );
+                        sendingTask.Add( ThrottledExecute( () => SendToRecipientv2( recipient.Id, communication, mediumEntityTypeId, mediumAttributes, mergeFields, templateEmailMessage, organizationEmail ) ) );
+                    }
 
-                            var result = await SendEmailAsync( recipientEmailMessage ).ConfigureAwait( false );
-
-                            // Update recipient status and status note
-                            recipient.Status = result.Status;
-                            recipient.StatusNote = result.StatusNote;
-                            recipient.TransportEntityTypeName = this.GetType().FullName;
-
-                            try
-                            {
-                                var historyChangeList = new History.HistoryChangeList();
-                                historyChangeList.AddChange(
-                                    History.HistoryVerb.Sent,
-                                    History.HistoryChangeType.Record,
-                                    $"Communication" )
-                                    .SetRelatedData( recipientEmailMessage.FromName, communicationEntityTypeId, communication.Id )
-                                    .SetCaption( recipientEmailMessage.Subject );
-
-                                HistoryService.SaveChanges( rockContextRecipient, typeof( Rock.Model.Person ), communicationCategoryGuid, recipient.PersonAlias.PersonId, historyChangeList, false, communication.SenderPersonAliasId );
-                            }
-                            catch ( Exception ex )
-                            {
-                                ExceptionLogService.LogException( ex, null );
-                            }
-                        }
-                        catch ( Exception ex )
-                        {
-                            ExceptionLogService.LogException( ex );
-                            recipient.Status = CommunicationRecipientStatus.Failed;
-                            recipient.StatusNote = "Exception: " + ex.Messages().AsDelimited( " => " );
-                        }
-
-                        rockContextRecipient.SaveChanges();
+                    while ( sendingTask.Count > 0 )
+                    {
+                        var completedTask = await Task.WhenAny( sendingTask ).ConfigureAwait( false );
+                        sendingTask.Remove( completedTask );
                     }
                 }
             }
         }
 
-        private Model.Communication GetSendableCommunication(int communicationId, RockContext rockContext)
+        private async Task SendToRecipientv2(
+            int recipientId,
+            Model.Communication communication,
+            int mediumEntityTypeId,
+            Dictionary<string, string> mediumAttributes,
+            Dictionary<string, object> mergeFields,
+            RockEmailMessage templateEmailMessage,
+            string organizationEmail )
+        {
+            var methodTimer = System.Diagnostics.Stopwatch.StartNew();
+            using ( var rockContext = new RockContext() )
+            {
+                var recipient = new CommunicationRecipientService( rockContext ).Get( recipientId );                
+
+                if ( recipient == null )
+                {
+                    return;
+                }
+
+                try
+                {
+                    // Create merge field dictionary
+                    var mergeObjects = recipient.CommunicationMergeValues( mergeFields );
+                    var recipientEmailMessage = GetRecipientRockEmailMessage( templateEmailMessage, communication, recipient, mergeObjects, organizationEmail, mediumAttributes );
+
+                    var result = await SendEmailAsync( recipientEmailMessage );
+
+                    // Update recipient status and status note
+                    recipient.Status = result.Status;
+                    recipient.StatusNote = result.StatusNote;
+                    recipient.TransportEntityTypeName = this.GetType().FullName;
+
+                    // Log it
+                    try
+                    {
+                        var historyChangeList = new History.HistoryChangeList();
+                        var communicationEntityTypeId = EntityTypeCache.Get( "Rock.Model.Communication" ).Id;
+                        var communicationCategoryGuid = Rock.SystemGuid.Category.HISTORY_PERSON_COMMUNICATIONS.AsGuid();
+
+                        historyChangeList.AddChange(
+                            History.HistoryVerb.Sent,
+                            History.HistoryChangeType.Record,
+                            $"Communication" )
+                            .SetRelatedData( recipientEmailMessage.FromName, communicationEntityTypeId, communication.Id )
+                            .SetCaption( recipientEmailMessage.Subject );
+
+                        HistoryService.SaveChanges( rockContext, typeof( Rock.Model.Person ), communicationCategoryGuid, recipient.PersonAlias.PersonId, historyChangeList, false, communication.SenderPersonAliasId );
+                    }
+                    catch ( Exception ex )
+                    {
+                        ExceptionLogService.LogException( ex, null );
+                    }
+                }
+                catch ( Exception ex )
+                {
+                    ExceptionLogService.LogException( ex );
+                    recipient.Status = CommunicationRecipientStatus.Failed;
+                    recipient.StatusNote = "Exception: " + ex.Messages().AsDelimited( " => " );
+                }
+
+                rockContext.SaveChanges();
+            }
+            RockLogger.Log.Debug( RockLogDomains.Communications, "{0}: Took {1} ticks to retrieve and send the email.", nameof( SendToRecipientv2 ), methodTimer.ElapsedTicks );
+        }
+
+        /// <summary>
+        /// Sends the asynchronous.
+        /// </summary>
+        /// <param name="communication">The communication.</param>
+        /// <param name="mediumEntityTypeId">The medium entity type identifier.</param>
+        /// <param name="mediumAttributes">The medium attributes.</param>
+        //public override async Task SendAsync( Model.Communication communication, int mediumEntityTypeId, Dictionary<string, string> mediumAttributes )
+        //{
+        //    using ( var rockContext = new RockContext() )
+        //    {
+        //        // Requery the Communication
+        //        communication = GetSendableCommunication( communication.Id, rockContext );
+
+        //        if ( communication == null )
+        //        {
+        //            return;
+        //        }
+
+        //        // If there are no pending recipients than just exit the method
+        //        var communicationRecipientService = new CommunicationRecipientService( rockContext );
+
+        //        var unprocessedRecipients = communicationRecipientService
+        //            .Queryable()
+        //            .ByCommunicationId( communication.Id )
+        //            .ByStatus( CommunicationRecipientStatus.Pending )
+        //            .ByMediumEntityTypeId( mediumEntityTypeId )
+        //            .ToList();
+
+        //        if ( !unprocessedRecipients.Any() )
+        //        {
+        //            return;
+        //        }
+
+        //        var currentPerson = communication.CreatedByPersonAlias?.Person;
+        //        var mergeFields = GetAllMergeFields( currentPerson, communication.AdditionalLavaFields );
+
+        //        var globalAttributes = GlobalAttributesCache.Get();
+
+        //        var templateEmailMessage = GetTemplateRockEmailMessage( communication, mergeFields, globalAttributes );
+        //        var organizationEmail = globalAttributes.GetValue( "OrganizationEmail" );
+
+        //        var cssInliningEnabled = communication.CommunicationTemplate?.CssInliningEnabled ?? false;
+
+        //        var personEntityTypeId = EntityTypeCache.Get( "Rock.Model.Person" ).Id;
+        //        var communicationEntityTypeId = EntityTypeCache.Get( "Rock.Model.Communication" ).Id;
+        //        var communicationCategoryGuid = Rock.SystemGuid.Category.HISTORY_PERSON_COMMUNICATIONS.AsGuid();
+
+        //        using ( var mutex = new SemaphoreSlim( MaxParallelization ) )
+        //        {
+        //            async Task ThrottledExecute( Func<Task> throttledMethod )
+        //            {
+        //                try
+        //                {
+        //                    await throttledMethod().ConfigureAwait( false );
+        //                }
+        //                catch ( Exception ex )
+        //                {
+        //                    ExceptionLogService.LogException( ex, null );
+        //                }
+        //                finally
+        //                {
+        //                    mutex.Release();
+        //                }
+        //            }
+
+        //            // Loop through recipients and send the email
+        //            var sendingTask = new List<Task>( unprocessedRecipients.Count );
+        //            foreach ( var recipient in unprocessedRecipients )
+        //            {
+        //                await mutex.WaitAsync().ConfigureAwait( false );
+        //                sendingTask.Add( ThrottledExecute( () => SendToRecipient( recipient, communication, mediumEntityTypeId, mediumAttributes, mergeFields, templateEmailMessage, organizationEmail ) ) );
+        //            }
+
+        //            while ( sendingTask.Count > 0 )
+        //            {
+        //                var completedTask = await Task.WhenAny( sendingTask ).ConfigureAwait( false );
+        //                sendingTask.Remove( completedTask );
+        //            }
+        //        }
+        //    }
+        //}
+
+        private async Task SendToRecipient( CommunicationRecipient recipient,
+            Model.Communication communication,
+            int mediumEntityTypeId,
+            Dictionary<string, string> mediumAttributes,
+            Dictionary<string, object> mergeFields,
+            RockEmailMessage templateEmailMessage,
+            string organizationEmail )
+        {
+            var delayTime = RockDateTime.Now.AddMinutes( -10 );
+
+            using ( var rockContext = new RockContext() )
+            {
+                try
+                {
+                    var connectedRecipient = new CommunicationRecipientService( rockContext )
+                    .Queryable()
+                    .Include( r => r.Communication )
+                    .Include( r => r.PersonAlias.Person )
+                    .Where( r =>
+                        r.Id == recipient.Id &&
+                        ( r.Status == CommunicationRecipientStatus.Pending ||
+                            ( r.Status == CommunicationRecipientStatus.Sending && r.ModifiedDateTime < delayTime )
+                        ) &&
+                        r.MediumEntityTypeId.HasValue &&
+                        r.MediumEntityTypeId.Value == mediumEntityTypeId )
+                    .FirstOrDefault();
+
+                    if ( connectedRecipient == null )
+                    {
+                        return;
+                    }
+
+                    // Create merge field dictionary
+                    var mergeObjects = connectedRecipient.CommunicationMergeValues( mergeFields );
+                    var recipientEmailMessage = GetRecipientRockEmailMessage( templateEmailMessage, communication, connectedRecipient, mergeObjects, organizationEmail, mediumAttributes );
+
+                    var result = await SendEmailAsync( recipientEmailMessage ).ConfigureAwait( false );
+
+                    // Update recipient status and status note
+                    connectedRecipient.Status = result.Status;
+                    connectedRecipient.StatusNote = result.StatusNote;
+                    connectedRecipient.TransportEntityTypeName = this.GetType().FullName;
+
+                    try
+                    {
+                        var communicationEntityTypeId = EntityTypeCache.Get( "Rock.Model.Communication" ).Id;
+                        var communicationCategoryGuid = Rock.SystemGuid.Category.HISTORY_PERSON_COMMUNICATIONS.AsGuid();
+                        var historyChangeList = new History.HistoryChangeList();
+                        historyChangeList.AddChange(
+                            History.HistoryVerb.Sent,
+                            History.HistoryChangeType.Record,
+                            $"Communication" )
+                            .SetRelatedData( recipientEmailMessage.FromName, communicationEntityTypeId, communication.Id )
+                            .SetCaption( recipientEmailMessage.Subject );
+
+                        HistoryService.SaveChanges( rockContext, typeof( Rock.Model.Person ), communicationCategoryGuid, connectedRecipient.PersonAlias.PersonId, historyChangeList, false, communication.SenderPersonAliasId );
+                    }
+                    catch ( Exception ex )
+                    {
+                        ExceptionLogService.LogException( ex, null );
+                    }
+                }
+                catch ( Exception ex )
+                {
+                    ExceptionLogService.LogException( ex );
+                    recipient.Status = CommunicationRecipientStatus.Failed;
+                    recipient.StatusNote = "Exception: " + ex.Messages().AsDelimited( " => " );
+                }
+                finally
+                {
+                    rockContext.SaveChanges();
+                }
+            }
+        }
+
+        private Model.Communication GetSendableCommunication( int communicationId, RockContext rockContext )
         {
             var communication = new CommunicationService( rockContext )
                     .Queryable()
@@ -433,6 +652,23 @@ namespace Rock.Communication
             }
 
             return communication;
+        }
+
+        private Rock.Model.CommunicationRecipient GetNextPending( int communicationId, int mediumEntityId, bool isBulkCommunication )
+        {
+            using ( var rockContext = new RockContext() )
+            {
+                var recipient = Model.Communication.GetNextPending( communicationId, mediumEntityId, rockContext );
+                if ( ValidRecipient( recipient, isBulkCommunication ) )
+                {
+                    return recipient;
+                }
+                else
+                {
+                    rockContext.SaveChanges();
+                    return GetNextPending( communicationId, mediumEntityId, isBulkCommunication );
+                }
+            }
         }
 
         /// <summary>

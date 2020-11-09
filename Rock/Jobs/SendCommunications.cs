@@ -20,6 +20,7 @@ using System.ComponentModel;
 using System.Data.Entity;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Quartz;
 
@@ -40,6 +41,7 @@ namespace Rock.Jobs
 
     [IntegerField( "Delay Period", "The number of minutes to wait before sending any new communication (If the communication block's 'Send When Approved' option is turned on, then a delay should be used here to prevent a send overlap).", false, 30, "", 0 )]
     [IntegerField( "Expiration Period", "The number of days after a communication was created or scheduled to be sent when it should no longer be sent.", false, 3, "", 1 )]
+    [IntegerField( "Parallel Communications", "The number of communications that can be sent at the same time.", false, 10, "", 2 )]
     [DisallowConcurrentExecution]
     public class SendCommunications : IJob
     {
@@ -59,6 +61,7 @@ namespace Rock.Jobs
             JobDataMap dataMap = context.JobDetail.JobDataMap;
             int expirationDays = dataMap.GetInt( "ExpirationPeriod" );
             int delayMinutes = dataMap.GetInt( "DelayPeriod" );
+            int maxParallelization = dataMap.GetInt( "ParallelCommunications" );
 
             List<Model.Communication> sendCommunications = null;
             var stopWatch = Stopwatch.StartNew();
@@ -85,40 +88,45 @@ namespace Rock.Jobs
             stopWatch = Stopwatch.StartNew();
             var sendCommunicationTasks = new List<Task<SendCommunicationAsyncResult>>();
 
-            for ( var i = 0; i < sendCommunications.Count(); i++ )
+            RockLogger.Log.Debug( RockLogDomains.Jobs, "{0}: Send communications {1} communications.", nameof( SendCommunications ), sendCommunicationTasks.Count );
+            using ( var mutex = new SemaphoreSlim( maxParallelization ) )
             {
-                var comm = sendCommunications[i];
-                sendCommunicationTasks.Add( SendCommunicationAsync( comm ) );
-            }
-
-            while ( sendCommunicationTasks.Count > 0 )
-            {
-                var completedTask = AsyncHelper.RunSync<Task<SendCommunicationAsyncResult>>( () => Task.WhenAny<SendCommunicationAsyncResult>( sendCommunicationTasks.ToArray() ));
-                var communicationResult = completedTask.Result;
-                if ( communicationResult.Exception != null )
+                for ( var i = 0; i < sendCommunications.Count(); i++ )
                 {
-                    var agException = communicationResult.Exception as AggregateException;
-                    if(agException == null )
+                    mutex.Wait();
+                    var comm = sendCommunications[i];
+
+                    sendCommunicationTasks.Add( Task.Run<SendCommunicationAsyncResult>( async () => await SendCommunicationAsync( comm, mutex ) ) );
+                }
+
+                while ( sendCommunicationTasks.Count > 0 )
+                {
+                    var completedTask = AsyncHelper.RunSync<Task<SendCommunicationAsyncResult>>( () => Task.WhenAny<SendCommunicationAsyncResult>( sendCommunicationTasks.ToArray() ) );
+                    var communicationResult = completedTask.Result;
+                    if ( communicationResult.Exception != null )
                     {
-                        exceptionMsgs.Add( $"Exception occurred sending communication ID:{communicationResult.Communication.Id}:{Environment.NewLine}    {communicationResult.Exception.Messages().AsDelimited( Environment.NewLine + "   " )}" );
+                        var agException = communicationResult.Exception as AggregateException;
+                        if ( agException == null )
+                        {
+                            exceptionMsgs.Add( $"Exception occurred sending communication ID:{communicationResult.Communication.Id}:{Environment.NewLine}    {communicationResult.Exception.Messages().AsDelimited( Environment.NewLine + "   " )}" );
+                        }
+                        else
+                        {
+                            var allExceptions = agException.Flatten();
+                            foreach ( var ex in allExceptions.InnerExceptions )
+                            {
+                                exceptionMsgs.Add( $"Exception occurred sending communication ID:{communicationResult.Communication.Id}:{Environment.NewLine}    {ex.Messages().AsDelimited( Environment.NewLine + "   " )}" );
+                            }
+                        }
+                        ExceptionLogService.LogException( communicationResult.Exception, System.Web.HttpContext.Current );
                     }
                     else
                     {
-                        var allExceptions = agException.Flatten();
-                        foreach ( var ex in allExceptions.InnerExceptions )
-                        {
-                            exceptionMsgs.Add( $"Exception occurred sending communication ID:{communicationResult.Communication.Id}:{Environment.NewLine}    {ex.Messages().AsDelimited( Environment.NewLine + "   " )}" );
-                        }
+                        communicationsSent++;
                     }
-                    ExceptionLogService.LogException( communicationResult.Exception, System.Web.HttpContext.Current );
+                    sendCommunicationTasks.Remove( completedTask );
                 }
-                else
-                {
-                    communicationsSent++;
-                }
-                sendCommunicationTasks.Remove( completedTask );
             }
-
             RockLogger.Log.Information( RockLogDomains.Jobs, "{0}: Send communications runtime: {1} ms", nameof( SendCommunications ), stopWatch.ElapsedMilliseconds );
 
             if ( communicationsSent > 0 )
@@ -164,7 +172,7 @@ namespace Rock.Jobs
             public Model.Communication Communication { get; set; }
         }
 
-        private async Task<SendCommunicationAsyncResult> SendCommunicationAsync( Model.Communication comm )
+        private async Task<SendCommunicationAsyncResult> SendCommunicationAsync( Model.Communication comm, SemaphoreSlim mutex )
         {
             var communicationResult = new SendCommunicationAsyncResult
             {
@@ -172,14 +180,17 @@ namespace Rock.Jobs
             };
 
             var communicationStopWatch = Stopwatch.StartNew();
+            RockLogger.Log.Debug( RockLogDomains.Jobs, "{0}: Starting to send {1}.", nameof(SendCommunicationAsync),  comm.Name );
             try
             {
                 await Model.Communication.SendAsync( comm ).ConfigureAwait( false );
-            } catch (Exception ex )
+            }
+            catch ( Exception ex )
             {
                 communicationResult.Exception = ex;
             }
             RockLogger.Log.Information( RockLogDomains.Jobs, "{0}: {1} took {2} ms", nameof( SendCommunications ), comm.Name, communicationStopWatch.ElapsedMilliseconds );
+            mutex.Release();
             return communicationResult;
         }
     }

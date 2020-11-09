@@ -17,12 +17,15 @@
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
+using System.Diagnostics;
 using System.Linq;
 using System.Net.Mail;
 using System.Net.Mime;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using Rock.Data;
+using Rock.Logging;
 using Rock.Model;
 using Rock.Transactions;
 using Rock.Web.Cache;
@@ -114,6 +117,19 @@ namespace Rock.Communication.Transport
         /// </value>
         public virtual string StatusNote { get { return string.Empty; } }
 
+        /// <summary>
+        /// Gets the maximum parallelization.
+        /// </summary>
+        /// <value>
+        /// The maximum parallelization.
+        /// </value>
+        public override int MaxParallelization
+        {
+            get
+            {
+                return GetAttributeValue( "MaxParallelization" ).AsIntegerOrNull() ?? 10;
+            }
+        }
         #endregion
 
         /// <summary>
@@ -144,8 +160,10 @@ namespace Rock.Communication.Transport
         {
             var mailMessage = GetMailMessageFromRockEmailMessage( rockEmailMessage );
             var smtpClient = GetSmtpClient();
-            await smtpClient.SendMailAsync( mailMessage );
 
+            RockLogger.Log.Debug( RockLogDomains.Communications, "{0}: Starting to send {1} to {2}.", nameof( SendEmailAsync ), rockEmailMessage.Subject, rockEmailMessage.GetRecipients().FirstOrDefault()?.To );
+            await smtpClient.SendMailAsync( mailMessage );
+            
             return new EmailSendResponse
             {
                 Status = CommunicationRecipientStatus.Delivered,

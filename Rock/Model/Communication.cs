@@ -789,6 +789,7 @@ namespace Rock.Model
 
             // Get all the List member which is not part of communication recipients yet
             var newMemberInList = qryCommunicationListMembers
+                .Include( c => c.Person )
                 .Where( a => !recipientsQry.Any( r => r.PersonAlias.PersonId == a.PersonId ) )
                 .AsNoTracking()
                 .ToList();
@@ -797,34 +798,30 @@ namespace Rock.Model
             var smsMediumEntityType = EntityTypeCache.Get( SystemGuid.EntityType.COMMUNICATION_MEDIUM_SMS.AsGuid() );
             var pushMediumEntityType = EntityTypeCache.Get( SystemGuid.EntityType.COMMUNICATION_MEDIUM_PUSH_NOTIFICATION.AsGuid() );
 
-            foreach ( var newMember in newMemberInList )
+            var recipientsToAdd = newMemberInList.Select( m => new CommunicationRecipient
             {
-                var communicationRecipient = new CommunicationRecipient
-                {
-                    PersonAliasId = newMember.Person.PrimaryAliasId.Value,
-                    Status = CommunicationRecipientStatus.Pending,
-                    CommunicationId = Id
-                };
+                PersonAliasId = m.Person.PrimaryAliasId.Value,
+                Status = CommunicationRecipientStatus.Pending,
+                CommunicationId = Id,
+                MediumEntityTypeId = DetermineMediumEntityTypeId( emailMediumEntityType.Id,
+                                                                 smsMediumEntityType.Id,
+                                                                 pushMediumEntityType.Id,
+                                                                 CommunicationType,
+                                                                 m.CommunicationPreference,
+                                                                 m.Person.CommunicationPreference )
+            } );
+            rockContext.BulkInsert<CommunicationRecipient>( recipientsToAdd );
 
-                communicationRecipient.MediumEntityTypeId = DetermineMediumEntityTypeId( emailMediumEntityType.Id,
-                                                                smsMediumEntityType.Id,
-                                                                pushMediumEntityType.Id,
-                                                                CommunicationType,
-                                                                newMember.CommunicationPreference,
-                                                                newMember.Person.CommunicationPreference );
-
-                communicationRecipientService.Add( communicationRecipient );
-            }
-
-            // Get all pending communication recipents that are no longer part of the group list member, then delete them from the Recipients
+            // Get all pending communication recipients that are no longer part of the group list member, then delete them from the Recipients
             var missingMemberInList = recipientsQry.Where( a => a.Status == CommunicationRecipientStatus.Pending )
-                .Where( a => !qryCommunicationListMembers.Any( r => r.PersonId == a.PersonAlias.PersonId ) )
-                .ToList();
+                .Where( a => !qryCommunicationListMembers.Any( r => r.PersonId == a.PersonAlias.PersonId ) );
+            //.ToList();
 
-            foreach ( var missingMember in missingMemberInList )
-            {
-                communicationRecipientService.Delete( missingMember );
-            }
+            //foreach ( var missingMember in missingMemberInList )
+            //{
+            rockContext.BulkDelete<CommunicationRecipient>( missingMemberInList );
+            //    communicationRecipientService.Delete( missingMember );
+            //}
 
             rockContext.SaveChanges();
         }
@@ -1082,7 +1079,6 @@ namespace Rock.Model
 
             return recipient;
         }
-
         #endregion
     }
 

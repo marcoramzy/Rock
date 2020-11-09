@@ -204,7 +204,16 @@ namespace Rock.Communication
                 var transport = Transport;
                 if ( transport != null && transport.IsActive )
                 {
-                    await transport.SendAsync( communication, mediumEntityTypeId, mediumAttributes );
+                    var asyncTransport = transport as IAsyncTransport;
+
+                    if ( asyncTransport == null )
+                    {
+                        await Task.Run( () => transport.Send( communication, mediumEntityTypeId, mediumAttributes ) ).ConfigureAwait( false );
+                    }
+                    else
+                    {
+                        await transport.SendAsync( communication, mediumEntityTypeId, mediumAttributes ).ConfigureAwait( false );
+                    }
                 }
             }
         }

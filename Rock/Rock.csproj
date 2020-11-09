@@ -532,6 +532,7 @@
     <Compile Include="CheckIn\LocalDeviceConfiguration.cs" />
     <Compile Include="CheckIn\RosterAttendee.cs" />
     <Compile Include="Communication\CommunicationHelper.cs" />
+    <Compile Include="Communication\IAsyncTransport.cs" />
     <Compile Include="Communication\IAsyncMediumComponent.cs" />
     <Compile Include="Communication\IRockMobilePush.cs" />
     <Compile Include="Communication\PushData.cs" />
