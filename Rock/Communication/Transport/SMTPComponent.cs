@@ -35,7 +35,7 @@ namespace Rock.Communication.Transport
     /// <summary>
     /// Sends a communication through SMTP protocol
     /// </summary>
-    public abstract class SMTPComponent : EmailTransportComponent
+    public abstract class SMTPComponent : EmailTransportComponent, IAsyncTransport
     {
         #region Properties
 
@@ -130,6 +130,14 @@ namespace Rock.Communication.Transport
                 return GetAttributeValue( "MaxParallelization" ).AsIntegerOrNull() ?? 10;
             }
         }
+
+        /// <summary>
+        /// Gets a value indicating whether this instance is asynchronous email implemented.
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if this instance is asynchronous email implemented; otherwise, <c>false</c>.
+        /// </value>
+        public override bool IsAsyncImplemented => true;
         #endregion
 
         /// <summary>

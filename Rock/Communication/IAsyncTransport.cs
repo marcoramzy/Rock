@@ -17,6 +17,14 @@ namespace Rock.Communication
         int MaxParallelization { get; }
 
         /// <summary>
+        /// Gets a value indicating whether this instance is asynchronous email implemented.
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if this instance is asynchronous email implemented; otherwise, <c>false</c>.
+        /// </value>
+        bool IsAsyncImplemented { get; }
+
+        /// <summary>
         /// Sends the asynchronous.
         /// </summary>
         /// <param name="communication">The communication.</param>

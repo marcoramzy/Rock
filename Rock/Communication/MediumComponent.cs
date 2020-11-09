@@ -18,6 +18,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Ajax.Utilities;
 using Rock.Attribute;
 using Rock.Extension;
 using Rock.Model;
@@ -145,7 +146,18 @@ namespace Rock.Communication
                 var transport = Transport;
                 if ( transport != null && transport.IsActive )
                 {
-                    return await transport.SendAsync( rockMessage, mediumEntityTypeId, mediumAttributes );
+                    var asyncTransport = transport as IAsyncTransport;
+
+                    if ( asyncTransport == null || !asyncTransport.IsAsyncImplemented )
+                    {
+                        return await Task.Run( () => new SendMessageResult{
+                           MessagesSent = transport.Send( rockMessage, mediumEntityTypeId, mediumAttributes, out var errorMessage ) ? rockMessage.GetRecipients().Count : 0
+                            } ).ConfigureAwait( false );
+                    }
+                    else
+                    {
+                        return await transport.SendAsync( rockMessage, mediumEntityTypeId, mediumAttributes );
+                    }
                 }
                 else
                 {
@@ -206,7 +218,7 @@ namespace Rock.Communication
                 {
                     var asyncTransport = transport as IAsyncTransport;
 
-                    if ( asyncTransport == null )
+                    if ( asyncTransport == null || !asyncTransport.IsAsyncImplemented )
                     {
                         await Task.Run( () => transport.Send( communication, mediumEntityTypeId, mediumAttributes ) ).ConfigureAwait( false );
                     }

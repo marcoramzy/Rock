@@ -68,14 +68,6 @@ namespace Rock.Communication
         }
 
         /// <summary>
-        /// Sends the specified communication.
-        /// </summary>
-        /// <param name="communication">The communication.</param>
-        /// <param name="mediumEntityTypeId">The medium entity type identifier.</param>
-        /// <param name="mediumAttributes">The medium attributes.</param>
-        public abstract void Send( Model.Communication communication, int mediumEntityTypeId, Dictionary<string, string> mediumAttributes );
-
-        /// <summary>
         /// Sends the asynchronous.
         /// </summary>
         /// <param name="communication">The communication.</param>
@@ -87,7 +79,14 @@ namespace Rock.Communication
             throw new NotImplementedException();
         }
 
-
+        /// <summary>
+        /// Sends the specified communication.
+        /// </summary>
+        /// <param name="communication">The communication.</param>
+        /// <param name="mediumEntityTypeId">The medium entity type identifier.</param>
+        /// <param name="mediumAttributes">The medium attributes.</param>
+        public abstract void Send( Model.Communication communication, int mediumEntityTypeId, Dictionary<string, string> mediumAttributes );
+        
         /// <summary>
         /// Validates the recipient.
         /// </summary>
