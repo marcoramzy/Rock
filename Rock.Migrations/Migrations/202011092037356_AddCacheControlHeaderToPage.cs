@@ -16,9 +16,11 @@
 //
 namespace Rock.Migrations
 {
-
+    using System;
+    using System.Data.Entity.Migrations;
+    
     /// <summary>
-    /// Addes CacheControlHeader to the Page Model
+    ///
     /// </summary>
     public partial class AddCacheControlHeaderToPage : Rock.Migrations.RockMigration
     {
@@ -27,7 +29,7 @@ namespace Rock.Migrations
         /// </summary>
         public override void Up()
         {
-            AddColumn( "dbo.Page", "CacheControlHeaderSettings", c => c.String( maxLength: 500 ) );
+            AddColumn("dbo.Page", "CacheControlHeaderSettings", c => c.String(maxLength: 500));
 
             Sql( @"
                 UPDATE [Page]
@@ -38,13 +40,13 @@ namespace Rock.Migrations
                     ELSE '{""RockCacheablityType"":1,""MaxAge"":null,""MaxSharedAge"":null}' END
             " );
         }
-
+        
         /// <summary>
         /// Operations to be performed during the downgrade process.
         /// </summary>
         public override void Down()
         {
-            DropColumn( "dbo.Page", "CacheControlHeaderSettings" );
+            DropColumn("dbo.Page", "CacheControlHeaderSettings");
         }
     }
 }
