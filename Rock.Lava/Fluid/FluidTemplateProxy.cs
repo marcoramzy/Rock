@@ -36,7 +36,7 @@ namespace Rock.Lava.Fluid
     {
         #region Constructors
 
-        private TemplateContext _templateContext;
+        //private TemplateContext _templateContext;
         private FluidTemplate _template;
 
         //public ILavaEngine LavaEngine
@@ -80,6 +80,7 @@ namespace Rock.Lava.Fluid
             // Not required?
         }
 
+        [Obsolete]
         public override void SetContextValue( string key, object value )
         {
             throw new NotImplementedException();

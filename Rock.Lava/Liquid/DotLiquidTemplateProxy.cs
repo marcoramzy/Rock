@@ -51,6 +51,7 @@ namespace Rock.Lava.DotLiquid
             }
         }
 
+        [Obsolete]
         public override void SetContextValue( string key, object value )
         {
             // DotLiquid does not process ExpandoObjects, so replace with Dictionary<string, object>

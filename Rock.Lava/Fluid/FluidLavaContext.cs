@@ -31,7 +31,7 @@ namespace Rock.Lava.Fluid
             _context = context;
         }
 
-        public object this[string key] { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        //public object this[string key] { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
         public IList<IDictionary<string, object>> Environments
         {
