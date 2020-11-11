@@ -23,21 +23,9 @@ using Rock.Tests.Shared;
 namespace Rock.Tests.UnitTests.Lava
 {
     [TestClass]
-    public class TextFilterTests
+    public class TextFilterTests : LavaUnitTestBase
     {
         private const string _TestTextParagraph = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.Odio eu feugiat pretium nibh.Semper risus in hendrerit gravida.Enim diam vulputate ut pharetra. Massa tincidunt nunc pulvinar sapien et ligula ullamcorper. Morbi tristique senectus et netus et malesuada.Praesent semper feugiat nibh sed pulvinar proin gravida hendrerit.Ultrices in iaculis nunc sed.Tortor id aliquet lectus proin nibh nisl condimentum id.Vel pretium lectus quam id leo in vitae.In mollis nunc sed id.";
-
-        private static LavaTestHelper _helper;
-
-        #region Constructors
-
-        [ClassInitialize]
-        public static void Initialize( TestContext context )
-        {
-            _helper = LavaTestHelper.New();
-        }
-
-        #endregion
 
         /// <summary>
         /// For complex objects, the filter should return the .NET ToString() result for the object.
@@ -291,7 +279,7 @@ namespace Rock.Tests.UnitTests.Lava
         public void RegExMatch_EmailAddressValidationSucceeds( string input, bool isMatch )
         {
             // This regular expression is the same one used in Rock for email validation.
-            var template = @"{{ '<input>' | RegExMatch:'\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*' }}"
+            var template = @"{{ '<input>' | RegExMatch:'\\w+([-+.]\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*' }}"
                            .Replace( "<input>", input );
 
             _helper.AssertTemplateOutput( isMatch.ToString().ToLower(), template );
@@ -303,8 +291,8 @@ namespace Rock.Tests.UnitTests.Lava
         [TestMethod]
         public void RegExMatchValue_FindsFirstMatchOnly()
         {
-            _helper.AssertTemplateOutput( "12345", @"{{ 'group 12345' | RegExMatchValue:'\d+' }}" );
-            _helper.AssertTemplateOutput( "Saturday", @"{{ 'Services on Saturday and Sunday' | RegExMatchValue:'\b\w+day\b' }}" );
+            _helper.AssertTemplateOutput( "12345", @"{{ 'group 12345' | RegExMatchValue:'\\d+' }}" );
+            _helper.AssertTemplateOutput( "Saturday", @"{{ 'Services on Saturday and Sunday' | RegExMatchValue:'\\b\\w+day\\b' }}" );
         }
 
         /// <summary>
@@ -314,7 +302,7 @@ namespace Rock.Tests.UnitTests.Lava
         public void RegExMatchValues_FindsAllMatches()
         {
             var template = @"
-{% assign days = 'Services on Saturday and Sunday and now also on Monday!' | RegExMatchValues:'\b\w+day\b' %}
+{% assign days = 'Services on Saturday and Sunday and now also on Monday!' | RegExMatchValues:'\\b\\w+day\\b' %}
 {% for day in days %}{{ day }},{% endfor %}
 ";
             template = template.Replace( "\n", string.Empty ).Replace( "\r", string.Empty );

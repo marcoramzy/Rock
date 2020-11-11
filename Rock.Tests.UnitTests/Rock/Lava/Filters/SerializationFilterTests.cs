@@ -18,25 +18,12 @@ using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
 using Rock.Lava;
-using Rock.Tests.Shared;
 
 namespace Rock.Tests.UnitTests.Lava
 {
     [TestClass]
-    public class SerializationFilterTests
+    public class SerializationFilterTests : LavaUnitTestBase
     {
-        private static LavaTestHelper _helper;
-
-        #region Constructors
-
-        [ClassInitialize]
-        public static void Initialize( TestContext context )
-        {
-            _helper = LavaTestHelper.New();
-        }
-
-        #endregion
-
         /// <summary>
         /// The filter should accept a Person object as input and return a valid JSON string.
         /// </summary>

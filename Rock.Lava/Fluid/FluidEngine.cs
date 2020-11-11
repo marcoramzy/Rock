@@ -16,25 +16,15 @@
 //
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using Fluid;
-using Fluid.Tags;
 using Fluid.Values;
-using Irony.Parsing;
-using Rock.Lava;
 
 namespace Rock.Lava.Fluid
 {    
-    public class FluidEngine : LavaEngineBase // ILavaEngine
+    public class FluidEngine : LavaEngineBase
     {
-        //public string FrameworkName
-        //{
-        //    get
-        //    {
-        //        return "Fluid";
-        //    }
-        //}
-
         public override string EngineName
         {
             get
@@ -76,15 +66,18 @@ namespace Rock.Lava.Fluid
             HideSnakeCaseFilters();
             RegisterBaseFilters();
 
-            //
-            // Register the Rock filters.
-            //
-            //TemplateContext.GlobalFilters.RegisterFiltersFromType( typeof( Filters.FluidFilters ) );
-            //RegisterLegacyFilters( Rock.)
-
             // Set the default strategy for locating object properties to our custom implementation that adds
             // the ability to resolve properties of nested anonymous Types using Reflection.
             TemplateContext.GlobalMemberAccessStrategy = new DynamicMemberAccessStrategy();
+
+            // Register custom filters last, so they can override built-in filters of the same name.
+            if ( filterImplementationTypes != null )
+            {
+                foreach ( var filterImplementationType in filterImplementationTypes )
+                {
+                    RegisterLavaFiltersFromImplementingType( filterImplementationType );
+                }
+            }
 
         }
         /// <summary>
@@ -205,81 +198,157 @@ namespace Rock.Lava.Fluid
         /// The original filters are wrapped in a function with a Fluid-compatible signature so they can be called by Fluid.
         /// </summary>
         /// <param name="type">The type that contains the Liquid filter functions.</param>
-        public static void RegisterLegacyFilters( Type type )
+        public static void RegisterLavaFiltersFromImplementingType( Type type )
         {
-            var methods = type.GetMethods( System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public );
+            // Get the filter methods ordered by name and parameter count.
+            // Fluid only allows one registered method for each filter name, so use the overload with the most parameters.
+            // This addresses the vast majority of use cases, but we could modify our Fluid filter function wrapper to
+            // distinguish different method signatures if necessary.
+            var lavaFilterMethods = type.GetMethods( System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public )
+                .ToList()
+                .OrderBy( x => x.Name )
+                .ThenByDescending( x => x.GetParameters().Count() );
 
-            foreach ( var method in methods )
+            string lastFilterName = null;
+
+            foreach ( var lavaFilterMethod in lavaFilterMethods )
             {
-                var parameters = method.GetParameters();
-
-                // Define the Fluid-compatible filter function that will wrap the legacy filter method.
-                FluidValue LegacyFilter( FluidValue input, FilterArguments arguments, TemplateContext context )
-                {
-                    var p = new object[parameters.Length];
-
-                    for ( int i = 0; i < parameters.Length; i++ )
-                    {
-                        FluidValue arg = null;
-
-                        if ( i == 0 )
-                        {
-                            arg = input;
-                        }
-                        else if ( arguments.Count > ( i - 1 ) )
-                        {
-                            arg = arguments.At( i - 1 );
-                        }
-
-                        if ( arg == null && parameters[i].IsOptional )
-                        {
-                            p[i] = parameters[i].DefaultValue;
-                        }
-                        else
-                        {
-                            if ( parameters[i].ParameterType == typeof( string ) )
-                            {
-                                p[i] = arg.ToStringValue();
-                            }
-                            else if ( parameters[i].ParameterType == typeof( int ) )
-                            {
-                                p[i] = (int)arg.ToNumberValue();
-                            }
-                            else if ( parameters[i].ParameterType == typeof( bool ) )
-                            {
-                                p[i] = arg.ToBooleanValue();
-                            }
-                            else if ( parameters[i].ParameterType == typeof( object ) )
-                            {
-                                p[i] = arg.ToObjectValue();
-                            }
-                            else
-                            {
-                                throw new ArgumentOutOfRangeException( parameters[i].Name, $"Parameter type '{parameters[i].ParameterType.Name}' is not supported for legacy filters." );
-                            }
-                        }
-                    }
-
-                    var result = method.Invoke( null, p );
-
-                    return FluidValue.Create( result );
-                }
-
-
-
-                //
-                // Skip any filters that require the DotLiquid context.
-                //
-                if ( parameters.Length >= 1 && parameters[0].ParameterType.FullName == "DotLiquid.Context" )
+                if ( lavaFilterMethod.Name == lastFilterName )
                 {
                     continue;
                 }
 
-                TemplateContext.GlobalFilters.AddFilter( method.Name, LegacyFilter );
+                lastFilterName = lavaFilterMethod.Name;
+
+                var lavaFilterMethodParameters = lavaFilterMethod.GetParameters();
+
+                if ( lavaFilterMethodParameters.Length == 0 )
+                {
+                    continue;
+                }
+
+                // The first argument passed to the Lava filter is either the Lava Context or the template input.
+                var hasContextParameter = lavaFilterMethodParameters[0].ParameterType == typeof( ILavaContext );
+
+                // Define the Fluid-compatible filter function that will wrap the Lava filter method.
+                FluidValue fluidFilterFunction( FluidValue input, FilterArguments arguments, TemplateContext context )
+                {
+                    var lavaFilterMethodArguments = new object[lavaFilterMethodParameters.Length];
+
+                    for ( int i = 0; i < lavaFilterMethodParameters.Length; i++ )
+                    {
+                        FluidValue fluidFilterArgument = null;
+
+                        // Get the value for the argument.
+                        if ( i == 0 )
+                        {
+                            // If this is the first parameter, it may be a LavaContext or the input template.
+                            if ( hasContextParameter )
+                            {
+                                lavaFilterMethodArguments[0] = new FluidLavaContext( context );
+                                continue;
+                            }
+                            else
+                            {
+                                fluidFilterArgument = input;
+                            }
+                        }
+                        else if ( i == 1 && hasContextParameter )
+                        {
+                            // If this is the second parameter, it may be the input template if the first parameter is a LavaContext.
+                            fluidFilterArgument = input;
+                        }
+                        else if ( arguments.Count > ( i - 1 ) )
+                        {
+                            // This parameter is a filter argument.
+                            fluidFilterArgument = arguments.At( i - 1 );
+                        }
+
+                        if ( fluidFilterArgument == null && lavaFilterMethodParameters[i].IsOptional )
+                        {
+                            lavaFilterMethodArguments[i] = lavaFilterMethodParameters[i].DefaultValue;
+                        }
+                        else
+                        {
+                            if ( lavaFilterMethodParameters[i].ParameterType == typeof( string ) )
+                            {
+                                if ( fluidFilterArgument != null )
+                                {
+                                    lavaFilterMethodArguments[i] = fluidFilterArgument.ToStringValue();
+                                }
+                            }
+                            else if ( lavaFilterMethodParameters[i].ParameterType == typeof( int ) )
+                            {
+                                if ( fluidFilterArgument == null )
+                                {
+                                    lavaFilterMethodArguments[i] = 0;
+                                }
+                                else
+                                {
+                                    lavaFilterMethodArguments[i] = (int)fluidFilterArgument.ToNumberValue();
+                                }
+                            }
+                            else if ( lavaFilterMethodParameters[i].ParameterType == typeof( bool ) )
+                            {
+                                if ( fluidFilterArgument == null )
+                                {
+                                    lavaFilterMethodArguments[i] = false;
+                                }
+                                else
+                                {
+                                    lavaFilterMethodArguments[i] = fluidFilterArgument.ToBooleanValue();
+                                }
+                            }
+                            else if ( lavaFilterMethodParameters[i].ParameterType == typeof( object ) )
+                            {
+                                if ( fluidFilterArgument != null )
+                                {
+                                    lavaFilterMethodArguments[i] = fluidFilterArgument.ToObjectValue();
+                                }
+                            }
+                            else
+                            {
+                                throw new ArgumentOutOfRangeException( lavaFilterMethodParameters[i].Name, $"Parameter type '{lavaFilterMethodParameters[i].ParameterType.Name}' is not supported for legacy filters." );
+                            }
+                        }
+                    }
+
+                    var result = lavaFilterMethod.Invoke( null, lavaFilterMethodArguments );
+
+                    return FluidValue.Create( result );
+                }
+            
+                TemplateContext.GlobalFilters.AddFilter( lavaFilterMethod.Name, fluidFilterFunction );
             }
         }
 
+        private object GetLavaParameterArgumentFromFluidValue( FluidValue fluidFilterArgument, Type argumentType )
+        {
+            object lavaArgument;
 
+            if ( argumentType == typeof( string ) )
+            {
+                lavaArgument = fluidFilterArgument.ToStringValue();
+            }
+            else if ( argumentType == typeof( int ) )
+            {
+                lavaArgument = (int)fluidFilterArgument.ToNumberValue();
+            }
+            else if ( argumentType == typeof( bool ) )
+            {
+                lavaArgument = fluidFilterArgument.ToBooleanValue();
+            }
+            else if ( argumentType == typeof( object ) )
+            {
+                lavaArgument = fluidFilterArgument.ToObjectValue();
+            }
+            else
+            {
+                throw new ArgumentOutOfRangeException( argumentType.Name, $"Parameter type '{argumentType.Name}' is not supported for legacy filters." );
+            }
+
+            return lavaArgument;
+        }
 
         /// <summary>
         /// Performs a no-operation filter. Just return the input. This simulates using
@@ -299,11 +368,6 @@ namespace Rock.Lava.Fluid
             throw new NotImplementedException();
         }
 
-        //public Type GetShortcodeType( string name )
-        //{
-        //    throw new NotImplementedException();
-        //}
-
         public override Type GetShortcodeType( string name )
         {
             throw new NotImplementedException();
@@ -314,95 +378,80 @@ namespace Rock.Lava.Fluid
             throw new NotImplementedException();
         }
 
-        //public void RegisterSafeType( Type type, string[] allowedMembers = null )
-        //{
-        //    throw new NotImplementedException();
-        //}
-
         public override void RegisterSafeType( Type type, string[] allowedMembers = null )
         {
-            throw new NotImplementedException();
+            TemplateContext.GlobalMemberAccessStrategy.Register( type, allowedMembers );
         }
 
-        //private static _shortcodeList<string, >
-        //public void RegisterShortcode( string name, Func<string, IRockShortcode> shortcodeFactoryMethod )
-        //{
-        //    var shortcode = shortcodeFactoryMethod( name ) as IRockShortcode;
+        private FluidTemplate CreateNewFluidTemplate( string inputTemplate )
+        {
+            IEnumerable<string> errors;
 
-        //    RegisterShortcode( shortcode );
-        //}
+            FluidTemplate template;
 
-        //public void RegisterShortcode( IRockShortcode shortcode )
-        //{
-        //    if ( shortcode == null )
-        //    {
-        //        return;
-        //    }
+            var isValidTemplate = FluidTemplate.TryParse( inputTemplate, out template, out errors );
 
-        //    var fluidTag = shortcode as ITag;
+            //LavaFluidTemplate template;
 
-        //    if ( fluidTag == null )
-        //    {
-        //        throw new Exception( "Shortcode object is invalid. Shortcode must implement FluidEngine.ITag interface." );
-        //    }
+            //var parser = _templateContext.TemplateFactory.cre .ParserFactory.CreateParser();
 
-        //    //var tagName = "#" + shortcode.Name;
+            //bool isValidTemplate = parser.pa .TryParse(( inputTemplate, out template );
+            //bool isValidTemplate = LavaFluidTemplate.TryParse( inputTemplate, out template );
 
-        //    if ( shortcode.ElementType == LavaElementTypeSpecifier.Inline )
-        //    {
-        //        LavaFluidTemplate.Factory.RegisterTag( shortcode.Name, fluidTag );
-        //    }
-        //    else
-        //    {
-        //        LavaFluidTemplate.Factory.RegisterBlock( shortcode.Name, fluidTag );
-        //    }
 
-        //}
+            //_templateContext.TemplateFactory. .TemplateFactory
 
-        //public void RegisterBlock( string name, ITag tag )
-        //{
-        //    // Use Reflection to modify grammar.
-        //    var parserFactory = FluidTemplate.Factory;
+            //List<Statement> statements;
+            
 
-        //    var grammerInternalInfo = parserFactory.GetType().GetField( "_grammar", System.Reflection.BindingFlags.NonPublic );
+            //isValidTemplate = LavaFluidTemplate.Factory.CreateParser().TryParse( inputTemplate, stripEmptyLines: false, out statements, out errors );
 
-        //    var _grammar = grammerInternalInfo.GetValue( parserFactory ) as FluidGrammar;
+            //if ( isValidTemplate )
+            //{
+            //    template = new LavaFluidTemplate
+            //    {
+            //        Statements = statements
+            //    };
+            //}
 
-        //    lock ( _grammar )
-        //    {
-        //        _languageData = null;
-        //        _blocks[name] = tag;
+            ////var parser = LavaFluidTemplate.Factory.CreateParser();
+            ////parser.TryParse( inputTemplate, true, out statements, out errors );
 
-        //        _tags[name] = tag;
+            //if ( !isValidTemplate )
+            //{
+            //    output = null;
+            //    return false;
+            //}
 
-        //        // Configure the grammar to add support for the custom syntax
+            //output = template.Render( _templateContext );
 
-        //        var terminal = new NonTerminal( name )
-        //        {
-        //            Rule = _grammar.ToTerm( name ) + tag.GetSyntax( _grammar )
-        //        };
-
-        //        _grammar.KnownTags.Rule |= terminal;
-
-        //        // Prevent the text from being added in the parsed tree.
-        //        _grammar.MarkPunctuation( name );
-        //    }
-
-        //}
-
-        //public void SetContextValue( string key, object value )
-        //{
-        //    throw new NotImplementedException();
-        //}
-
-        //public bool TryRender( string inputTemplate, out string output )
-        //{
-        //    throw new NotImplementedException();
-        //}
+            return template;
+        }
 
         public override bool TryRender( string inputTemplate, out string output, ILavaContext context )
         {
-            throw new NotImplementedException();
+            try
+            {
+                var template = CreateNewFluidTemplate( inputTemplate );
+
+                var templateContext = context as FluidLavaContext;
+
+                if ( templateContext == null )
+                {
+                    throw new LavaException( "Invalid LavaContext type." );
+                }
+
+                output = template.Render( templateContext.FluidContext );
+
+                return true;
+            }
+            catch ( Exception ex )
+            {
+                ProcessException( ex );
+
+                output = null;
+                return false;
+            }
         }
 
         public override void UnregisterShortcode( string name )

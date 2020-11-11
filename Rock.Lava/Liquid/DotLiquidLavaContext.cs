@@ -193,13 +193,13 @@ namespace Rock.Lava.DotLiquid
             }
         }
 
-        public override void SetMergeFieldValue( string key, object value )
-        {
-            var fieldValue = GetDotLiquidCompatibleValue( value );
+        //public override void SetMergeFieldValue( string key, object value )
+        //{
+        //    var fieldValue = GetDotLiquidCompatibleValue( value );
 
-            // Use the default implementation to set a variable in the current scope.
-            _context[key] = fieldValue;
-        }
+        //    // Use the default implementation to set a variable in the current scope.
+        //    _context[key] = fieldValue;
+        //}
 
         public override void SetMergeFieldValue( string key, object value, string scopeReference )
         {
@@ -439,19 +439,6 @@ namespace Rock.Lava.DotLiquid
         public void ClearValues()
         {
             _context.ClearInstanceAssigns();
-        }
-
-        public override void SetMergeFieldValues( LavaDictionary values )
-        {
-            if ( values == null )
-            {
-                return;
-            }
-
-            foreach ( var kvp in values )
-            {
-                SetMergeFieldValue( kvp.Key, kvp.Value );
-            }
         }
 
         private object GetDotLiquidCompatibleValue( object value )

@@ -24,23 +24,13 @@ using Rock.Tests.Shared;
 
 namespace Rock.Tests.UnitTests.Lava
 {
-    [TestClass]
-    public partial class CollectionFilterTests
-    {
-        private static LavaTestHelper _helper;
 
+
+    [TestClass]
+    public class CollectionFilterTests : LavaUnitTestBase
+    {
         List<string> _TestNameList = new List<string>() { "Ted", "Alisha", "Cynthia", "Brian" };
         List<string> _TestOrderedList = new List<string>() { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
-
-        #region Constructors
-
-        [ClassInitialize]
-        public static void Initialize( TestContext context )
-        {
-            _helper = LavaTestHelper.New();
-        }
-
-        #endregion
 
         /// <summary>
         /// Searching for strings in a collection returns correct match indicators.

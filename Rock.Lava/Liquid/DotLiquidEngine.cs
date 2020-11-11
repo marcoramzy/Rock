@@ -32,8 +32,6 @@ namespace Rock.Lava.DotLiquid
     /// </summary>
     public partial class DotLiquidEngine : LavaEngineBase
     {
-        public bool ThrowExceptions { get; set; } = true;
-
         public override string EngineName
         {
             get
@@ -368,27 +366,7 @@ namespace Rock.Lava.DotLiquid
 
                 var renderSettings = GetDotLiquidRenderParametersFromLavaContext( context );
 
-                //if ( mergeValues != null )
-                //{
-                //object fieldValue;
-
-                // Avoid DotLiquid wrapping unknown types in a DropProxy object,
-                // to prevent framework-specific Types being passed to our custom filters.
-                //foreach ( var key in mergeValues.Keys.ToList() )
-                //{
-                //    fieldValue = GetDotLiquidCompatibleValue( mergeValues[key] );
-
-                //    mergeValues[key] = fieldValue;
-                //}
-
                 output = template.Render( renderSettings );
-                // ( ( ( ( Hash.FromDictionary( mergeValues ) );
-                //output = template.Render(((( Hash.FromDictionary( mergeValues ) );
-            //}
-            //    else
-            //    {
-            //        output = template.Render();
-            //    }
 
                 return true;
             }
@@ -398,14 +376,6 @@ namespace Rock.Lava.DotLiquid
 
                 output = null;
                 return false;
-            }
-        }
-
-        private void ProcessException( Exception ex )
-        {
-            if ( this.ThrowExceptions )
-            {
-                throw ex;
             }
         }
 

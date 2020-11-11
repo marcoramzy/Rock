@@ -92,6 +92,7 @@
     <Compile Include="Rock\Lava\Filters\ColorFilterTests.cs" />
     <Compile Include="Rock\Lava\Filters\DateFilterTests.cs" />
     <Compile Include="Rock\Lava\Filters\EncodingFilterTests.cs" />
+    <Compile Include="Rock\Lava\LavaUnitTestBase.cs" />
     <Compile Include="Rock\Lava\Filters\NumericFilterTests.cs" />
     <Compile Include="Rock\Lava\Filters\ObjectFilterTests.cs" />
     <Compile Include="Rock\Lava\Filters\SerializationFilterTests.cs" />
@@ -124,6 +125,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="lava-dotliquid-engine.runsettings" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

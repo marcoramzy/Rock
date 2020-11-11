@@ -16,26 +16,12 @@
 //
 using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Rock.Lava;
-using Rock.Lava.DotLiquid;
 
 namespace Rock.Tests.UnitTests.Lava
 {
     [TestClass]
-    public class DateFilterTests
+    public class DateFilterTests : LavaUnitTestBase
     {
-        private static LavaTestHelper _helper;
-
-        #region Constructors
-
-        [ClassInitialize]
-        public static void Initialize( TestContext context )
-        {
-            _helper = LavaTestHelper.New();
-        }
-
-        #endregion
-
         #region Filter Tests: Date
 
         /*

@@ -8,6 +8,6 @@
   
   <TestRunParameters>
     <!-- [DotLiquid] | Fluid: lava engine to be tested -->
-    <Parameter name="LavaEngineType" value="Fluid" />
+    <Parameter name="LavaEngineType" value="DotLiquid" />
   </TestRunParameters>
 </RunSettings>

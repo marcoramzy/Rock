@@ -279,7 +279,7 @@ namespace Rock.Lava
 
         public abstract bool TryRender( string inputTemplate, out string output, ILavaContext context );
 
-    public abstract void UnregisterShortcode( string name );
+        public abstract void UnregisterShortcode( string name );
 
         public abstract bool AreEqualValue( object left, object right );
         //
@@ -431,5 +431,15 @@ namespace Rock.Lava
         }
 
         #endregion
+
+        protected void ProcessException( Exception ex )
+        {
+            if ( this.ThrowExceptions )
+            {
+                throw ex;
+            }
+        }
+
+        public bool ThrowExceptions { get; set; } = true;
     }
 }

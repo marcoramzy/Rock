@@ -1557,6 +1557,12 @@ namespace Rock.Lava
         /// <returns></returns>
         public static string HumanizeTimeSpan( object sStartDate, object sEndDate, string unit = "Day", string direction = "min" )
         {
+            if ( unit != null
+                 && unit.AsIntegerOrNull() != null )
+            {
+                return HumanizeTimeSpan( sStartDate, sEndDate, unit.AsInteger() );
+            }
+
             DateTime startDate = GetDateFromObject( sStartDate );
             DateTime endDate = GetDateFromObject( sEndDate );
 

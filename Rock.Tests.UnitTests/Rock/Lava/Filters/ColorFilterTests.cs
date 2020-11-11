@@ -15,26 +15,13 @@
 // </copyright>
 //
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Rock.Lava;
 using Rock.Tests.Shared;
 
 namespace Rock.Tests.UnitTests.Lava
 {
     [TestClass]
-    public partial class ColorFilterTests
+    public partial class ColorFilterTests : LavaUnitTestBase
     {
-        private static LavaTestHelper _helper;
-
-        #region Constructors
-
-        [ClassInitialize]
-        public static void Initialize( TestContext context )
-        {
-            _helper = LavaTestHelper.New();
-        }
-
-        #endregion
-
         /// <summary>
         /// Applying the AdjustHue color filter returns the expected value.
         /// </summary>

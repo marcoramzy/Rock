@@ -14,32 +14,14 @@
 // limitations under the License.
 // </copyright>
 //
-using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Rock.Lava;
-using Rock.Tests.Shared;
 
 namespace Rock.Tests.UnitTests.Lava
 {
     [TestClass]
-    public class ObjectFilterTests
+    public class ObjectFilterTests : LavaUnitTestBase
     {
-        private static LavaTestHelper _helper;
-
-        #region Constructors
-
-        [ClassInitialize]
-        public static void Initialize( TestContext context )
-        {
-            _helper = LavaTestHelper.New();
-
-            _helper.LavaEngine.RegisterSafeType( typeof( TestPerson ) );
-            _helper.LavaEngine.RegisterSafeType( typeof( TestCampus ) );
-
-        }
-
-        #endregion
-
         /// <summary>
         /// Referencing a valid property of an input object should return the property value.
         /// </summary>

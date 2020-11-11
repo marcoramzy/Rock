@@ -19,20 +19,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Rock.Tests.UnitTests.Lava
 {
     [TestClass]
-    public class EncodingFilterTests
+    public class EncodingFilterTests : LavaUnitTestBase
     {
-        private static LavaTestHelper _helper;
-
-        #region Constructors
-
-        [ClassInitialize]
-        public static void Initialize( TestContext context )
-        {
-            _helper = LavaTestHelper.New();
-        }
-
-        #endregion
-
         /// <summary>
         /// Ensure that a plain text string encoded using the Base64 scheme is encoded correctly.
         /// </summary>

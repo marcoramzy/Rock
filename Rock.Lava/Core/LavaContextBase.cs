@@ -56,9 +56,26 @@ namespace Rock.Lava
             SetEnabledCommands( commands );
         }
 
-        public abstract void SetMergeFieldValue( string key, object value );
+        public void SetMergeFieldValue( string key, object value )
+        {
+            SetMergeFieldValue( key, value, null );
+        }
+
         public abstract void SetMergeFieldValue( string key, object value, string scopeSelector );
-        public abstract void SetMergeFieldValues( LavaDictionary values );
+
+        public virtual void SetMergeFieldValues( LavaDictionary values )
+        {
+            if ( values == null )
+            {
+                return;
+            }
+
+            foreach ( var kvp in values )
+            {
+                SetMergeFieldValue( kvp.Key, kvp.Value );
+            }
+        }
+
         //public abstract void Stack( LavaDictionary newScope, Action callback );
         public abstract void Stack( Action callback );
     }

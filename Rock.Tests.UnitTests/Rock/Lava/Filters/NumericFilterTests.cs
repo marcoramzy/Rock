@@ -21,20 +21,8 @@ using Rock.Tests.Shared;
 namespace Rock.Tests.UnitTests.Lava
 {
     [TestClass]
-    public class NumericFilterTests
+    public class NumericFilterTests : LavaUnitTestBase
     {
-        private static LavaTestHelper _helper;
-
-        #region Constructors
-
-        [ClassInitialize]
-        public static void Initialize( TestContext context )
-        {
-            _helper = LavaTestHelper.New();
-        }
-
-        #endregion
-
         #region Filter Tests: Format
 
         /*

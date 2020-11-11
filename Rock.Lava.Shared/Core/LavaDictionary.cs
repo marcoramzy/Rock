@@ -18,8 +18,8 @@ namespace Rock.Lava
         #region Fields
 
         private readonly Func<LavaDictionary, string, object> _lambda;
-        private readonly Dictionary<string, object> _nestedDictionary;
-
+        private readonly Dictionary<string, object> _nestedDictionary = new Dictionary<string, object>( StringComparer.OrdinalIgnoreCase );
+        
         #endregion
 
         #region Static construction methods
@@ -67,8 +67,6 @@ namespace Rock.Lava
 
         public LavaDictionary()
         {
-            // Specify a case-insensitive dictionary.
-            _nestedDictionary = new Dictionary<string, object>( StringComparer.OrdinalIgnoreCase );
         }
 
         #endregion
