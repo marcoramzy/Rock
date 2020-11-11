@@ -86,11 +86,16 @@ namespace Rock.Lava
                 return _instance.ToString();
             }
 
-            var firstKey = _members.Keys.FirstOrDefault();
-            if ( firstKey != null )
+            if ( _members != null )
             {
-                var firstValue = _members[firstKey] ?? string.Empty;
-                return firstValue.ToString();
+                var firstKey = _members.Keys.FirstOrDefault();
+
+                if ( firstKey != null )
+                {
+                    var firstValue = _members[firstKey] ?? string.Empty;
+
+                    return firstValue.ToString();
+                }
             }
 
             return base.ToString();

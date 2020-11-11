@@ -208,6 +208,7 @@
     <Compile Include="Fluid\FluidLavaContext.cs" />
     <Compile Include="Fluid\FluidLavaParser.cs" />
     <Compile Include="Fluid\FluidTemplateProxy.cs" />
+    <Compile Include="Core\LavaException.cs" />
     <Compile Include="Fluid\LavaFluidParser.cs" />
     <Compile Include="Fluid\LavaFluidParserFactory.cs" />
     <Compile Include="Liquid\Blocks\DotLiquidDynamicShortcodeBlockProxy.cs" />

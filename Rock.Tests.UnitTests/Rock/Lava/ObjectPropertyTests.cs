@@ -51,11 +51,11 @@ namespace Rock.Tests.UnitTests.Lava
         /// Accessing a nested property using dot-notation "Campus.Name" should return the correct value.
         /// </summary>
         [TestMethod]
-        public void ObjectProperty_DotNotationNestedPropertyAccess_ReturnsPropertyValue()
+        public void ObjectProperty_DotNotationNestedPropertyAccessForPoco_ReturnsPropertyValue()
         {
             var mergeValues = new LavaDictionary { { "CurrentPerson", _helper.GetTestPersonTedDecker() } };
 
-            _helper.AssertTemplateOutput( "North Campus", "{{ CurrentPerson.Campus.Name' }}", mergeValues );
+            _helper.AssertTemplateOutput( "North Campus", "{{ CurrentPerson.Campus.Name }}", mergeValues );
         }
 
         /// <summary>
@@ -66,7 +66,7 @@ namespace Rock.Tests.UnitTests.Lava
         {
             var mergeValues = new LavaDictionary { { "CurrentPerson", _helper.GetTestPersonTedDecker() } };
 
-            _helper.AssertTemplateOutput( string.Empty, "{{ CurrentPerson.NonexistentProperty' }}", mergeValues );
+            _helper.AssertTemplateOutput( string.Empty, "{{ CurrentPerson.NonexistentProperty }}", mergeValues );
         }
 
         /// <summary>

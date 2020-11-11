@@ -230,6 +230,8 @@ namespace Rock.Lava.Fluid
                 // The first argument passed to the Lava filter is either the Lava Context or the template input.
                 var hasContextParameter = lavaFilterMethodParameters[0].ParameterType == typeof( ILavaContext );
 
+                var firstParameterIndex = 1 + ( hasContextParameter ? 1 : 0 );
+
                 // Define the Fluid-compatible filter function that will wrap the Lava filter method.
                 FluidValue fluidFilterFunction( FluidValue input, FilterArguments arguments, TemplateContext context )
                 {
@@ -255,13 +257,13 @@ namespace Rock.Lava.Fluid
                         }
                         else if ( i == 1 && hasContextParameter )
                         {
-                            // If this is the second parameter, it may be the input template if the first parameter is a LavaContext.
+                            // If this is the second parameter, it must be the input template if the first parameter is a LavaContext.
                             fluidFilterArgument = input;
                         }
-                        else if ( arguments.Count > ( i - 1 ) )
+                        else if ( arguments.Count > ( i - firstParameterIndex ) ) //arguments.Count > ( i - 1 ) )
                         {
                             // This parameter is a filter argument.
-                            fluidFilterArgument = arguments.At( i - 1 );
+                            fluidFilterArgument = arguments.At( i - firstParameterIndex );
                         }
 
                         if ( fluidFilterArgument == null && lavaFilterMethodParameters[i].IsOptional )
@@ -303,7 +305,16 @@ namespace Rock.Lava.Fluid
                             {
                                 if ( fluidFilterArgument != null )
                                 {
-                                    lavaFilterMethodArguments[i] = fluidFilterArgument.ToObjectValue();
+                                    //var fluidFilterArgumentType = fluidFilterArgument.GetType();
+
+                                    //if ( fluidFilterArgument is global::Fluid.Values.DictionaryValue xyz )
+                                    //{
+                                    //    xyz.ToRealObjectValue();
+                                    //}
+                                    //else
+                                    //{
+                                        lavaFilterMethodArguments[i] = fluidFilterArgument.ToRealObjectValue();
+                                    //}
                                 }
                             }
                             else
@@ -380,50 +391,28 @@ namespace Rock.Lava.Fluid
 
         public override void RegisterSafeType( Type type, string[] allowedMembers = null )
         {
-            TemplateContext.GlobalMemberAccessStrategy.Register( type, allowedMembers );
+            if ( allowedMembers != null
+                 && allowedMembers.Length > 0 )
+            {
+                TemplateContext.GlobalMemberAccessStrategy.Register( type, allowedMembers );
+            }
+            else
+            {
+                TemplateContext.GlobalMemberAccessStrategy.Register( type );
+            }
         }
 
         private FluidTemplate CreateNewFluidTemplate( string inputTemplate )
         {
             IEnumerable<string> errors;
-
             FluidTemplate template;
 
             var isValidTemplate = FluidTemplate.TryParse( inputTemplate, out template, out errors );
 
-            //LavaFluidTemplate template;
-
-            //var parser = _templateContext.TemplateFactory.cre .ParserFactory.CreateParser();
-
-            //bool isValidTemplate = parser.pa .TryParse(( inputTemplate, out template );
-            //bool isValidTemplate = LavaFluidTemplate.TryParse( inputTemplate, out template );
-
-
-            //_templateContext.TemplateFactory. .TemplateFactory
-
-            //List<Statement> statements;
-            
-
-            //isValidTemplate = LavaFluidTemplate.Factory.CreateParser().TryParse( inputTemplate, stripEmptyLines: false, out statements, out errors );
-
-            //if ( isValidTemplate )
-            //{
-            //    template = new LavaFluidTemplate
-            //    {
-            //        Statements = statements
-            //    };
-            //}
-
-            ////var parser = LavaFluidTemplate.Factory.CreateParser();
-            ////parser.TryParse( inputTemplate, true, out statements, out errors );
-
-            //if ( !isValidTemplate )
-            //{
-            //    output = null;
-            //    return false;
-            //}
-
-            //output = template.Render( _templateContext );
+            if ( !isValidTemplate )
+            {
+                throw new LavaException( "Create Lava Template failed.", errors );
+            }
 
             return template;
         }
@@ -493,14 +482,18 @@ namespace Rock.Lava.Fluid
             IMemberAccessor accessor = null;
 
             /*
-             * [2020-05-05] DL
-             * To access the members of an anonymous Type, we need to use reflection.
-             * We need to reimplement the entire MemberAccessStrategy to achieve this rather than simply register a new accessor via the Register() method,
-             * because the Type being accessed is not known in advance.
+             * To access the members of an anonymous type, we need to use reflection.
+             * The entire MemberAccessStrategy must be reimplemented rather than simply registering a new accessor via the Register() method,
+             * because the type being accessed is not known in advance.
              * This check for an anonymous type is fairly naive, but it works correctly for the .Net and Mono frameworks.
              * Refer https://stackoverflow.com/questions/2483023/how-to-test-if-a-type-is-anonymous.
              */
             if ( type.Name.Contains( "AnonymousType" ) || type.Name.Contains( "AnonType" ) )
+            {
+                return _dynamicMemberAccessor;
+            }
+
+            if ( typeof( RockDynamic ).IsAssignableFrom( type ) )
             {
                 return _dynamicMemberAccessor;
             }
