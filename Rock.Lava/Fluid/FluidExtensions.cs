@@ -181,7 +181,7 @@ namespace Rock.Lava.Fluid
             {
                 var fieldInfo = value.GetType().GetField( "_value", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance );
 
-                var values = ( List<FluidValue> ) fieldInfo.GetValue( value );
+                var values = ( IEnumerable<FluidValue> ) fieldInfo.GetValue( value );
 
                 return values.Select( a => a.ToRealObjectValue() ).ToList();
             }
