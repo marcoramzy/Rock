@@ -20,20 +20,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Rock.Tests.Integration.Lava
 {
     [TestClass]
-    public class DateFilterTests
+    public class DateFilterTests : LavaIntegrationTestBase
     {
-        private static LavaTestHelper _helper;
-
-        #region Constructors
-
-        [ClassInitialize]
-        public static void Initialize( TestContext context )
-        {
-            _helper = LavaTestHelper.NewForDotLiquidProcessor();
-        }
-
-        #endregion
-
         #region Filter Tests: SundayDate
 
         /// <summary>

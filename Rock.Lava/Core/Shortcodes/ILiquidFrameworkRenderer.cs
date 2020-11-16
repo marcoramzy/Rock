@@ -26,7 +26,7 @@ namespace Rock.Lava
     {
         // TODO: Remove the frameworkObject parameter - it should appear in IRockLavaBlock/Tag.
 
-        void Render( ILiquidFrameworkRenderer baseRenderer, ILavaContext context, TextWriter result );
+        void Render( ILiquidFrameworkRenderer baseRenderer, ILavaContext context, TextWriter writer );
 
         void Parse( ILiquidFrameworkRenderer baseRenderer, List<string> tokens, out List<object> nodes );
     }

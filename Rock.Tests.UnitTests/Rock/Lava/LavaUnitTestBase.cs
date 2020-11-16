@@ -31,7 +31,7 @@ namespace Rock.Tests.UnitTests.Lava
         {
             LavaEngineTypeSpecifier engineType;
 
-            var isValid = Enum.TryParse<LavaEngineTypeSpecifier>( testContext.Properties["LavaEngineType"].ToString(), out engineType );
+            var isValid = Enum.TryParse( testContext.Properties["LavaEngineType"].ToString(), out engineType );
 
             if ( !isValid )
             {

@@ -13,7 +13,7 @@ namespace Rock.Tests.Integration.Lava
         [ClassInitialize]
         public static void ClassInitialize( TestContext testContext )
         {
-            _helper = LavaTestHelper.NewForDotLiquidProcessor();
+            _helper = LavaTestHelper.New();
         }
 
         [TestMethod]

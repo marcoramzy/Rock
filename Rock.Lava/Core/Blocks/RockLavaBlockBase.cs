@@ -17,7 +17,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Rock.Lava.Shortcodes;
 
 namespace Rock.Lava.Blocks
 {
@@ -56,7 +55,17 @@ namespace Rock.Lava.Blocks
         /// <returns></returns>
         protected bool IsAuthorized( ILavaContext context )
         {
-            return LavaSecurityHelper.IsAuthorized( context, this.SourceElementName );
+            return IsAuthorized( context, this.SourceElementName );
+        }
+
+        /// <summary>
+        /// Determines if this block is authorized in the specified Lava context.
+        /// </summary>
+        /// <param name="context">The context.</param>
+        /// <returns></returns>
+        protected bool IsAuthorized( ILavaContext context, string commandName )
+        {
+            return LavaSecurityHelper.IsAuthorized( context, commandName );
         }
 
         #region DotLiquid Block Implementation
@@ -147,6 +156,12 @@ namespace Rock.Lava.Blocks
         /// <param name="proxy"></param>
         void ILiquidFrameworkRenderer.Render( ILiquidFrameworkRenderer baseRenderer, ILavaContext context, TextWriter result )
         {
+            // If this block was previously called with a different base renderer, exit to prevent a circular reference.
+            if ( _baseRenderer != null )
+            {
+                return;
+            }
+
             _baseRenderer = baseRenderer;
 
             OnRender( context, result );

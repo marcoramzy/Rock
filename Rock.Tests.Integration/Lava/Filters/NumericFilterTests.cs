@@ -20,20 +20,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Rock.Tests.Integration.Lava
 {
     [TestClass]
-    public class NumericFilterTests
+    public class NumericFilterTests : LavaIntegrationTestBase
     {
-        private static LavaTestHelper _helper;
-
-        #region Constructors
-
-        [ClassInitialize]
-        public static void Initialize( TestContext context )
-        {
-            _helper = LavaTestHelper.NewForDotLiquidProcessor();
-        }
-
-        #endregion
-
         /// <summary>
         /// Decimal input should be formatted using the supplied currency symbol.
         /// </summary>

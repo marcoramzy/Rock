@@ -15,32 +15,7 @@
 // </copyright>
 //
 
-
-
-//using Rock.Data;
-//using Rock.Model;
-//using Rock;
-//using System;
-
-//using System.Linq;
-//using System.Net;
-//using System.Security.Authentication;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-//using Newtonsoft.Json.Linq;
-//using RestSharp;
-//using Rock.Lava;
-
-//using Rock.Web.Cache;
-
-using System;
-using Rock;
-using Rock.Model;
-using Rock.Data;
-using RestSharp;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System.Net;
-using System.Security.Authentication;
 using Rock.Tests.Shared;
 
 namespace Rock.Tests.Integration.Lava
@@ -49,20 +24,8 @@ namespace Rock.Tests.Integration.Lava
     /// Tests for Lava-specific commands implemented as Liquid custom blocks and tags.
     /// </summary>
     [TestClass]
-    public class CommandTests
+    public class CommandTests : LavaIntegrationTestBase
     {
-        private static LavaTestHelper _helper;
-
-        #region Constructors
-
-        [ClassInitialize]
-        public static void Initialize( TestContext context )
-        {
-            _helper = LavaTestHelper.NewForDotLiquidProcessor();
-        }
-
-        #endregion
-
         #region Cache
 
         [TestMethod]

@@ -14,12 +14,7 @@
 // limitations under the License.
 // </copyright>
 //
-using System;
-using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Rock.Lava;
-using Rock.Model;
-using Rock.Web.Cache;
 
 namespace Rock.Tests.Integration.Lava
 {
@@ -27,23 +22,8 @@ namespace Rock.Tests.Integration.Lava
     /// Test for shortcodes that are defined and implemented as code components rather than as parameterized Lava templates.
     /// </summary>
     [TestClass]
-    public class ShortcodeCodeTests
+    public class ShortcodeCodeTests : LavaIntegrationTestBase
     {
-        private static LavaTestHelper _helper;
-
-        #region Constructors
-
-        [ClassInitialize]
-        public static void Initialize( TestContext context )
-        {
-            // Initialize the global DotLiquid Lava Processor;
-            _helper = LavaTestHelper.NewForDotLiquidProcessor();
-
-
-        }
-
-        #endregion
-
         #region Bootstrap Alert
 
         /// <summary>

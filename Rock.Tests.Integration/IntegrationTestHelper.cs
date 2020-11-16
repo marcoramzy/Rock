@@ -16,12 +16,17 @@
 //
 using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Rock.Lava;
+using Rock.Tests.Integration.Lava;
 
-namespace Rock.Tests.Integration.RockTests
+namespace Rock.Tests.Integration
 {
     [TestClass()]
-    public sealed class DivideClassTest
+    public sealed class IntegrationTestHelper
     {
+        public static LavaEngineTypeSpecifier EngineType { get; private set; }
+        public static LavaTestHelper LavaTestHelper { get; private set; }
+
         /// <summary>
         /// This will run before any tests in this assembly are run.
         /// </summary>
@@ -29,6 +34,18 @@ namespace Rock.Tests.Integration.RockTests
         [AssemblyInitialize]
         public static void AssemblyInitialize( TestContext context )
         {
+            LavaEngineTypeSpecifier engineType;
+
+            var isValid = Enum.TryParse( context.Properties["LavaEngineType"].ToString(), out engineType );
+
+            if ( !isValid )
+            {
+                engineType = LavaEngineTypeSpecifier.DotLiquid;
+            }
+
+            EngineType = engineType;
+
+            LavaTestHelper = LavaTestHelper.New( engineType );
         }
 
         /// <summary>

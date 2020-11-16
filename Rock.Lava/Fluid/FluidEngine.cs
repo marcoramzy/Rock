@@ -447,6 +447,52 @@ namespace Rock.Lava.Fluid
         {
             throw new NotImplementedException();
         }
+
+        public override void RegisterTag( string name, Func<string, IRockLavaTag> factoryMethod )
+        {
+            if ( name == null )
+            {
+                throw new ArgumentException( "Name must be specified." );
+            }
+
+            name = name.Trim().ToLower();
+
+            base.RegisterTag( name, factoryMethod );
+
+            // Some Lava elements, such as shortcodes, are defined dynamically at runtime.
+            // Therefore, we register the tag as a factory that can produce the requested element on demand.
+            var lavaTag = factoryMethod( name );
+
+            var fluidTag = new FluidTagProxy();
+
+            FluidTagProxy.RegisterFactory( name, factoryMethod );
+
+            // Register the proxy for the specified tag name.
+            FluidTemplate.Factory.RegisterTag<FluidTagProxy>( name );
+        }
+
+        public override void RegisterBlock( string name, Func<string, IRockLavaBlock> factoryMethod )
+        {
+            if ( name == null )
+            {
+                throw new ArgumentException( "Name must be specified." );
+            }
+
+            name = name.Trim().ToLower();
+
+            base.RegisterBlock( name, factoryMethod );
+
+            // Some Lava elements, such as shortcodes, are defined dynamically at runtime.
+            // Therefore, we register the tag as a factory that can produce the requested element on demand.
+            var lavaBlock = factoryMethod( name );
+
+            //var fluidBlock = new FluidBlockProxy();
+
+            FluidBlockProxy.RegisterFactory( name, factoryMethod );
+
+            // Register the proxy for the specified tag name.
+            FluidTemplate.Factory.RegisterBlock<FluidBlockProxy>( name );
+        }
     }
 
     #region Member Access Strategy implementation

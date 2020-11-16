@@ -14,33 +14,7 @@
 // limitations under the License.
 // </copyright>
 //
-
-
-
-//using Rock.Data;
-//using Rock.Model;
-//using Rock;
-//using System;
-
-//using System.Linq;
-//using System.Net;
-//using System.Security.Authentication;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-//using Newtonsoft.Json.Linq;
-//using RestSharp;
-//using Rock.Lava;
-
-//using Rock.Web.Cache;
-
-using System;
-using Rock;
-using Rock.Model;
-using Rock.Data;
-using RestSharp;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System.Net;
-using System.Security.Authentication;
 
 namespace Rock.Tests.Integration.Lava
 {
@@ -48,20 +22,8 @@ namespace Rock.Tests.Integration.Lava
     /// Test the scoping of variables in a Lava context using various container configurations
     /// </summary>
     [TestClass]
-    public class ScopeTests
+    public class ScopeTests : LavaIntegrationTestBase
     {
-        private static LavaTestHelper _helper;
-
-        #region Constructors
-
-        [ClassInitialize]
-        public static void Initialize( TestContext context )
-        {
-            _helper = LavaTestHelper.NewForDotLiquidProcessor();
-        }
-
-        #endregion
-
         // TODO: This is the observed behavior, but is it correct?
         [TestMethod]
         public void Scope_LocalVariableWithSameNameAsContainerVariable_ContainerVariableIsReturned()

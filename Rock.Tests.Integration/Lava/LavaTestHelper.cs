@@ -30,9 +30,9 @@ namespace Rock.Tests.Integration.Lava
 {
     public class LavaTestHelper
     {
-        public static LavaTestHelper NewForDotLiquidProcessor()
+        public static LavaTestHelper New( LavaEngineTypeSpecifier? engineType = null )
         {
-            global::Rock.Lava.LavaEngine.InitializeDotLiquidFramework( null, new List<Type> { typeof( RockFilters ) } );
+            global::Rock.Lava.LavaEngine.Initialize( engineType, null, new List<Type> { typeof( RockFilters ) } );
 
             var engine = global::Rock.Lava.LavaEngine.Instance;
 
@@ -41,15 +41,6 @@ namespace Rock.Tests.Integration.Lava
 
             RegisterStaticShortcodes( engine );
             RegisterDynamicShortcodes( engine );
-
-
-            //Debug.Print( "** Registered Tags:" );
-
-            //foreach (var tag in engine.GetRegisteredElements())
-            //{
-            //    Debug.Print( "{0} [{1}]", tag.Key, tag.Value.SystemTypeName );
-            //}
-            //Debug.Print( "**" );
 
             var helper = new LavaTestHelper();
 

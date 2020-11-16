@@ -34,15 +34,6 @@ namespace Rock.Tests.UnitTests.Lava
             return helper;
         }
 
-        //public static LavaTestHelper New()
-        //{
-        //    global::Rock.Lava.LavaEngine.InitializeDotLiquidFramework( null, new List<Type> { typeof( RockFilters ) } );
-
-        //    var helper = new LavaTestHelper();
-
-        //    return helper;
-        //}
-
         public ILavaEngine LavaEngine
         {
             get
