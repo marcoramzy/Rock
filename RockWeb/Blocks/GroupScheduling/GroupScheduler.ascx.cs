@@ -2017,19 +2017,18 @@ btnCopyToClipboard.ClientID );
                 .Where( a => attendanceOccurrenceIdList.Contains( a.OccurrenceId ) )
                 .Where( a => a.ScheduleConfirmationSent != true );
 
-            List<string> errorMessages;
-            var emailsSent = attendanceService.SendScheduleConfirmationSystemEmails( sendConfirmationAttendancesQuery, out errorMessages );
-            bool isSendConfirmationAttendancesFound = sendConfirmationAttendancesQuery.Any();
+            var sendMessageResult = attendanceService.SendScheduleConfirmationCommunication( sendConfirmationAttendancesQuery );
+            var isSendConfirmationAttendancesFound = sendConfirmationAttendancesQuery.Any();
             rockContext.SaveChanges();
 
             StringBuilder summaryMessageBuilder = new StringBuilder();
             ModalAlertType alertType;
 
-            if ( errorMessages.Any() )
+            if ( sendMessageResult.Errors.Any() )
             {
                 alertType = ModalAlertType.Alert;
 
-                var logException = new Exception( "One or more errors occurred when sending confirmation emails: " + Environment.NewLine + errorMessages.AsDelimited( Environment.NewLine ) );
+                var logException = new Exception( "One or more errors occurred when sending confirmations: " + Environment.NewLine + sendMessageResult.Errors.AsDelimited( Environment.NewLine ) );
 
                 ExceptionLogService.LogException( logException );
 
@@ -2038,13 +2037,13 @@ btnCopyToClipboard.ClientID );
             else
             {
                 alertType = ModalAlertType.Information;
-                if ( emailsSent > 0 && isSendConfirmationAttendancesFound )
+                if ( sendMessageResult.MessagesSent > 0 && isSendConfirmationAttendancesFound )
                 {
-                    summaryMessageBuilder.AppendLine( string.Format( "Successfully sent {0} confirmation {1}", emailsSent, "email".PluralizeIf( emailsSent != 1 ) ) );
+                    summaryMessageBuilder.AppendLine( string.Format( "Successfully sent {0} {1}.", sendMessageResult.MessagesSent, "confirmation".PluralizeIf( sendMessageResult.MessagesSent != 1 ) ) );
                 }
                 else
                 {
-                    summaryMessageBuilder.AppendLine( "Everybody has already been sent a confirmation email. No additional confirmation emails sent." );
+                    summaryMessageBuilder.AppendLine( "Everybody has already been sent a confirmation. No additional confirmations sent." );
                 }
             }
 

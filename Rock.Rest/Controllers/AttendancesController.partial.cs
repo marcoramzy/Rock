@@ -254,6 +254,8 @@ namespace Rock.Rest.Controllers
         [Authenticate, Secured]
         [System.Web.Http.Route( "api/Attendances/ScheduledPersonSendConfirmationEmail" )]
         [HttpPut]
+        [Obsolete( "Use ScheduledPersonSendConfirmationCommunication instead." )]
+        [RockObsolete( "1.12" )]
         public void ScheduledPersonSendConfirmationEmail( int attendanceId )
         {
             var rockContext = new RockContext();
@@ -261,6 +263,24 @@ namespace Rock.Rest.Controllers
             var sendConfirmationAttendancesQuery = attendanceService.Queryable().Where( a => a.Id == attendanceId );
             List<string> errorMessages;
             attendanceService.SendScheduleConfirmationSystemEmails( sendConfirmationAttendancesQuery, out errorMessages );
+            rockContext.SaveChanges();
+        }
+
+        /// <summary>
+        /// Sends (or Re-sends) a confirmation email to the person in the specified scheduled attendance record
+        /// </summary>
+        /// <param name="attendanceId">The attendance identifier.</param>
+        [Authenticate, Secured]
+        [System.Web.Http.Route( "api/Attendances/ScheduledPersonSendConfirmationCommunication" )]
+        [HttpPut]
+        public void ScheduledPersonSendConfirmationCommunication( int attendanceId )
+        {
+            var rockContext = new RockContext();
+            var attendanceService = new AttendanceService( rockContext );
+            var sendConfirmationAttendancesQuery = attendanceService.Queryable().Where( a => a.Id == attendanceId );
+
+            attendanceService.SendScheduleConfirmationCommunication( sendConfirmationAttendancesQuery);
+
             rockContext.SaveChanges();
         }
 
