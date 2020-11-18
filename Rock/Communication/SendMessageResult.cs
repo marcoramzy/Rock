@@ -32,6 +32,7 @@ namespace Rock.Communication
         /// The warnings.
         /// </value>
         public List<string> Warnings { get; set; } = new List<string>();
+
         /// <summary>
         /// Gets or sets the errors.
         /// </summary>

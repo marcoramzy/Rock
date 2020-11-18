@@ -279,7 +279,7 @@ namespace Rock.Rest.Controllers
             var attendanceService = new AttendanceService( rockContext );
             var sendConfirmationAttendancesQuery = attendanceService.Queryable().Where( a => a.Id == attendanceId );
 
-            attendanceService.SendScheduleConfirmationCommunication( sendConfirmationAttendancesQuery);
+            attendanceService.SendScheduleConfirmationCommunication( sendConfirmationAttendancesQuery );
 
             rockContext.SaveChanges();
         }
@@ -320,7 +320,6 @@ namespace Rock.Rest.Controllers
                 .RegisterRSVPRecipients( occurrenceId, personIdList );
         }
 
-
         #endregion RSVP Related
 
         #region Import related
@@ -353,6 +352,5 @@ namespace Rock.Rest.Controllers
         }
 
         #endregion Import related
-
     }
 }
