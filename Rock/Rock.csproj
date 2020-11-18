@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -580,6 +580,10 @@
     <Compile Include="Logging\RockLogSystemSettings.cs" />
     <Compile Include="Logging\RockSerilogReader.cs" />
     <Compile Include="Model\AchievementAttemptService.Partial.cs" />
+    <Compile Include="Model\CodeGenerated\WebFarmNodeLogService.cs" />
+    <Compile Include="Model\CodeGenerated\WebFarmNodeService.cs" />
+    <Compile Include="Model\WebFarmNodeLog.cs" />
+    <Compile Include="Model\WebFarmNode.cs" />
     <Compile Include="Model\AttendanceCheckInSession.cs" />
     <Compile Include="Model\AuthClaim.cs" />
     <Compile Include="Model\AuthClient.cs" />
@@ -595,6 +599,8 @@
     <Compile Include="Model\DocumentService.Partial.cs" />
     <Compile Include="Model\FinancialPaymentDetailService.Partial.cs" />
     <Compile Include="Model\GroupSyncService.Partial.cs" />
+    <Compile Include="Plugin\HotFixes\139_ProfileEdit_RequireGender.cs" />
+    <Compile Include="Plugin\HotFixes\138_MigrationRollupsFor11_4_1.cs" />
     <Compile Include="Plugin\HotFixes\137_MigrationRollupsFor11_4_0.cs" />
     <Compile Include="Plugin\HotFixes\136_MigrationRollupsFor11_3_0.cs" />
     <Compile Include="Plugin\HotFixes\135_MigrationRollupsFor11_2_0.cs" />

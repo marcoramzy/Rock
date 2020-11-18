@@ -283,7 +283,6 @@ namespace Rock.Model
             return FindPersons( new PersonMatchQuery( firstName, lastName, email, string.Empty ) );
         }
 
-
         /// <summary>
         /// Finds people who are considered to be good matches based on the query provided.
         /// </summary>
@@ -317,6 +316,17 @@ namespace Rock.Model
             if ( searchParameters.Gender.HasValue )
             {
                 query = query.Where( a => a.Gender == searchParameters.Gender.Value || a.Gender == Gender.Unknown );
+            }
+
+            /* 2020-11-12 MDP
+              if Email is specified and the Matched Person has an email, it MUST match the person's primary email. This avoids
+              a problem where an email could be changed on an existing person.
+              see https://app.asana.com/0/1181881054809083/1199161381220905/f for why this was done
+            */
+            if ( searchParameters.Email.IsNotNullOrWhiteSpace() )
+            {
+
+                query = query.Where( a => a.Email == searchParameters.Email || a.Email == string.Empty || a.Email == null );
             }
 
             // Create dictionary
@@ -2288,7 +2298,7 @@ namespace Rock.Model
             var recordTypeValueIdNameless = DefinedValueCache.GetId( Rock.SystemGuid.DefinedValue.PERSON_RECORD_TYPE_NAMELESS.AsGuid() );
 
             int numberTypeMobileValueId = DefinedValueCache.Get( SystemGuid.DefinedValue.PERSON_PHONE_TYPE_MOBILE ).Id;
-           
+
             // cleanup phone
             phoneNumber = PhoneNumber.CleanNumber( phoneNumber );
 
@@ -2380,17 +2390,20 @@ namespace Rock.Model
 
             newPerson.PhoneNumbers = new List<PhoneNumber>();
 
-            var namelessPersonMobilePhoneNumberNumber = namelessPerson.PhoneNumbers.FirstOrDefault( n => n.NumberTypeValueId == mobilePhoneTypeId ).Number;
+            var namelessPersonMobilePhoneNumber = namelessPerson.PhoneNumbers.FirstOrDefault( n => n.NumberTypeValueId == mobilePhoneTypeId );
 
-            // the person we are linking the phone number to doesn't have a SMS Messaging Number, so add a new one
-            var newPersonMobilePhoneNumber = new PhoneNumber
+            if ( namelessPersonMobilePhoneNumber != null )
             {
-                NumberTypeValueId = mobilePhoneTypeId,
-                IsMessagingEnabled = true,
-                Number = namelessPersonMobilePhoneNumberNumber
-            };
+                // the person we are linking the phone number to doesn't have a SMS Messaging Number, so add a new one
+                var newPersonMobilePhoneNumber = new PhoneNumber
+                {
+                    NumberTypeValueId = mobilePhoneTypeId,
+                    IsMessagingEnabled = true,
+                    Number = namelessPersonMobilePhoneNumber.Number
+                };
 
-            newPerson.PhoneNumbers.Add( newPersonMobilePhoneNumber );
+                newPerson.PhoneNumbers.Add( newPersonMobilePhoneNumber );
+            }
 
             var groupMember = new GroupMember();
             groupMember.GroupRoleId = newPersonGroupRoleId;
@@ -3398,7 +3411,7 @@ namespace Rock.Model
 
         /// <summary>
         /// Adds a person alias, known relationship group, implied relationship group, and family for a new person.
-        /// Returns the new Family(Group) that was created for the person.
+        /// Returns the new Family(Group) that was created for the person. The Person and Family are saved to the database.
         /// </summary>
         /// <param name="person">The person.</param>
         /// <param name="rockContext">The rock context.</param>
@@ -3492,7 +3505,7 @@ namespace Rock.Model
         }
 
         /// <summary>
-        /// Adds the person to family.
+        /// Adds the person to family and saves changes to the database
         /// </summary>
         /// <param name="person">The person.</param>
         /// <param name="newPerson">if set to <c>true</c> [new person].</param>

@@ -754,6 +754,15 @@ namespace Rock.Client.Enums
 
     /// <summary>
     /// </summary>
+    public enum SeverityLevel
+    {
+        Info = 0x0,
+        Warning = 0x1,
+        Critical = 0x2,
+    }
+
+    /// <summary>
+    /// </summary>
     public enum SignatureDocumentAction
     {
         Email = 0x0,
@@ -843,6 +852,15 @@ namespace Rock.Client.Enums
     {
         Cards = 0x0,
         Grid = 0x1,
+    }
+
+    /// <summary>
+    /// </summary>
+    public enum WorkflowActionFormPersonEntryOption
+    {
+        Hidden = 0x0,
+        Optional = 0x1,
+        Required = 0x2,
     }
 
     /// <summary>
