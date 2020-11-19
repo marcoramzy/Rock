@@ -62,7 +62,7 @@ namespace Rock.Communication
         /// <param name="mediumAttributes">The medium attributes.</param>
         /// <returns></returns>
         /// <exception cref="System.NotImplementedException"></exception>
-        public virtual async Task<SendMessageResult> SendAsync( RockMessage rockMessage, int mediumEntityTypeId, Dictionary<string, string> mediumAttributes )
+        public virtual Task<SendMessageResult> SendAsync( RockMessage rockMessage, int mediumEntityTypeId, Dictionary<string, string> mediumAttributes )
         {
             throw new NotImplementedException();
         }
@@ -74,7 +74,7 @@ namespace Rock.Communication
         /// <param name="mediumEntityTypeId">The medium entity type identifier.</param>
         /// <param name="mediumAttributes">The medium attributes.</param>
         /// <exception cref="System.NotImplementedException"></exception>
-        public virtual async Task SendAsync( Model.Communication communication, int mediumEntityTypeId, Dictionary<string, string> mediumAttributes )
+        public virtual Task SendAsync( Model.Communication communication, int mediumEntityTypeId, Dictionary<string, string> mediumAttributes )
         {
             throw new NotImplementedException();
         }

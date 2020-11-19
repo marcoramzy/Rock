@@ -23,7 +23,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Mail;
 using System.Net.Mime;
-
+using System.Threading.Tasks;
 using RestSharp;
 using RestSharp.Authenticators;
 
@@ -109,6 +109,26 @@ namespace Rock.Communication.Transport
             };
         }
 
+        protected override async Task<EmailSendResponse> SendEmailAsync( RockEmailMessage rockEmailMessage )
+        {
+            var restRequest = GetRestRequestFromRockEmailMessage( rockEmailMessage );
+
+            var restClient = new RestClient
+            {
+                BaseUrl = new Uri( GetAttributeValue( "BaseURL" ) ),
+                Authenticator = new HttpBasicAuthenticator( "api", GetAttributeValue( "APIKey" ) )
+            };
+
+            // Call the API and get the response
+            Response = await restClient.ExecuteTaskAsync( restRequest );
+
+            return new EmailSendResponse
+            {
+                Status = Response.StatusCode == HttpStatusCode.OK ? CommunicationRecipientStatus.Delivered : CommunicationRecipientStatus.Failed,
+                StatusNote = Response.StatusDescription
+            };
+        }
+
         /// <summary>
         /// Checks the safe sender.
         /// </summary>
@@ -128,6 +148,7 @@ namespace Rock.Communication.Transport
         private void AddAdditionalHeaders( RestRequest restRequest, Dictionary<string, string> headers )
         {
             // Add tracking settings
+            restRequest.AddParameter( "o:testmode", true.ToYesNo() );
             restRequest.AddParameter( "o:tracking", CanTrackOpens.ToYesNo() );
             restRequest.AddParameter( "o:tracking-opens", CanTrackOpens.ToYesNo() );
             restRequest.AddParameter( "o:tracking-clicks", CanTrackOpens.ToYesNo() );

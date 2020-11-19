@@ -20,6 +20,7 @@ using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 using Rock.Attribute;
 using Rock.Model;
 using SendGrid;
@@ -97,10 +98,27 @@ namespace Rock.Communication.Transport
 
             // Send it
             var response = client.SendEmailAsync( sendGridMessage ).GetAwaiter().GetResult();
+
             return new EmailSendResponse
             {
                 Status = response.StatusCode == HttpStatusCode.Accepted ? CommunicationRecipientStatus.Delivered : CommunicationRecipientStatus.Failed,
                 StatusNote = response.Body.ReadAsStringAsync().GetAwaiter().GetResult()
+            };
+        }
+
+        protected override async Task<EmailSendResponse> SendEmailAsync( RockEmailMessage rockEmailMessage )
+        {
+            var client = new SendGridClient( GetAttributeValue( AttributeKey.ApiKey ), host: GetAttributeValue( AttributeKey.BaseUrl ) );
+            var sendGridMessage = GetSendGridMessageFromRockEmailMessage( rockEmailMessage );
+
+            // Send it
+            var response = await client.SendEmailAsync( sendGridMessage ).ConfigureAwait( false );
+
+            var responseBody = await response.Body.ReadAsStringAsync().ConfigureAwait( false );
+            return new EmailSendResponse
+            {
+                Status = response.StatusCode == HttpStatusCode.Accepted ? CommunicationRecipientStatus.Delivered : CommunicationRecipientStatus.Failed,
+                StatusNote = responseBody
             };
         }
 

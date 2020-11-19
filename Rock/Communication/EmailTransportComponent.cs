@@ -69,7 +69,6 @@ namespace Rock.Communication
         /// <param name="rockMessage">The rock message.</param>
         /// <param name="mediumEntityTypeId">The medium entity type identifier.</param>
         /// <param name="mediumAttributes">The medium attributes.</param>
-        /// <param name="errorMessages">The error messages.</param>
         /// <returns></returns>
         public override async Task<SendMessageResult> SendAsync( RockMessage rockMessage, int mediumEntityTypeId, Dictionary<string, string> mediumAttributes )
         {
