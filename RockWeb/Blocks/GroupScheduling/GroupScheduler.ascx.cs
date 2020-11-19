@@ -1983,7 +1983,7 @@ btnCopyToClipboard.ClientID );
         protected void btnSendNowAllGroups_Click( object sender, EventArgs e )
         {
             List<Group> sendToGroups = GetAuthorizedListedGroups();
-            SendConfirmationEmails( sendToGroups );
+            SendConfirmations( sendToGroups );
         }
 
         /// <summary>
@@ -2000,14 +2000,14 @@ btnCopyToClipboard.ClientID );
                 sendToGroups.Add( currentlySelectedGroup );
             }
 
-            SendConfirmationEmails( sendToGroups );
+            SendConfirmations( sendToGroups );
         }
 
         /// <summary>
         /// Sends the confirmation emails to the specified groups
         /// </summary>
         /// <param name="groups">The groups.</param>
-        protected void SendConfirmationEmails( List<Group> groups )
+        protected void SendConfirmations( List<Group> groups )
         {
             upnlContent.Update();
             var rockContext = new RockContext();

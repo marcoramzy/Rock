@@ -679,7 +679,7 @@ namespace Rock.Model
         /// <param name="errorMessages">The error messages.</param>
         /// <returns></returns>
         [Obsolete( "Use SendScheduleConfirmationCommunication instead." )]
-        [RockObsolete( "1.12" )]
+        [RockObsolete( "1.13" )]
         public int SendScheduleConfirmationSystemEmails( IQueryable<Attendance> sendConfirmationAttendancesQuery, out List<string> errorMessages )
         {
             int emailsSent = 0;
@@ -769,7 +769,7 @@ namespace Rock.Model
         /// <param name="sendReminderAttendancesQuery">The send reminder attendances query.</param>
         /// <returns></returns>
         [Obsolete( "Use SendScheduleReminderSystemCommunication instead." )]
-        [RockObsolete( "1.12" )]
+        [RockObsolete( "1.13" )]
         public int SendScheduleReminderSystemEmails( IQueryable<Attendance> sendReminderAttendancesQuery )
         {
             int emailsSent = 0;
@@ -865,7 +865,7 @@ namespace Rock.Model
 
             if ( sendMessageResults.Exceptions.Any() )
             {
-                ExceptionLogService.LogException( new AggregateException( "Errors Occurred sending schedule confirmation emails", sendMessageResults.Exceptions ) );
+                ExceptionLogService.LogException( new AggregateException( "Errors Occurred sending schedule confirmations", sendMessageResults.Exceptions ) );
             }
 
             return sendMessageResults;
@@ -910,7 +910,7 @@ namespace Rock.Model
 
             if ( sendMessageResults.Exceptions.Any() )
             {
-                ExceptionLogService.LogException( new AggregateException( "Errors Occurred sending schedule confirmation emails", sendMessageResults.Exceptions ) );
+                ExceptionLogService.LogException( new AggregateException( "Errors Occurred sending schedule reminders.", sendMessageResults.Exceptions ) );
             }
 
             return sendMessageResults;

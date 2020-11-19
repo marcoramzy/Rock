@@ -28,7 +28,7 @@ using Rock.Model;
 namespace Rock.Jobs
 {
     /// <summary>
-    /// Sends Group Scheduling Confirmation and Reminder emails to people that haven't been notified yet.
+    /// Sends Group Scheduling Confirmations and Reminders to people that haven't been notified yet.
     /// </summary>
     /// <seealso cref="Quartz.IJob" />
     [DisallowConcurrentExecution]
@@ -38,7 +38,7 @@ namespace Rock.Jobs
     [GroupField(
         "Group",
         Key = AttributeKey.RootGroup,
-        Description = "Only people in or under this group will receive the schedule notifications emails.",
+        Description = "Only people in or under this group will receive the schedule notifications.",
         IsRequired = false,
         Order = 0 )]
     public class SendGroupScheduleNotifications : IJob
@@ -83,12 +83,12 @@ namespace Rock.Jobs
             var exceptionMessage = string.Empty;
             if ( confirmationSends.Errors.Any() )
             {
-                exceptionMessage = "One or more errors occurred when sending confirmation emails: " + Environment.NewLine + confirmationSends.Errors.AsDelimited( Environment.NewLine );
+                exceptionMessage = "One or more errors occurred when sending confirmations: " + Environment.NewLine + confirmationSends.Errors.AsDelimited( Environment.NewLine );
             }
 
             if ( reminderSends.Errors.Any() )
             {
-                exceptionMessage += "One or more errors occurred when sending reminder emails: " + Environment.NewLine + reminderSends.Errors.AsDelimited( Environment.NewLine );
+                exceptionMessage += "One or more errors occurred when sending reminders: " + Environment.NewLine + reminderSends.Errors.AsDelimited( Environment.NewLine );
             }
 
             if ( exceptionMessage.IsNotNullOrWhiteSpace() )
@@ -101,7 +101,7 @@ namespace Rock.Jobs
         }
 
         /// <summary>
-        /// Sends the group schedule confirmation emails.
+        /// Sends the group schedule confirmations.
         /// </summary>
         /// <param name="rootGroupGuid">The root group unique identifier.</param>
         private SendMessageResult SendGroupScheduleConfirmationCommunications( System.Guid? rootGroupGuid )
@@ -143,7 +143,7 @@ namespace Rock.Jobs
         }
 
         /// <summary>
-        /// Sends the group schedule reminder emails.
+        /// Sends the group schedule reminders.
         /// </summary>
         /// <param name="rootGroupGuid">The root group unique identifier.</param>
         private SendMessageResult SendGroupScheduleReminderCommunications( System.Guid? rootGroupGuid )
