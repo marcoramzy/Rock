@@ -324,7 +324,7 @@ namespace Rock.Rest.Controllers
         [System.Web.Http.Route( "api/Attendances/ScheduledPersonSendConfirmationEmail" )]
         [HttpPut]
         [Obsolete( "Use ScheduledPersonSendConfirmationCommunication instead." )]
-        [RockObsolete( "1.12" )]
+        [RockObsolete( "1.13" )]
         public void ScheduledPersonSendConfirmationEmail( int attendanceId )
         {
             var rockContext = new RockContext();
